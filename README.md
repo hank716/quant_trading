@@ -3,7 +3,7 @@
 - 修正 `official_hybrid` 基本資料日期格式，會把 `19620209`、`83/12/05` 這類官方格式正規化成 `YYYY-MM-DD`，避免 `listing_days` 變成 `missing`。
 - `official_hybrid` 的財報行為改成 **cache-only**：`main.py` 與 `sync_data.py` 不再 live 呼叫 FinMind 財報。
 - 新增 `sync_financials_slow.py`：用小批次、低頻、可續跑的方式慢慢補齊 FinMind 財報快取。
-- 主流程仍會讀季度財報，但只讀 `.cache/finmind` 內已存在的快取；若快取為空，請先執行 `sync_financials_slow.py`。
+- 主流程仍會讀季度財報，但只讀 `.cache/finmind` 內已存在的快取；若快取為空，請先執行 `sync_financials_slow.py`。 
 
 ### v12 建議執行方式
 
