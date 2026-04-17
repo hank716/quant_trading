@@ -1,6 +1,6 @@
 {
   "date": "2026-04-17",
-  "generated_at": "2026-04-17T17:40:52+08:00",
+  "generated_at": "2026-04-17T23:38:54+08:00",
   "profile_name": "user_a",
   "profile_display_name": "使用者 A",
   "strategy": "1M_LLM_Assisted_Discovery_Strategy",
@@ -23,9 +23,11 @@
         "三大法人合計買超量達到門檻"
       ],
       "risk": [
-        "月營收歷史長度不足"
+        "月營收歷史長度不足",
+        "最新財報 ROE 未達門檻",
+        "最新財報毛利率未達門檻"
       ],
-      "score": 3.466062,
+      "score": 2.466062,
       "metrics": {
         "latest_close": 282.0,
         "ma_value": 222.105,
@@ -56,24 +58,39 @@
             "window_days": 20
           }
         },
+        "latest_financial_date": "2025-12-31",
+        "roe_percent": null,
+        "gross_margin_percent": null,
+        "operating_margin_percent": null,
+        "eps": 3.12,
+        "financial_snapshot": {
+          "roe_percent": null,
+          "gross_margin_percent": null,
+          "operating_margin_percent": null,
+          "eps": 3.12
+        },
         "signal_breakdown": {
           "price": true,
           "institutional_flow": true,
           "monthly_revenue": false,
-          "financial_statement": true
+          "financial_statement": false
         },
-        "ranking_score": 3.466062,
+        "ranking_score": 2.466062,
         "llm_verdict": "consider",
-        "llm_confidence": 0.85,
-        "llm_summary": "買進，目標價約 310 元（+10%）。",
+        "llm_confidence": 0.7,
+        "llm_summary": "臻鼎科技股價穩定於均線上，外資與投信買超顯著，缺乏財報數據。",
         "llm_bull_points": [
-          "外資、投信、自營商均有正向買超，累計買超超過 1.8 億；價格距離 20 日均線 27% 內，未過度追價；財報訊號正向。"
+          "總淨買入超過1.8億",
+          "12天正向法人流動",
+          "價格距離均線距離0.27",
+          "外資買超13.2億",
+          "投信買超0.28億"
         ],
         "llm_bear_points": [
-          "月營收歷史不足，無法評估營收成長；自營商最新買超較低。"
+          "缺乏ROE與毛利率資料"
         ],
         "llm_invalidation_conditions": [
-          "若月營收持續缺失或外資持續賣超，或價格距離均線超過 40%。"
+          "若財報指標未達門檻"
         ]
       }
     },
@@ -93,9 +110,11 @@
         "三大法人合計買超量達到門檻"
       ],
       "risk": [
-        "月營收歷史長度不足"
+        "月營收歷史長度不足",
+        "最新財報 ROE 未達門檻",
+        "最新財報毛利率未達門檻"
       ],
-      "score": 3.410553,
+      "score": 2.410553,
       "metrics": {
         "latest_close": 724.0,
         "ma_value": 569.975,
@@ -126,192 +145,69 @@
             "window_days": 20
           }
         },
-        "signal_breakdown": {
-          "price": true,
-          "institutional_flow": true,
-          "monthly_revenue": false,
-          "financial_statement": true
-        },
-        "ranking_score": 3.410553,
-        "llm_verdict": "consider",
-        "llm_confidence": 0.83,
-        "llm_summary": "買進，目標價約 800 元（+10%）。",
-        "llm_bull_points": [
-          "投信買超 13.4 億，外資買超 6.4 億，總買超 21 億；價格距離均線 27% 內；財報訊號正向。"
-        ],
-        "llm_bear_points": [
-          "外資最新買超為負，可能短期壓力；自營商最新買超為負。"
-        ],
-        "llm_invalidation_conditions": [
-          "若外資持續賣超或價格距離均線超過 40%。"
-        ]
-      }
-    },
-    {
-      "asset": "2308",
-      "name": "台達電子工業股份有限公司",
-      "market": "twse",
-      "asset_category": "Stock",
-      "industry": "28",
-      "why": [
-        "近 20 日報酬仍在可接受範圍",
-        "價格未明顯偏離均線，沒有過度追價",
-        "外資近 20 日有 11 日買超，累計買超 10540259",
-        "投信近 20 日有 11 日買超，累計買超 1729334",
-        "自營商近 20 日有 18 日買超，累計買超 5191105",
-        "三大法人合計在近 20 日中，有 11 日買超",
-        "三大法人合計買超量達到門檻"
-      ],
-      "risk": [
-        "月營收歷史長度不足"
-      ],
-      "score": 3.374605,
-      "metrics": {
-        "latest_close": 1840.0,
-        "ma_value": 1501.05,
-        "lookback_return": 0.264605,
-        "distance_from_ma": 0.225809,
-        "positive_flow_days": 11,
-        "total_net_buy": 17460698.0,
-        "institutional_breakdown": {
-          "foreign_investor": {
-            "label": "外資",
-            "positive_days": 11,
-            "total_net_buy": 10540259.0,
-            "latest_net_buy": -875361.0,
-            "window_days": 20
-          },
-          "investment_trust": {
-            "label": "投信",
-            "positive_days": 11,
-            "total_net_buy": 1729334.0,
-            "latest_net_buy": 357424.0,
-            "window_days": 20
-          },
-          "dealer": {
-            "label": "自營商",
-            "positive_days": 18,
-            "total_net_buy": 5191105.0,
-            "latest_net_buy": 57488.0,
-            "window_days": 20
-          }
+        "latest_financial_date": "2025-12-31",
+        "roe_percent": null,
+        "gross_margin_percent": null,
+        "operating_margin_percent": null,
+        "eps": 1.86,
+        "financial_snapshot": {
+          "roe_percent": null,
+          "gross_margin_percent": null,
+          "operating_margin_percent": null,
+          "eps": 1.86
         },
         "signal_breakdown": {
           "price": true,
           "institutional_flow": true,
           "monthly_revenue": false,
-          "financial_statement": true
+          "financial_statement": false
         },
-        "ranking_score": 3.374605,
+        "ranking_score": 2.410553,
         "llm_verdict": "consider",
-        "llm_confidence": 0.82,
-        "llm_summary": "買進，目標價約 2000 元（+10%）。",
+        "llm_confidence": 0.7,
+        "llm_summary": "南亞電路板股價接近均線，機構買盤強勁，雖外資持續賣超且缺乏財報指標。",
         "llm_bull_points": [
-          "投信買超 1.7 億，外資買超 10.5 億，總買超 17 億；價格距離均線 22% 內；財報訊號正向。"
+          "總淨買入超過2.0億新台幣",
+          "12天正向法人流動",
+          "價格距離均線距離0.27",
+          "投信與自營商持續買超"
         ],
         "llm_bear_points": [
-          "外資最新買超為負，可能短期壓力。"
+          "外資近20天淨流出6.4億",
+          "缺乏ROE與毛利率資料"
         ],
         "llm_invalidation_conditions": [
-          "若外資持續賣超或價格距離均線超過 40%。"
-        ]
-      }
-    },
-    {
-      "asset": "2303",
-      "name": "聯華電子股份有限公司",
-      "market": "twse",
-      "asset_category": "Stock",
-      "industry": "24",
-      "why": [
-        "近 20 日報酬仍在可接受範圍",
-        "價格未明顯偏離均線，沒有過度追價",
-        "外資近 20 日有 7 日買超，累計買超 52342228",
-        "投信近 20 日有 12 日買超，累計買超 60201712",
-        "自營商近 20 日有 15 日買超，累計買超 20522283",
-        "三大法人合計在近 20 日中，有 9 日買超",
-        "三大法人合計買超量達到門檻"
-      ],
-      "risk": [
-        "月營收歷史長度不足"
-      ],
-      "score": 3.333612,
-      "metrics": {
-        "latest_close": 73.0,
-        "ma_value": 57.28,
-        "lookback_return": 0.243612,
-        "distance_from_ma": 0.274441,
-        "positive_flow_days": 9,
-        "total_net_buy": 133066223.0,
-        "institutional_breakdown": {
-          "foreign_investor": {
-            "label": "外資",
-            "positive_days": 7,
-            "total_net_buy": 52342228.0,
-            "latest_net_buy": 57658150.0,
-            "window_days": 20
-          },
-          "investment_trust": {
-            "label": "投信",
-            "positive_days": 12,
-            "total_net_buy": 60201712.0,
-            "latest_net_buy": 11524189.0,
-            "window_days": 20
-          },
-          "dealer": {
-            "label": "自營商",
-            "positive_days": 15,
-            "total_net_buy": 20522283.0,
-            "latest_net_buy": 2444993.0,
-            "window_days": 20
-          }
-        },
-        "signal_breakdown": {
-          "price": true,
-          "institutional_flow": true,
-          "monthly_revenue": false,
-          "financial_statement": true
-        },
-        "ranking_score": 3.333612,
-        "llm_verdict": "consider",
-        "llm_confidence": 0.81,
-        "llm_summary": "買進，目標價約 80 元（+10%）。",
-        "llm_bull_points": [
-          "投信買超 60 億，外資買超 52 億，總買超 133 億；價格距離均線 27% 內；財報訊號正向。"
-        ],
-        "llm_bear_points": [
-          "價格相對均線偏高，需留意追價風險。"
-        ],
-        "llm_invalidation_conditions": [
-          "若價格距離均線超過 40%。"
+          "若外資持續賣超超過門檻",
+          "若財報指標未達門檻"
         ]
       }
     }
   ],
   "watch_only_candidates": [],
   "notes": [
-    "掃描股票數: 18",
+    "掃描股票數: 47",
     "被硬規則淘汰: 0",
     "訊號不足未進入候選池: 0",
-    "進入候選池數量: 18",
+    "進入候選池數量: 47",
     "本版策略不預設排除 ETF，由 LLM 與規則共同挑選今天值得研究的標的。",
     "已先用 FinMind 資料做摘要，再交給 LLM 從前 10 檔候選中判讀。",
-    "LLM 市場觀察：近期法人買超持續正向，個股價格相對均線偏高但未過度追價，月營收歷史不足為主要風險。",
+    "LLM 市場觀察：市場波動持續，機構投資流向仍是主要驅動因素。",
     "LLM 投組提醒：目前持有兩檔ETF，未與個股重疊，風格分散。",
-    "可進一步思考標的: 4",
+    "可進一步思考標的: 2",
     "僅觀察標的: 0",
     "LLM 安全模式已啟用：selector 已使用 groq，為降低 rate limit，說明層自動改用 rule_based。",
     "資料源：official_hybrid（官方日價/法人/營收 + 本地快取財報）。",
-    "stock-limit-mode=liquidity：以 2026-04-17 最新成交金額排序挑選前 20 檔，並保留目前持股。",
+    "stock-limit-mode=liquidity：以 2026-04-17 最新成交金額排序挑選前 50 檔，並保留目前持股。",
     "本次資料對齊的最新交易日：2026-04-17",
-    "財報資料：使用本地快取，共 2528 筆。",
+    "財報資料：使用本地快取，共 6687 筆。",
     "設定檔：user_a（使用者 A）",
     "設定檔路徑：/home/hank/Documents/fin/config/profiles/user_a.yaml",
     "JSON 輸出：daily_result_20260417.json",
     "Markdown 輸出：daily_report_20260417.md",
-    "Discord 發送失敗：Discord webhook send failed: 400 Client Error: Bad Request for url: https://discord.com/api/webhooks/1494540760178233464/EASlwOhQygIMk8iRnW7Mdos0jGC3O-WdmsjUEepWU5LNxnUpbtXJgDYOnRKFSTx0PpTT?wait=true"
+    "HTML 輸出：daily_report_20260417.html",
+    "Discord webhook 已送出報告。"
   ],
-  "explanation": "策略意圖：一個月左右持有，不預設排除 ETF 或個股；先做很輕量的硬規則過濾，再把價格、法人、月營收與財報摘要交給 LLM 挑出今天最值得研究的標的。\n\n目前庫存股：0050 元大台灣50（ETF，股數 409）、2330 主動統一台股增長（ETF，股數 4000）\n\n今天系統列出 4 檔較值得進一步研究的標的，因此整體動作為『consider』；這仍是研究輔助，不代表直接買賣建議。\n\n1. 4958 臻鼎科技控股股份有限公司（Stock）：\n- 綜合判讀：買進，目標價約 310 元（+10%）。\n- 支持因素：外資、投信、自營商均有正向買超，累計買超超過 1.8 億；價格距離 20 日均線 27% 內，未過度追價；財報訊號正向。\n- 法人拆解：外資 12 日買超、累計 13226803.0；投信 13 日買超、累計 277123.0；自營商 13 日買超、累計 5079135.0\n- 基本面補充：月營收年增 None%｜ROE None%｜毛利率 None%\n- 保留因素：月營收歷史不足，無法評估營收成長；自營商最新買超較低。\n- 失效條件：若月營收持續缺失或外資持續賣超，或價格距離均線超過 40%。\n\n2. 8046 南亞電路板股份有限公司（Stock）：\n- 綜合判讀：買進，目標價約 800 元（+10%）。\n- 支持因素：投信買超 13.4 億，外資買超 6.4 億，總買超 21 億；價格距離均線 27% 內；財報訊號正向。\n- 法人拆解：外資 11 日買超、累計 6428234.0；投信 18 日買超、累計 13394544.0；自營商 8 日買超、累計 1169033.0\n- 基本面補充：月營收年增 None%｜ROE None%｜毛利率 None%\n- 保留因素：外資最新買超為負，可能短期壓力；自營商最新買超為負。\n- 失效條件：若外資持續賣超或價格距離均線超過 40%。\n\n3. 2308 台達電子工業股份有限公司（Stock）：\n- 綜合判讀：買進，目標價約 2000 元（+10%）。\n- 支持因素：投信買超 1.7 億，外資買超 10.5 億，總買超 17 億；價格距離均線 22% 內；財報訊號正向。\n- 法人拆解：外資 11 日買超、累計 10540259.0；投信 11 日買超、累計 1729334.0；自營商 18 日買超、累計 5191105.0\n- 基本面補充：月營收年增 None%｜ROE None%｜毛利率 None%\n- 保留因素：外資最新買超為負，可能短期壓力。\n- 失效條件：若外資持續賣超或價格距離均線超過 40%。\n\n4. 2303 聯華電子股份有限公司（Stock）：\n- 綜合判讀：買進，目標價約 80 元（+10%）。\n- 支持因素：投信買超 60 億，外資買超 52 億，總買超 133 億；價格距離均線 27% 內；財報訊號正向。\n- 法人拆解：外資 7 日買超、累計 52342228.0；投信 12 日買超、累計 60201712.0；自營商 15 日買超、累計 20522283.0\n- 基本面補充：月營收年增 None%｜ROE None%｜毛利率 None%\n- 保留因素：價格相對均線偏高，需留意追價風險。\n- 失效條件：若價格距離均線超過 40%。\n\n系統補充：掃描股票數: 18；被硬規則淘汰: 0；訊號不足未進入候選池: 0；進入候選池數量: 18；本版策略不預設排除 ETF，由 LLM 與規則共同挑選今天值得研究的標的。；已先用 FinMind 資料做摘要，再交給 LLM 從前 10 檔候選中判讀。。",
+  "explanation": "策略意圖：一個月左右持有，不預設排除 ETF 或個股；先做很輕量的硬規則過濾，再把價格、法人、月營收與財報摘要交給 LLM 挑出今天最值得研究的標的。\n\n目前庫存股：0050 元大台灣50（ETF，股數 409）、2330 主動統一台股增長（ETF，股數 4000）\n\n今天系統列出 2 檔較值得進一步研究的標的，因此整體動作為『consider』；這仍是研究輔助，不代表直接買賣建議。\n\n1. 4958 臻鼎科技控股股份有限公司（Stock）：\n- 綜合判讀：臻鼎科技股價穩定於均線上，外資與投信買超顯著，缺乏財報數據。\n- 支持因素：總淨買入超過1.8億；12天正向法人流動；價格距離均線距離0.27；外資買超13.2億\n- 法人拆解：外資 12 日買超、累計 13226803.0；投信 13 日買超、累計 277123.0；自營商 13 日買超、累計 5079135.0\n- 基本面補充：月營收年增 None%｜ROE None%｜毛利率 None%\n- 保留因素：缺乏ROE與毛利率資料\n- 失效條件：若財報指標未達門檻\n\n2. 8046 南亞電路板股份有限公司（Stock）：\n- 綜合判讀：南亞電路板股價接近均線，機構買盤強勁，雖外資持續賣超且缺乏財報指標。\n- 支持因素：總淨買入超過2.0億新台幣；12天正向法人流動；價格距離均線距離0.27；投信與自營商持續買超\n- 法人拆解：外資 11 日買超、累計 6428234.0；投信 18 日買超、累計 13394544.0；自營商 8 日買超、累計 1169033.0\n- 基本面補充：月營收年增 None%｜ROE None%｜毛利率 None%\n- 保留因素：外資近20天淨流出6.4億；缺乏ROE與毛利率資料\n- 失效條件：若外資持續賣超超過門檻、若財報指標未達門檻\n\n系統補充：掃描股票數: 47；被硬規則淘汰: 0；訊號不足未進入候選池: 0；進入候選池數量: 47；本版策略不預設排除 ETF，由 LLM 與規則共同挑選今天值得研究的標的。；已先用 FinMind 資料做摘要，再交給 LLM 從前 10 檔候選中判讀。。",
   "llm_payload": {
     "strategy_intent": "一個月左右持有，不預設排除 ETF 或個股；先做很輕量的硬規則過濾，再把價格、法人、月營收與財報摘要交給 LLM 挑出今天最值得研究的標的。",
     "portfolio_snapshot": {
@@ -350,9 +246,11 @@
             "三大法人合計買超量達到門檻"
           ],
           "risk": [
-            "月營收歷史長度不足"
+            "月營收歷史長度不足",
+            "最新財報 ROE 未達門檻",
+            "最新財報毛利率未達門檻"
           ],
-          "score": 3.466062,
+          "score": 2.466062,
           "metrics": {
             "latest_close": 282.0,
             "ma_value": 222.105,
@@ -383,24 +281,39 @@
                 "window_days": 20
               }
             },
+            "latest_financial_date": "2025-12-31",
+            "roe_percent": null,
+            "gross_margin_percent": null,
+            "operating_margin_percent": null,
+            "eps": 3.12,
+            "financial_snapshot": {
+              "roe_percent": null,
+              "gross_margin_percent": null,
+              "operating_margin_percent": null,
+              "eps": 3.12
+            },
             "signal_breakdown": {
               "price": true,
               "institutional_flow": true,
               "monthly_revenue": false,
-              "financial_statement": true
+              "financial_statement": false
             },
-            "ranking_score": 3.466062,
+            "ranking_score": 2.466062,
             "llm_verdict": "consider",
-            "llm_confidence": 0.85,
-            "llm_summary": "買進，目標價約 310 元（+10%）。",
+            "llm_confidence": 0.7,
+            "llm_summary": "臻鼎科技股價穩定於均線上，外資與投信買超顯著，缺乏財報數據。",
             "llm_bull_points": [
-              "外資、投信、自營商均有正向買超，累計買超超過 1.8 億；價格距離 20 日均線 27% 內，未過度追價；財報訊號正向。"
+              "總淨買入超過1.8億",
+              "12天正向法人流動",
+              "價格距離均線距離0.27",
+              "外資買超13.2億",
+              "投信買超0.28億"
             ],
             "llm_bear_points": [
-              "月營收歷史不足，無法評估營收成長；自營商最新買超較低。"
+              "缺乏ROE與毛利率資料"
             ],
             "llm_invalidation_conditions": [
-              "若月營收持續缺失或外資持續賣超，或價格距離均線超過 40%。"
+              "若財報指標未達門檻"
             ]
           }
         },
@@ -420,9 +333,11 @@
             "三大法人合計買超量達到門檻"
           ],
           "risk": [
-            "月營收歷史長度不足"
+            "月營收歷史長度不足",
+            "最新財報 ROE 未達門檻",
+            "最新財報毛利率未達門檻"
           ],
-          "score": 3.410553,
+          "score": 2.410553,
           "metrics": {
             "latest_close": 724.0,
             "ma_value": 569.975,
@@ -453,190 +368,67 @@
                 "window_days": 20
               }
             },
-            "signal_breakdown": {
-              "price": true,
-              "institutional_flow": true,
-              "monthly_revenue": false,
-              "financial_statement": true
-            },
-            "ranking_score": 3.410553,
-            "llm_verdict": "consider",
-            "llm_confidence": 0.83,
-            "llm_summary": "買進，目標價約 800 元（+10%）。",
-            "llm_bull_points": [
-              "投信買超 13.4 億，外資買超 6.4 億，總買超 21 億；價格距離均線 27% 內；財報訊號正向。"
-            ],
-            "llm_bear_points": [
-              "外資最新買超為負，可能短期壓力；自營商最新買超為負。"
-            ],
-            "llm_invalidation_conditions": [
-              "若外資持續賣超或價格距離均線超過 40%。"
-            ]
-          }
-        },
-        {
-          "asset": "2308",
-          "name": "台達電子工業股份有限公司",
-          "market": "twse",
-          "asset_category": "Stock",
-          "industry": "28",
-          "why": [
-            "近 20 日報酬仍在可接受範圍",
-            "價格未明顯偏離均線，沒有過度追價",
-            "外資近 20 日有 11 日買超，累計買超 10540259",
-            "投信近 20 日有 11 日買超，累計買超 1729334",
-            "自營商近 20 日有 18 日買超，累計買超 5191105",
-            "三大法人合計在近 20 日中，有 11 日買超",
-            "三大法人合計買超量達到門檻"
-          ],
-          "risk": [
-            "月營收歷史長度不足"
-          ],
-          "score": 3.374605,
-          "metrics": {
-            "latest_close": 1840.0,
-            "ma_value": 1501.05,
-            "lookback_return": 0.264605,
-            "distance_from_ma": 0.225809,
-            "positive_flow_days": 11,
-            "total_net_buy": 17460698.0,
-            "institutional_breakdown": {
-              "foreign_investor": {
-                "label": "外資",
-                "positive_days": 11,
-                "total_net_buy": 10540259.0,
-                "latest_net_buy": -875361.0,
-                "window_days": 20
-              },
-              "investment_trust": {
-                "label": "投信",
-                "positive_days": 11,
-                "total_net_buy": 1729334.0,
-                "latest_net_buy": 357424.0,
-                "window_days": 20
-              },
-              "dealer": {
-                "label": "自營商",
-                "positive_days": 18,
-                "total_net_buy": 5191105.0,
-                "latest_net_buy": 57488.0,
-                "window_days": 20
-              }
+            "latest_financial_date": "2025-12-31",
+            "roe_percent": null,
+            "gross_margin_percent": null,
+            "operating_margin_percent": null,
+            "eps": 1.86,
+            "financial_snapshot": {
+              "roe_percent": null,
+              "gross_margin_percent": null,
+              "operating_margin_percent": null,
+              "eps": 1.86
             },
             "signal_breakdown": {
               "price": true,
               "institutional_flow": true,
               "monthly_revenue": false,
-              "financial_statement": true
+              "financial_statement": false
             },
-            "ranking_score": 3.374605,
+            "ranking_score": 2.410553,
             "llm_verdict": "consider",
-            "llm_confidence": 0.82,
-            "llm_summary": "買進，目標價約 2000 元（+10%）。",
+            "llm_confidence": 0.7,
+            "llm_summary": "南亞電路板股價接近均線，機構買盤強勁，雖外資持續賣超且缺乏財報指標。",
             "llm_bull_points": [
-              "投信買超 1.7 億，外資買超 10.5 億，總買超 17 億；價格距離均線 22% 內；財報訊號正向。"
+              "總淨買入超過2.0億新台幣",
+              "12天正向法人流動",
+              "價格距離均線距離0.27",
+              "投信與自營商持續買超"
             ],
             "llm_bear_points": [
-              "外資最新買超為負，可能短期壓力。"
+              "外資近20天淨流出6.4億",
+              "缺乏ROE與毛利率資料"
             ],
             "llm_invalidation_conditions": [
-              "若外資持續賣超或價格距離均線超過 40%。"
-            ]
-          }
-        },
-        {
-          "asset": "2303",
-          "name": "聯華電子股份有限公司",
-          "market": "twse",
-          "asset_category": "Stock",
-          "industry": "24",
-          "why": [
-            "近 20 日報酬仍在可接受範圍",
-            "價格未明顯偏離均線，沒有過度追價",
-            "外資近 20 日有 7 日買超，累計買超 52342228",
-            "投信近 20 日有 12 日買超，累計買超 60201712",
-            "自營商近 20 日有 15 日買超，累計買超 20522283",
-            "三大法人合計在近 20 日中，有 9 日買超",
-            "三大法人合計買超量達到門檻"
-          ],
-          "risk": [
-            "月營收歷史長度不足"
-          ],
-          "score": 3.333612,
-          "metrics": {
-            "latest_close": 73.0,
-            "ma_value": 57.28,
-            "lookback_return": 0.243612,
-            "distance_from_ma": 0.274441,
-            "positive_flow_days": 9,
-            "total_net_buy": 133066223.0,
-            "institutional_breakdown": {
-              "foreign_investor": {
-                "label": "外資",
-                "positive_days": 7,
-                "total_net_buy": 52342228.0,
-                "latest_net_buy": 57658150.0,
-                "window_days": 20
-              },
-              "investment_trust": {
-                "label": "投信",
-                "positive_days": 12,
-                "total_net_buy": 60201712.0,
-                "latest_net_buy": 11524189.0,
-                "window_days": 20
-              },
-              "dealer": {
-                "label": "自營商",
-                "positive_days": 15,
-                "total_net_buy": 20522283.0,
-                "latest_net_buy": 2444993.0,
-                "window_days": 20
-              }
-            },
-            "signal_breakdown": {
-              "price": true,
-              "institutional_flow": true,
-              "monthly_revenue": false,
-              "financial_statement": true
-            },
-            "ranking_score": 3.333612,
-            "llm_verdict": "consider",
-            "llm_confidence": 0.81,
-            "llm_summary": "買進，目標價約 80 元（+10%）。",
-            "llm_bull_points": [
-              "投信買超 60 億，外資買超 52 億，總買超 133 億；價格距離均線 27% 內；財報訊號正向。"
-            ],
-            "llm_bear_points": [
-              "價格相對均線偏高，需留意追價風險。"
-            ],
-            "llm_invalidation_conditions": [
-              "若價格距離均線超過 40%。"
+              "若外資持續賣超超過門檻",
+              "若財報指標未達門檻"
             ]
           }
         }
       ],
       "watch_only_candidates": [],
       "notes": [
-        "掃描股票數: 18",
+        "掃描股票數: 47",
         "被硬規則淘汰: 0",
         "訊號不足未進入候選池: 0",
-        "進入候選池數量: 18",
+        "進入候選池數量: 47",
         "本版策略不預設排除 ETF，由 LLM 與規則共同挑選今天值得研究的標的。",
         "已先用 FinMind 資料做摘要，再交給 LLM 從前 10 檔候選中判讀。",
-        "LLM 市場觀察：近期法人買超持續正向，個股價格相對均線偏高但未過度追價，月營收歷史不足為主要風險。",
+        "LLM 市場觀察：市場波動持續，機構投資流向仍是主要驅動因素。",
         "LLM 投組提醒：目前持有兩檔ETF，未與個股重疊，風格分散。",
-        "可進一步思考標的: 4",
+        "可進一步思考標的: 2",
         "僅觀察標的: 0",
         "LLM 安全模式已啟用：selector 已使用 groq，為降低 rate limit，說明層自動改用 rule_based。",
         "資料源：official_hybrid（官方日價/法人/營收 + 本地快取財報）。",
-        "stock-limit-mode=liquidity：以 2026-04-17 最新成交金額排序挑選前 20 檔，並保留目前持股。",
+        "stock-limit-mode=liquidity：以 2026-04-17 最新成交金額排序挑選前 50 檔，並保留目前持股。",
         "本次資料對齊的最新交易日：2026-04-17",
-        "財報資料：使用本地快取，共 2528 筆。",
+        "財報資料：使用本地快取，共 6687 筆。",
         "設定檔：user_a（使用者 A）",
         "設定檔路徑：/home/hank/Documents/fin/config/profiles/user_a.yaml",
         "JSON 輸出：daily_result_20260417.json",
         "Markdown 輸出：daily_report_20260417.md",
-        "Discord 發送失敗：Discord webhook send failed: 400 Client Error: Bad Request for url: https://discord.com/api/webhooks/1494540760178233464/EASlwOhQygIMk8iRnW7Mdos0jGC3O-WdmsjUEepWU5LNxnUpbtXJgDYOnRKFSTx0PpTT?wait=true"
+        "HTML 輸出：daily_report_20260417.html",
+        "Discord webhook 已送出報告。"
       ]
     }
   }

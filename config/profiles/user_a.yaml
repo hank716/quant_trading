@@ -9,11 +9,13 @@ output:
   use_profile_subdirectory: true
   json_prefix: daily_result
   markdown_prefix: daily_report
+  html_prefix: selection_web
 discord:
   enabled: true
   webhook_url_env: DISCORD_WEBHOOK_URL_USER_A
   username: 使用者 A 選股機器人
   include_json_file: false
   include_markdown_file: false
+  include_html_file: true  
   include_report_body: false
-  max_report_chars: 10000
+  max_report_chars: 5000

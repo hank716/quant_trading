@@ -4,6 +4,9 @@ from typing import Any
 
 from core.models import Candidate, DailyResult
 
+import html as _html
+
+import re as _re
 
 class MarkdownReportRenderer:
     def render(self, result: DailyResult) -> str:
@@ -296,3 +299,127 @@ class MarkdownReportRenderer:
         if isinstance(value, float):
             return f"{value:.2f}"
         return str(value)
+
+
+class HtmlReportRenderer:
+    """Convert a DailyResult into a self-contained HTML file."""
+
+    CSS = """
+    body{font-family:system-ui,sans-serif;max-width:960px;margin:2rem auto;padding:0 1rem;
+         background:#0d1117;color:#c9d1d9}
+    h1,h2,h3,h4,h5{color:#58a6ff;margin-top:1.5rem}
+    table{border-collapse:collapse;width:100%;margin:.5rem 0;font-size:.85rem}
+    th{background:#161b22;color:#8b949e;text-align:left;padding:.4rem .6rem;
+       border:1px solid #30363d}
+    td{padding:.35rem .6rem;border:1px solid #21262d}
+    tr:nth-child(even) td{background:#161b22}
+    ul{padding-left:1.4rem}
+    li{margin:.2rem 0}
+    strong{color:#e6edf3}
+    hr{border:0;border-top:1px solid #30363d;margin:1.5rem 0}
+    .badge-consider{color:#3fb950} .badge-watch{color:#d29922}
+    .badge-hold{color:#8b949e}
+    pre{white-space:pre-wrap;word-break:break-word}
+    """
+
+    # ── markdown → HTML primitives ──────────────────────────────────────────
+
+    @staticmethod
+    def _esc(text: str) -> str:
+        return _html.escape(str(text), quote=False)
+
+    @classmethod
+    def _md_to_html(cls, md: str) -> str:
+        lines = md.split("\n")
+        out: list[str] = []
+        in_table = False
+        in_list = False
+
+        for raw in lines:
+            line = raw.rstrip()
+
+            # Table row
+            if line.startswith("|"):
+                cells = [c.strip() for c in line.strip("|").split("|")]
+                # separator row (---|---)
+                if all(_re.fullmatch(r":?-+:?", c) for c in cells if c):
+                    if not in_table:
+                        out.append("<table>")
+                        # promote last <tr> to <thead>
+                        if out and "<tr>" in out[-2]:
+                            out[-2] = out[-2].replace("<tr>", "<thead><tr>").replace("</tr>", "</tr></thead><tbody>")
+                    in_table = True
+                    continue
+                tag = "th" if not in_table else "td"
+                row = "".join(f"<{tag}>{cls._esc(c)}</{tag}>" for c in cells)
+                out.append(f"<tr>{row}</tr>")
+                continue
+            else:
+                if in_table:
+                    out.append("</tbody></table>")
+                    in_table = False
+
+            # List item
+            if line.startswith("- "):
+                if not in_list:
+                    out.append("<ul>")
+                    in_list = True
+                content = cls._inline(line[2:])
+                out.append(f"<li>{content}</li>")
+                continue
+            else:
+                if in_list:
+                    out.append("</ul>")
+                    in_list = False
+
+            # Headings
+            m = _re.match(r"^(#{1,5})\s+(.*)", line)
+            if m:
+                level = len(m.group(1))
+                out.append(f"<h{level}>{cls._inline(m.group(2))}</h{level}>")
+                continue
+
+            # HR
+            if _re.fullmatch(r"[-*_]{3,}", line.strip()):
+                out.append("<hr>")
+                continue
+
+            # Blank line
+            if not line.strip():
+                out.append("")
+                continue
+
+            out.append(f"<p>{cls._inline(line)}</p>")
+
+        if in_table:
+            out.append("</tbody></table>")
+        if in_list:
+            out.append("</ul>")
+        return "\n".join(out)
+
+    @classmethod
+    def _inline(cls, text: str) -> str:
+        text = cls._esc(text)
+        # **bold**
+        text = _re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
+        # `code`
+        text = _re.sub(r"`(.+?)`", r"<code>\1</code>", text)
+        return text
+
+    # ── public API ───────────────────────────────────────────────────────────
+
+    def render(self, result: "DailyResult", markdown_text: str) -> str:  # type: ignore[name-defined]
+        body = self._md_to_html(markdown_text)
+        action_cls = "badge-consider" if result.action == "consider" else "badge-hold"
+        action_label = "可進一步研究" if result.action == "consider" else "先觀察"
+        title = f"選股報告 {result.date} — {result.profile_display_name or result.profile_name or ''}"
+        return (
+            "<!DOCTYPE html>\n<html lang='zh-Hant'>\n<head>\n"
+            f"<meta charset='utf-8'>\n<title>{_html.escape(title)}</title>\n"
+            f"<style>{self.CSS}</style>\n</head>\n<body>\n"
+            f"<h1>{_html.escape(title)}</h1>\n"
+            f"<p>動作：<strong class='{action_cls}'>{action_label}</strong>"
+            f" &nbsp;|&nbsp; Consider：{len(result.eligible_candidates)} 檔"
+            f" &nbsp;|&nbsp; Watch：{len(result.watch_only_candidates)} 檔</p>\n"
+            f"<hr>\n{body}\n</body>\n</html>\n"
+        )

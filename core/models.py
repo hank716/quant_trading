@@ -130,6 +130,7 @@ class OutputConfig(BaseModel):
     use_profile_subdirectory: bool = True
     json_prefix: str = "daily_result"
     markdown_prefix: str = "daily_report"
+    html_prefix: str = "daily_report"
 
 
 class DiscordConfig(BaseModel):
@@ -141,8 +142,10 @@ class DiscordConfig(BaseModel):
     mention_text: str | None = None
     include_json_file: bool = True
     include_markdown_file: bool = True
+    include_html_file: bool = False 
     include_report_body: bool = True
     max_report_chars: int = 1600
+    
 
 
 class ProfileConfig(BaseModel):

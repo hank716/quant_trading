@@ -46,10 +46,16 @@ class DiscordNotifier:
             lines.extend(["", "---", ""])
             lines.append(markdown_text[: self.config.max_report_chars].strip())
             if len(markdown_text) > self.config.max_report_chars:
-                lines.append("\n（內容過長，完整版本請看附件 Markdown 檔。）")
+                lines.append("\n（內容過長，完整版本請看附件。）")
         return "\n".join(line for line in lines if line is not None).strip()
 
-    def send(self, result: DailyResult, markdown_path: Path, json_path: Path) -> dict[str, Any]:
+    def send(
+        self, 
+        result: DailyResult, 
+        markdown_path: Path, 
+        json_path: Path, 
+        html_path: Path | None = None
+    ) -> dict[str, Any]:
         webhook_url = self.resolve_webhook_url()
         if not self.config.enabled:
             return {"status": "disabled", "reason": "discord disabled in profile"}
@@ -73,11 +79,17 @@ class DiscordNotifier:
             if self.config.include_markdown_file and markdown_path.exists():
                 markdown_handle = markdown_path.open("rb")
                 handles.append(markdown_handle)
-                files["files[0]"] = (markdown_path.name, markdown_handle, "text/markdown")
+                files[f"files[{len(files)}]"] = (markdown_path.name, markdown_handle, "text/markdown")
+            
             if self.config.include_json_file and json_path.exists():
                 json_handle = json_path.open("rb")
                 handles.append(json_handle)
                 files[f"files[{len(files)}]"] = (json_path.name, json_handle, "application/json")
+
+            if self.config.include_html_file and html_path and html_path.exists():
+                html_handle = html_path.open("rb")
+                handles.append(html_handle)
+                files[f"files[{len(files)}]"] = (html_path.name, html_handle, "text/html")
 
             if files:
                 response = requests.post(

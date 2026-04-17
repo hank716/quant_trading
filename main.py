@@ -69,6 +69,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--portfolio", default=None)
     parser.add_argument("--output", default=None)
     parser.add_argument("--markdown-output", default=None)
+    parser.add_argument("--html-output", default=None) # 確保參數存在
     parser.add_argument("--as-of-date", default=date.today().isoformat())
     parser.add_argument("--stock-limit", type=int, default=None)
     parser.add_argument(
@@ -120,7 +121,7 @@ def resolve_output_paths(
     args: argparse.Namespace,
     profile: ProfileConfig,
     as_of_date: date,
-) -> tuple[Path, Path]:
+) -> tuple[Path, Path, Path]:
     if args.output:
         output_path = resolve_path(base_dir, args.output)
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -139,9 +140,20 @@ def resolve_output_paths(
             dated_filename(profile.output.markdown_prefix, as_of_date, ".md")
         )
         markdown_output_path.parent.mkdir(parents=True, exist_ok=True)
-    return output_path, markdown_output_path
 
+    # 修正：改用 markdown_prefix 避免找不到 html_prefix 的錯誤
+    if args.html_output:
+        html_output_path = resolve_path(base_dir, args.html_output)
+        html_output_path.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        html_output_path = output_path.with_name(
+            dated_filename(profile.output.markdown_prefix, as_of_date, ".html")
+        )
+        html_output_path.parent.mkdir(parents=True, exist_ok=True)
 
+    return output_path, markdown_output_path, html_output_path
+
+    
 def select_provider(
     cli_value: str | None,
     profile_value: str | None,
@@ -168,11 +180,15 @@ def resolve_effective_explainer_provider(
     return requested_provider, None
 
 
-def write_outputs(result, output_path: Path, markdown_output_path: Path) -> str:
+def write_outputs(result, output_path, markdown_output_path, html_output_path=None):
+    from core.report_renderer import HtmlReportRenderer
     output_path.write_text(result.model_dump_json(indent=2), encoding="utf-8")
-    markdown_renderer = MarkdownReportRenderer()
-    markdown_text = markdown_renderer.render(result)
+    renderer = MarkdownReportRenderer()
+    markdown_text = renderer.render(result)
     markdown_output_path.write_text(markdown_text, encoding="utf-8")
+    if html_output_path is not None:
+        html_text = HtmlReportRenderer().render(result, markdown_text)
+        html_output_path.write_text(html_text, encoding="utf-8")
     return markdown_text
 
 
@@ -299,7 +315,11 @@ def main() -> None:
 
     strategy_path = resolve_path(base_dir, args.strategy or profile.strategy)
     portfolio_path = resolve_path(base_dir, args.portfolio or profile.portfolio)
-    output_path, markdown_output_path = resolve_output_paths(base_dir, args, profile, as_of_date)
+    
+    # 修正：接收三個回傳值，避免 ValueError
+    output_path, markdown_output_path, html_output_path = resolve_output_paths(
+        base_dir, args, profile, as_of_date
+    )
 
     llm_provider = select_provider(
         args.llm_provider,
@@ -433,10 +453,12 @@ def main() -> None:
             f"設定檔路徑：{profile_path}",
             f"JSON 輸出：{output_path.name}",
             f"Markdown 輸出：{markdown_output_path.name}",
+            f"HTML 輸出：{html_output_path.name}",
         ]
     )
 
-    write_outputs(result, output_path, markdown_output_path)
+    # 修正：傳入 html_output_path
+    write_outputs(result, output_path, markdown_output_path, html_output_path=html_output_path)
 
     discord_status = "skipped"
     if args.skip_discord:
@@ -444,7 +466,13 @@ def main() -> None:
     else:
         notifier = DiscordNotifier(profile.discord)
         try:
-            discord_info = notifier.send(result, markdown_output_path, output_path)
+            # 修正：傳入 html_path 給 notifier
+            discord_info = notifier.send(
+                result, 
+                markdown_output_path, 
+                output_path,
+                html_path=html_output_path
+            )
             discord_status = str(discord_info.get("status", "unknown"))
             if discord_status == "sent":
                 result.notes.append("Discord webhook 已送出報告。")
@@ -455,14 +483,17 @@ def main() -> None:
         except DiscordNotifierError as exc:
             discord_status = "failed"
             result.notes.append(f"Discord 發送失敗：{exc}")
+        
         if result.notes and result.notes[-1].startswith("Discord"):
-            write_outputs(result, output_path, markdown_output_path)
+            # 重新寫入以更新 notes
+            write_outputs(result, output_path, markdown_output_path, html_output_path=html_output_path)
 
     summary = {
         "profile": profile.profile_name,
         "display_name": profile.display_name,
         "output": str(output_path),
         "markdown_output": str(markdown_output_path),
+        "html_output": str(html_output_path),
         "date": result.date,
         "generated_at": result.generated_at,
         "strategy": result.strategy,

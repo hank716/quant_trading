@@ -30,7 +30,7 @@ monthly_revenue:
   min_consecutive_positive_yoy_months: 0
 
 financial_statement:
-  enabled: false
+  enabled: true
   min_roe_percent: 0
   min_gross_margin_percent: 0
   min_operating_margin_percent: null
