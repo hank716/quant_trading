@@ -1,0 +1,14 @@
+holdings:
+  "0056":
+    name: 元大高股息
+    asset_type: ETF
+    shares: 1500
+    avg_cost: 36.5
+    note: 使用者 B 偏好高股息
+
+  "2882":
+    name: 國泰金
+    asset_type: Stock
+    shares: 500
+    avg_cost: 63.0
+    note: 使用者 B 持有金融股

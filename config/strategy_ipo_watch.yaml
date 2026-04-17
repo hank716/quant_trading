@@ -1,0 +1,29 @@
+strategy_name: IPO_Watch_Strategy
+strategy_intent: Watch newer listings with improving flow and basic price support. Use this as a watchlist gate, not as a trading trigger.
+
+hard_rules:
+  include_markets: [twse, tpex, emerging]
+  exclude_type_keywords: [etf, warrant, fund, index]
+  exclude_name_keywords: []
+  min_listing_days: 5
+  min_price: 20
+  max_price: 3000
+
+price_rules:
+  ma_window: 10
+  require_close_above_ma: true
+  lookback_days: 10
+  min_return_over_lookback: -0.1
+  max_distance_from_ma: 0.2
+
+institutional_flow:
+  enabled: true
+  investor_keywords: [Investment_Trust, investment trust, fund, trust]
+  lookback_days: 10
+  min_positive_days: 3
+  min_total_net_buy: 100
+
+decision:
+  max_consider: 5
+  min_signals_for_watch: 1
+  require_all_signals_for_consider: false

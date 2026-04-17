@@ -1,0 +1,19 @@
+profile_name: user_b
+display_name: 使用者 B
+strategy: config/strategy_1m.yaml
+portfolio: config/portfolio_user_b.yaml
+selector_provider: groq
+llm_provider: groq
+output:
+  directory: outputs
+  use_profile_subdirectory: true
+  json_prefix: daily_result
+  markdown_prefix: daily_report
+discord:
+  enabled: false
+  webhook_url_env: DISCORD_WEBHOOK_URL_USER_B
+  username: 使用者 B 選股機器人
+  include_json_file: true
+  include_markdown_file: true
+  include_report_body: true
+  max_report_chars: 1600

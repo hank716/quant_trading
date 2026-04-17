@@ -1,0 +1,14 @@
+holdings:
+  "0050":
+    name: 元大台灣50
+    asset_type: ETF
+    shares: 409
+    avg_cost: 69.35
+    note: 使用者 A 的核心 ETF
+
+  "2330":
+    name: 主動統一台股增長
+    asset_type: ETF
+    shares: 4000
+    avg_cost: 25.21
+    note: 使用者 A 的核心持股

@@ -1,0 +1,45 @@
+strategy_name: 1M_LLM_Assisted_Discovery_Strategy
+strategy_intent: 一個月左右持有，不預設排除 ETF 或個股；先做很輕量的硬規則過濾，再把價格、法人、月營收與財報摘要交給 LLM 挑出今天最值得研究的標的。
+
+hard_rules:
+  include_markets: [twse, tpex, emerging, etf]
+  exclude_type_keywords: []
+  exclude_name_keywords: []
+  min_listing_days: 7
+  min_price: 1
+  max_price: null
+
+price_rules:
+  ma_window: 20
+  require_close_above_ma: false
+  lookback_days: 20
+  min_return_over_lookback: -0.18
+  max_distance_from_ma: 0.30
+
+institutional_flow:
+  enabled: true
+  lookback_days: 20
+  min_positive_days: 1
+  min_total_net_buy: -500000
+  require_any_major_player: false
+
+monthly_revenue:
+  enabled: true
+  min_latest_yoy_percent: -20
+  min_latest_mom_percent: null
+  min_consecutive_positive_yoy_months: 0
+
+financial_statement:
+  enabled: false
+  min_roe_percent: 0
+  min_gross_margin_percent: 0
+  min_operating_margin_percent: null
+
+decision:
+  max_consider: 5
+  min_signals_for_watch: 1
+  require_all_signals_for_consider: false
+  selection_mode: llm_assisted
+  pre_llm_candidate_limit: 10
+  min_signal_count_for_preselection: 0
+  max_watch: 10

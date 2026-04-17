@@ -1,0 +1,29 @@
+# --- Python 相關 ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# --- 測試與工具 ---
+.pytest_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# --- 專案特定快取與環境變數 ---
+.cache/
+.env
+.env.test
+
+# --- 資料與輸出 ---
+outputs/*.json
+!outputs/daily_result.json
+
+# --- 系統檔案 ---
+.DS_Store
+Thumbs.db
