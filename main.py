@@ -80,7 +80,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--use-mock-data", action="store_true")
     parser.add_argument("--allow-premium-batch", action="store_true")
-    parser.add_argument("--cache-dir", default=".cache/finmind")
+    parser.add_argument("--cache-dir", default=os.path.join(os.getenv("CACHE_DIR", ".cache"), "finmind"))
     parser.add_argument(
         "--data-provider",
         default=os.getenv("DATA_PROVIDER", "finmind"),

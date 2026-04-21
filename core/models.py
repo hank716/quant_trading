@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from datetime import date
 from typing import Any, Literal
 
@@ -126,7 +127,7 @@ class Candidate(BaseModel):
 
 
 class OutputConfig(BaseModel):
-    directory: str = "outputs"
+    directory: str = Field(default_factory=lambda: os.getenv("OUTPUT_DIR", "outputs"))
     use_profile_subdirectory: bool = True
     json_prefix: str = "daily_result"
     markdown_prefix: str = "daily_report"
