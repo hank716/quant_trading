@@ -69,7 +69,7 @@ services:
     env_file:
       - path: ../.env.local
         required: false
-    command: ["python", "main.py", "--use-mock-data", "--skip-discord"]
+    command: ["python", "-m", "src.orchestration.run_daily", "--use-mock-data", "--skip-discord"]
 
 volumes:
   prometheus-data:
