@@ -1,0 +1,142 @@
+{
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0" },
+    { "type": "datasource", "id": "postgres", "name": "PostgreSQL", "version": "1.0.0" },
+    { "type": "panel", "id": "stat", "name": "Stat", "version": "" },
+    { "type": "panel", "id": "table", "name": "Table", "version": "" },
+    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "" }
+  ],
+  "annotations": { "list": [] },
+  "description": "fin data coverage health — revenue and financial statement completeness",
+  "editable": true,
+  "panels": [
+    {
+      "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL_(SUPABASE)}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "red",    "value": null },
+            { "color": "yellow", "value": 0.6 },
+            { "color": "green",  "value": 0.8 }
+          ]},
+          "unit": "percentunit", "min": 0, "max": 1
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "auto",
+        "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto" },
+      "title": "最新月營收覆蓋率",
+      "type": "stat",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL_(SUPABASE)}" },
+        "rawSql": "SELECT revenue_coverage AS value FROM coverage_snapshots ORDER BY trade_date DESC LIMIT 1",
+        "format": "table", "refId": "A"
+      }]
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL_(SUPABASE)}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "red",    "value": null },
+            { "color": "yellow", "value": 0.5 },
+            { "color": "green",  "value": 0.7 }
+          ]},
+          "unit": "percentunit", "min": 0, "max": 1
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "auto",
+        "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto" },
+      "title": "最新財報覆蓋率",
+      "type": "stat",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL_(SUPABASE)}" },
+        "rawSql": "SELECT financial_coverage AS value FROM coverage_snapshots ORDER BY trade_date DESC LIMIT 1",
+        "format": "table", "refId": "A"
+      }]
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL_(SUPABASE)}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "red",   "value": 1 }
+          ]}
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "auto",
+        "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto" },
+      "title": "缺件 Critical 標的數",
+      "type": "stat",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL_(SUPABASE)}" },
+        "rawSql": "SELECT jsonb_array_length(missing_critical) AS value FROM coverage_snapshots ORDER BY trade_date DESC LIMIT 1",
+        "format": "table", "refId": "A"
+      }]
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL_(SUPABASE)}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "lineWidth": 2 },
+          "unit": "percentunit", "min": 0, "max": 1,
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null }
+          ]}
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 4 },
+      "id": 4,
+      "options": {
+        "legend": { "calcs": ["mean", "last"], "displayMode": "table", "placement": "right" },
+        "tooltip": { "mode": "multi" }
+      },
+      "title": "30 日覆蓋率趨勢",
+      "type": "timeseries",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL_(SUPABASE)}" },
+        "rawSql": "SELECT trade_date AS time, revenue_coverage AS \"月營收覆蓋率\", financial_coverage AS \"財報覆蓋率\" FROM coverage_snapshots ORDER BY trade_date",
+        "format": "time_series", "refId": "A"
+      }]
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL_(SUPABASE)}" },
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 12 },
+      "id": 5,
+      "options": { "footer": { "show": false }, "showHeader": true },
+      "title": "Coverage 歷史記錄",
+      "type": "table",
+      "targets": [{
+        "datasource": { "type": "postgres", "uid": "${DS_POSTGRESQL_(SUPABASE)}" },
+        "rawSql": "SELECT trade_date, run_id, revenue_coverage, financial_coverage, jsonb_array_length(missing_critical) AS missing_critical_count, created_at FROM coverage_snapshots ORDER BY trade_date DESC LIMIT 30",
+        "format": "table", "refId": "A"
+      }]
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 38,
+  "tags": ["fin", "coverage"],
+  "time": { "from": "now-30d", "to": "now" },
+  "timepicker": {},
+  "timezone": "Asia/Taipei",
+  "title": "Coverage Health",
+  "uid": "fin-coverage-health",
+  "version": 1
+}
