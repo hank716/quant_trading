@@ -2,6 +2,18 @@
 
 每次啟動請在此檔最上方新增一筆：
 
+## 2026-04-21 23:15
+- 啟動時所在 branch：develop（Phase 4 merge 後）
+- 使用 agents：fin-pipeline-engineer（tech/fund/builder 實作）+ fin-test-engineer（3 個測試檔）協同
+- 完成的子任務：Phase 4 TASKS.md 補標記 [x]；Phase 5a 全部（5a.1–5a.6）
+  - src/features/__init__.py
+  - src/features/tech_features.py: ma_return, volume_features, institutional_flow_features
+  - src/features/fund_features.py: revenue_momentum, roe_feature, gross_margin_feature
+  - src/features/feature_builder.py: build_feature_matrix（cross-sectional median fill）
+  - tests: 28 new（tech 13 + fund 10 + builder 5），116 total pass
+- 遇到的卡點：test_gm_basic array length mismatch，立即修正
+- 下次繼續：Phase 5b（LightGBM Trainer，feat/phase5b-lightgbm-trainer）
+
 ## 2026-04-21 22:30
 - 啟動時所在 branch：develop（接續 Phase 3 merge 後）
 - 使用 agents：fin-pipeline-engineer（主實作）+ fin-test-engineer（測試）協同
