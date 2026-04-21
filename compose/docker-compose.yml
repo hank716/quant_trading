@@ -36,6 +36,41 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     restart: unless-stopped
 
+  quant-sync:
+    image: fin-app:test
+    build:
+      context: ..
+      dockerfile: docker/app.Dockerfile
+    profiles: ["jobs"]
+    volumes:
+      - ../workspace:/app/workspace
+      - ../outputs:/app/outputs
+    env_file:
+      - path: ../.env.local
+        required: false
+    command: ["python", "sync_data.py"]
+
+  quant-financials:
+    image: fin-app:test
+    profiles: ["jobs"]
+    volumes:
+      - ../workspace:/app/workspace
+    env_file:
+      - path: ../.env.local
+        required: false
+    command: ["python", "sync_financials_slow.py"]
+
+  quant-daily:
+    image: fin-app:test
+    profiles: ["jobs"]
+    volumes:
+      - ../workspace:/app/workspace
+      - ../outputs:/app/outputs
+    env_file:
+      - path: ../.env.local
+        required: false
+    command: ["python", "main.py", "--use-mock-data", "--skip-discord"]
+
 volumes:
   prometheus-data:
   grafana-data:
