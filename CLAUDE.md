@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Personal Taiwan stock screening system that performs daily analysis of TWSE/TPEx markets to identify investment candidates using rule-based filtering, quantitative signals, and optional LLM-assisted selection and explanation.
+Personal Taiwan stock screening system. Daily pipeline analyzes TWSE/TPEx markets (~2000 stocks), applies rule-based filters and quantitative signals, and outputs investment candidates with explanations. Infrastructure uses Docker + Supabase + pCloud, with a Streamlit control UI and Grafana dashboards.
 
 ## Commands
 
@@ -12,23 +12,26 @@ Personal Taiwan stock screening system that performs daily analysis of TWSE/TPEx
 # Install dependencies
 pip install -r requirements.txt
 
-# Run tests
-pytest -q
+# Run tests (unit only, no external deps)
+pytest -q -m "not integration"
 
-# Run a single test file
-pytest test/test_decision_system.py -v
+# Run all tests including integration
+pytest -q
 
 # Test with mock data (no API calls, no Discord)
 python main.py --profile user_a --use-mock-data --skip-discord
 
-# Sync daily market data to local cache (run before main.py)
+# Sync daily market data to local cache
 python sync_data.py --profile user_a --data-provider official_hybrid --lookback-days 35
 
-# Sync financial statements slowly (run periodically, respects quotas)
+# Sync financial statements (run periodically, respects quotas)
 python sync_financials_slow.py --batch-size 30
 
 # Full run with official data
 python main.py --profile user_a --data-provider official_hybrid --stock-limit 100 --stock-limit-mode liquidity --skip-discord
+
+# Apply Supabase schema (requires DATABASE_URL)
+bash scripts/linux/apply_schema.sh
 ```
 
 **Key `main.py` flags:**
@@ -40,26 +43,30 @@ python main.py --profile user_a --data-provider official_hybrid --stock-limit 10
 
 ## Architecture
 
-### Pipeline (main.py → DecisionEngine)
+### Full Pipeline
 
 ```
-UniverseBuilder         → ~2000 Taiwan stocks/ETFs, ranked by trading volume
+UniverseBuilder          → ~2000 Taiwan stocks/ETFs, ranked by trading volume
   ↓
-Data fetch (parallel)   → price history, institutional flows, monthly revenue, financials
+Data fetch (parallel)    → price history, institutional flows, monthly revenue, financials
   ↓
-For each stock:
-  FilterEngine          → hard rules (market type, listing age, price floor, keyword exclusions)
-  SignalEngine          → quantitative signals (MA, 20-day return, inst. flows, revenue YoY, ROE)
+FilterEngine             → hard rules: market type, listing age, price floor, keyword exclusions
+SignalEngine             → quantitative signals: MA, 20-day return, inst. flows, revenue YoY, ROE
   ↓
-SelectorFactory         → RuleBasedSelector (deterministic rank) OR LLM selector (Groq/OpenAI)
+SelectorFactory          → RuleBasedSelector OR LLM selector (Groq/OpenAI-compat)
+ExplainerFactory         → RuleBasedExplainer OR LLM explainer (Chinese-language thesis)
   ↓
-ExplainerFactory        → RuleBasedExplainer OR LLM explainer (Chinese-language thesis)
+ArtifactWriter           → signals.parquet, positions.parquet, trades.parquet, report.json, manifest.json
   ↓
-ReportRenderer          → Markdown + HTML reports + JSON result
-DiscordNotifier         → webhook with report attachments
+SupabaseClient           → insert pipeline_run, register artifacts, insert candidates
+  ↓
+PCloudClient             → upload artifacts to /reports/date={date}/run_id={run_id}/
+  ↓
+ReportRenderer           → Markdown + HTML reports
+DiscordNotifier          → webhook with report attachments
 ```
 
-### Key modules
+### Module Map
 
 | Path | Responsibility |
 |------|---------------|
@@ -70,53 +77,131 @@ DiscordNotifier         → webhook with report attachments
 | `core/universe.py` | Fetches metadata for all stocks; optionally ranks by liquidity |
 | `core/strategy_loader.py` | Parses strategy, profile, and portfolio YAML files |
 | `core/report_renderer.py` | Markdown and HTML report generation |
-| `data/official_hybrid_client.py` | Primary data client: official TWSE/TPEx JSON/CSV + cached financials |
+| `data/official_hybrid_client.py` | Primary data: TWSE/TPEx JSON/CSV + cached financials |
 | `data/finmind_client.py` | Alternative data client with MD5-keyed response cache |
 | `llm/selector.py` | Rule-based and LLM candidate selection |
 | `llm/explainer.py` | Rule-based and LLM explanation generation |
-| `llm/openai_compat.py` | OpenAI-compatible API abstraction with retry, rate-limit, and response caching |
+| `llm/openai_compat.py` | OpenAI-compatible API abstraction with retry, rate-limit, response caching |
 | `notifications/discord_notifier.py` | Discord webhook with file attachment support |
+| `src/orchestration/run_daily.py` | Daily pipeline entry point: artifacts + DB writes |
+| `src/database/client.py` | Supabase wrapper with mock fallback |
+| `src/database/crud.py` | PipelineRunCRUD, ArtifactCRUD, CandidateCRUD, CoverageCRUD |
+| `src/database/schema.sql` | Supabase schema: 11 tables + indexes |
+| `src/storage/artifact_writer.py` | Writes parquet/json artifacts to workspace/runs/{run_id}/ |
+| `src/storage/pcloud_client.py` | pCloud API wrapper with mock fallback |
+| `src/reporting/converter.py` | DailyResult → artifact schemas converter |
+| `src/ui/app.py` | Streamlit UI: Home / Runs / 庫存股 / Coverage / Reports / Run Control |
 
-### Configuration hierarchy
+### Directory Structure
+
+```
+fin/
+├── core/           ← existing decision engine (preserve, gradually migrate to src/)
+├── data/           ← data clients (official_hybrid, finmind)
+├── llm/            ← selector, explainer, openai_compat
+├── notifications/  ← discord notifier
+├── config/         ← strategy YAML, profiles, portfolios
+├── src/
+│   ├── orchestration/   ← run_daily.py, run_signal.py, run_report.py
+│   ├── database/        ← client.py, crud.py, schema.sql
+│   ├── storage/         ← pcloud_client.py, artifact_writer.py
+│   ├── reporting/       ← schema.py, converter.py
+│   ├── signals/         ← schema.py (Phase 5: labeler, trainer, predictor)
+│   ├── features/        ← (Phase 5: tech_features, fund_features, feature_builder)
+│   ├── registry/        ← (Phase 5: model_registry, retrain_gate)
+│   ├── monitoring/      ← (Phase 4: coverage_checker)
+│   └── ui/              ← app.py
+├── tests/
+│   ├── unit/            ← fast tests, no external deps
+│   ├── contract/        ← schema validation
+│   └── integration/     ← require Docker or credentials (@pytest.mark.integration)
+├── docker/         ← app.Dockerfile, ui.Dockerfile
+├── compose/        ← docker-compose.yml, prometheus.yml, grafana provisioning
+├── scripts/        ← linux/ and windows/ run/start scripts
+├── docs/           ← setup guides, ADRs, env reference, work log
+├── workspace/      ← runtime data (gitignored): hotdata, runs, outputs, logs, tmp
+└── main.py         ← legacy entry point (compatibility layer)
+```
+
+### Configuration Hierarchy
 
 ```
 config/strategy_1m.yaml          ← hard rules, signal thresholds, selection limits
 config/profiles/{profile}.yaml   ← user's strategy, portfolio, LLM provider, output dir, Discord
-config/portfolio_{profile}.yaml  ← current holdings (for overlap warnings)
-.env                             ← secrets: API tokens, webhook URLs, LLM keys
+config/portfolio_{profile}.yaml  ← current holdings (shown in Streamlit UI, editable)
+.env.local                       ← secrets: API tokens, webhook URLs, LLM keys (gitignored)
 ```
 
-Profiles reference a strategy file and a portfolio file. The `--profile` flag is how you switch between users.
+### LLM Safe Mode
 
-### LLM safe mode
+When `LLM_SAFE_MODE=true` (default) and both selector and explainer use the same external LLM, the explainer auto-demotes to `rule_based` to halve API calls. Use `--force-llm-explainer` to override.
 
-When `LLM_SAFE_MODE=true` (default) and both selector and explainer are configured to the same external LLM (e.g., both Groq), the explainer is automatically demoted to `rule_based` to halve API calls. This is logged in `result.notes`. Use `--force-llm-explainer` to override.
+LLM responses are cached to `.cache/llm/` by SHA256 of the request payload.
 
-LLM responses are cached to `.cache/llm/` by SHA256 of the request payload, so identical requests never re-hit the API.
+### Data Sources
 
-### Data sources
+`official_hybrid` (recommended): daily prices, institutional flows, monthly revenue from official TWSE/TPEx endpoints. Financial statements from local cache built by `sync_financials_slow.py` only — never live-fetched in `main.py`.
 
-`official_hybrid` (recommended): daily prices, institutional flows, and monthly revenue come from official TWSE/TPEx endpoints; financial statements come exclusively from the local cache built by `sync_financials_slow.py`. The `finmind` provider uses the FinMind API for everything (higher quota cost).
+### Artifact Storage
 
-Financial statements are **never live-fetched** in `main.py` — run `sync_financials_slow.py` periodically to keep the cache current.
+Each run writes to `workspace/runs/{run_id}/`:
+- `signals.parquet`, `positions.parquet`, `trades.parquet`
+- `report.json`, `manifest.json`
 
-### Output
+Run state is tracked in Supabase `pipeline_runs` table. Artifacts are uploaded to pCloud at `/reports/date={date}/run_id={run_id}/`.
 
-Each run writes to `outputs/{profile}/`:
-- `daily_result_YYYYMMDD.json` — full structured result with candidates, metrics, and notes
-- `daily_report_YYYYMMDD.md` — human-readable Markdown report
-- `daily_report_YYYYMMDD.html` — styled HTML version
+## Git Workflow
+
+```
+main     ← protected, never push directly, only manual review merges here
+develop  ← integration branch, merge feature branches here
+feat/phaseN-description  ← working branch per phase
+```
+
+Every phase: branch from develop → commit subtasks → `pytest -q` passes → PR to develop → squash merge.
 
 ## Environment Variables
 
-See `env.example` for the full reference. Critical ones:
+See `env.example` for full reference. Critical ones by phase:
 
 ```dotenv
-FINMIND_TOKEN=           # Required if using finmind data provider
+# Always needed
 DATA_PROVIDER=official_hybrid
-GROQ_API_KEY=            # Required if using groq LLM provider
-GROQ_BASE_URL=https://api.groq.com/openai/v1
-GROQ_MODEL=openai/gpt-oss-20b
-DISCORD_WEBHOOK_URL_USER_A=
-OFFICIAL_TLS_INSECURE_FALLBACK=true   # Set if TWSE/TPEx TLS errors occur
+FINMIND_TOKEN=          # if using finmind provider
+
+# LLM
+GROQ_API_KEY=
+LLM_SAFE_MODE=true
+OFFICIAL_TLS_INSECURE_FALLBACK=true
+
+# Phase 2+: pCloud
+PCLOUD_TOKEN=
+PCLOUD_REGION=eu
+
+# Phase 3+: Supabase
+SUPABASE_URL=
+SUPABASE_SERVICE_KEY=
+SUPABASE_DB_HOST=       # for Grafana PostgreSQL datasource
+SUPABASE_DB_PASSWORD=
 ```
+
+## Claude Code Agents
+
+Project-level agents live in `.claude/agents/`. Use them for specialized tasks:
+
+| Agent | When to invoke |
+|-------|---------------|
+| `taiwan-quant-analyst` | Signal design, strategy evaluation, Taiwan market analysis, Chinese investment thesis |
+| `fin-pipeline-engineer` | Phase implementation, Docker/Supabase/pCloud, git workflow enforcement |
+| `fin-test-engineer` | Writing unit/contract/integration tests, coverage review |
+| `fin-architect-doc` | ADR writing, CLAUDE.md updates, documentation consolidation, architecture planning |
+
+## Testing
+
+```bash
+pytest -q -m "not integration"   # unit tests only (fast, no external deps)
+pytest -q                         # all tests (integration tests skip without credentials)
+```
+
+Integration tests in `tests/integration/` are gated with `@pytest.mark.skipif(not os.getenv(...))`.
+Legacy smoke test `test/test_decision_system.py` must always pass.
