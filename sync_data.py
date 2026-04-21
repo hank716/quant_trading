@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -17,7 +18,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--profile-config", default=None)
     parser.add_argument("--as-of-date", default=date.today().isoformat())
     parser.add_argument("--data-provider", default="official_hybrid", choices=["finmind", "official_hybrid"])
-    parser.add_argument("--cache-dir", default=".cache/official_hybrid")
+    parser.add_argument("--cache-dir", default=os.path.join(os.getenv("CACHE_DIR", ".cache"), "official_hybrid"))
     parser.add_argument("--lookback-days", type=int, default=35)
     parser.add_argument("--use-mock-data", action="store_true")
     parser.add_argument("--skip-financials", action="store_true", help="official_hybrid 下可跳過快取財報掃描；不會觸發 live 財報 API。")

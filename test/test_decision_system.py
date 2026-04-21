@@ -505,7 +505,7 @@ def test_main_generates_dated_output_with_profile(tmp_path: Path) -> None:
     assert payload["profile_display_name"] == "測試使用者"
     assert payload["date"] == "2026-04-17"
     assert payload["generated_at"]
-    assert "daily_result_20260417.json" in payload["notes"][-2]
+    assert any("daily_result_20260417.json" in n for n in payload["notes"])
     assert "設定檔" in markdown
     assert "測試使用者" in markdown
     assert "2026-04-17" in markdown

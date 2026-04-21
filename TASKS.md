@@ -989,6 +989,7 @@ feat(phase0): add docker-compose skeleton with quant-ui service
 - [ ] 5d.4 Streamlit 模型頁：
   - champion version + metrics
   - candidate（若有）
+  - 不同user可自行在UI調參數，以對應不同的策略
   - SHAP top features bar chart
   - 「Promote candidate」按鈕
 - [ ] 5d.5 上傳 SHAP 到 pCloud：`/shap/date={date}/run_id={run_id}/`

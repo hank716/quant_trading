@@ -18,6 +18,8 @@ htmlcov/
 # --- 專案特定快取與環境變數 ---
 .cache/
 .env
+.env.local
+.env.*.local
 .env.test
 
 # --- 資料與輸出 ---
@@ -27,3 +29,16 @@ outputs/*.json
 # --- 系統檔案 ---
 .DS_Store
 Thumbs.db
+
+# --- Workspace（新結構）---
+workspace/hotdata/
+workspace/tmp/
+workspace/logs/
+workspace/runs/*/
+
+# --- Docker ---
+.docker-cache/
+
+# --- Claude Code ---
+.claude/
+BLOCKED.md
