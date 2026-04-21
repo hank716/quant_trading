@@ -1,0 +1,435 @@
+{
+  "date": "2026-04-19",
+  "generated_at": "2026-04-19T15:19:47+08:00",
+  "profile_name": "user_a",
+  "profile_display_name": "使用者 A",
+  "strategy": "1M_LLM_Assisted_Discovery_Strategy",
+  "action": "consider",
+  "selection_mode": "llm_assisted",
+  "eligible_candidates": [
+    {
+      "asset": "4958",
+      "name": "臻鼎科技控股股份有限公司",
+      "market": "twse",
+      "asset_category": "Stock",
+      "industry": "28",
+      "why": [
+        "近 20 日報酬仍在可接受範圍",
+        "價格未明顯偏離均線，沒有過度追價",
+        "外資近 20 日有 12 日買超，累計買超 13226803",
+        "投信近 20 日有 13 日買超，累計買超 277123",
+        "自營商近 20 日有 13 日買超，累計買超 5079135",
+        "三大法人合計在近 20 日中，有 12 日買超",
+        "三大法人合計買超量達到門檻"
+      ],
+      "risk": [
+        "月營收歷史長度不足",
+        "最新財報 ROE 未達門檻",
+        "最新財報毛利率未達門檻"
+      ],
+      "score": 2.466062,
+      "metrics": {
+        "latest_close": 282.0,
+        "ma_value": 222.105,
+        "lookback_return": 0.346062,
+        "distance_from_ma": 0.26967,
+        "positive_flow_days": 12,
+        "total_net_buy": 18583061.0,
+        "institutional_breakdown": {
+          "foreign_investor": {
+            "label": "外資",
+            "positive_days": 12,
+            "total_net_buy": 13226803.0,
+            "latest_net_buy": 4216794.0,
+            "window_days": 20
+          },
+          "investment_trust": {
+            "label": "投信",
+            "positive_days": 13,
+            "total_net_buy": 277123.0,
+            "latest_net_buy": -545000.0,
+            "window_days": 20
+          },
+          "dealer": {
+            "label": "自營商",
+            "positive_days": 13,
+            "total_net_buy": 5079135.0,
+            "latest_net_buy": 565679.0,
+            "window_days": 20
+          }
+        },
+        "latest_financial_date": "2025-12-31",
+        "roe_percent": null,
+        "gross_margin_percent": null,
+        "operating_margin_percent": null,
+        "eps": 3.12,
+        "financial_snapshot": {
+          "roe_percent": null,
+          "gross_margin_percent": null,
+          "operating_margin_percent": null,
+          "eps": 3.12
+        },
+        "signal_breakdown": {
+          "price": true,
+          "institutional_flow": true,
+          "monthly_revenue": false,
+          "financial_statement": false
+        },
+        "ranking_score": 2.466062,
+        "llm_verdict": "consider",
+        "llm_confidence": 0.7,
+        "llm_summary": "臻鼎科技股價穩定於均線上，外資與投信買超顯著，缺乏財報數據。",
+        "llm_bull_points": [
+          "總淨買入超過1.8億",
+          "12天正向法人流動",
+          "價格距離均線距離0.27",
+          "外資買超13.2億",
+          "投信買超0.28億"
+        ],
+        "llm_bear_points": [
+          "缺乏ROE與毛利率資料"
+        ],
+        "llm_invalidation_conditions": [
+          "若財報指標未達門檻"
+        ]
+      }
+    },
+    {
+      "asset": "8046",
+      "name": "南亞電路板股份有限公司",
+      "market": "twse",
+      "asset_category": "Stock",
+      "industry": "28",
+      "why": [
+        "近 20 日報酬仍在可接受範圍",
+        "價格未明顯偏離均線，沒有過度追價",
+        "外資近 20 日有 11 日買超，累計買超 6428234",
+        "投信近 20 日有 18 日買超，累計買超 13394544",
+        "自營商近 20 日有 8 日買超，累計買超 1169033",
+        "三大法人合計在近 20 日中，有 12 日買超",
+        "三大法人合計買超量達到門檻"
+      ],
+      "risk": [
+        "月營收歷史長度不足",
+        "最新財報 ROE 未達門檻",
+        "最新財報毛利率未達門檻"
+      ],
+      "score": 2.410553,
+      "metrics": {
+        "latest_close": 724.0,
+        "ma_value": 569.975,
+        "lookback_return": 0.290553,
+        "distance_from_ma": 0.270231,
+        "positive_flow_days": 12,
+        "total_net_buy": 20991811.0,
+        "institutional_breakdown": {
+          "foreign_investor": {
+            "label": "外資",
+            "positive_days": 11,
+            "total_net_buy": 6428234.0,
+            "latest_net_buy": -3207341.0,
+            "window_days": 20
+          },
+          "investment_trust": {
+            "label": "投信",
+            "positive_days": 18,
+            "total_net_buy": 13394544.0,
+            "latest_net_buy": 609001.0,
+            "window_days": 20
+          },
+          "dealer": {
+            "label": "自營商",
+            "positive_days": 8,
+            "total_net_buy": 1169033.0,
+            "latest_net_buy": -113585.0,
+            "window_days": 20
+          }
+        },
+        "latest_financial_date": "2025-12-31",
+        "roe_percent": null,
+        "gross_margin_percent": null,
+        "operating_margin_percent": null,
+        "eps": 1.86,
+        "financial_snapshot": {
+          "roe_percent": null,
+          "gross_margin_percent": null,
+          "operating_margin_percent": null,
+          "eps": 1.86
+        },
+        "signal_breakdown": {
+          "price": true,
+          "institutional_flow": true,
+          "monthly_revenue": false,
+          "financial_statement": false
+        },
+        "ranking_score": 2.410553,
+        "llm_verdict": "consider",
+        "llm_confidence": 0.7,
+        "llm_summary": "南亞電路板股價接近均線，機構買盤強勁，雖外資持續賣超且缺乏財報指標。",
+        "llm_bull_points": [
+          "總淨買入超過2.0億新台幣",
+          "12天正向法人流動",
+          "價格距離均線距離0.27",
+          "投信與自營商持續買超"
+        ],
+        "llm_bear_points": [
+          "外資近20天淨流出6.4億",
+          "缺乏ROE與毛利率資料"
+        ],
+        "llm_invalidation_conditions": [
+          "若外資持續賣超超過門檻",
+          "若財報指標未達門檻"
+        ]
+      }
+    }
+  ],
+  "watch_only_candidates": [],
+  "notes": [
+    "掃描股票數: 47",
+    "被硬規則淘汰: 0",
+    "訊號不足未進入候選池: 0",
+    "進入候選池數量: 47",
+    "本版策略不預設排除 ETF，由 LLM 與規則共同挑選今天值得研究的標的。",
+    "已先用 FinMind 資料做摘要，再交給 LLM 從前 10 檔候選中判讀。",
+    "LLM 市場觀察：市場波動持續，機構投資流向仍是主要驅動因素。",
+    "LLM 投組提醒：目前持有兩檔ETF，未與個股重疊，風格分散。",
+    "可進一步思考標的: 2",
+    "僅觀察標的: 0",
+    "LLM 安全模式已啟用：selector 已使用 groq，為降低 rate limit，說明層自動改用 rule_based。",
+    "資料源：official_hybrid（官方日價/法人/營收 + 本地快取財報）。",
+    "stock-limit-mode=liquidity：以 2026-04-17 最新成交金額排序挑選前 50 檔，並保留目前持股。",
+    "本次資料對齊的最新交易日：2026-04-17",
+    "財報資料：使用本地快取，共 6687 筆。",
+    "設定檔：user_a（使用者 A）",
+    "設定檔路徑：/home/hank/Documents/fin/config/profiles/user_a.yaml",
+    "JSON 輸出：daily_result_20260419.json",
+    "Markdown 輸出：daily_report_20260419.md",
+    "HTML 輸出：daily_report_20260419.html",
+    "Discord webhook 已送出報告。"
+  ],
+  "explanation": "策略意圖：一個月左右持有，不預設排除 ETF 或個股；先做很輕量的硬規則過濾，再把價格、法人、月營收與財報摘要交給 LLM 挑出今天最值得研究的標的。\n\n目前庫存股：0050 元大台灣50（ETF，股數 409）、2330 主動統一台股增長（ETF，股數 4000）\n\n今天系統列出 2 檔較值得進一步研究的標的，因此整體動作為『consider』；這仍是研究輔助，不代表直接買賣建議。\n\n1. 4958 臻鼎科技控股股份有限公司（Stock）：\n- 綜合判讀：臻鼎科技股價穩定於均線上，外資與投信買超顯著，缺乏財報數據。\n- 支持因素：總淨買入超過1.8億；12天正向法人流動；價格距離均線距離0.27；外資買超13.2億\n- 法人拆解：外資 12 日買超、累計 13226803.0；投信 13 日買超、累計 277123.0；自營商 13 日買超、累計 5079135.0\n- 基本面補充：月營收年增 None%｜ROE None%｜毛利率 None%\n- 保留因素：缺乏ROE與毛利率資料\n- 失效條件：若財報指標未達門檻\n\n2. 8046 南亞電路板股份有限公司（Stock）：\n- 綜合判讀：南亞電路板股價接近均線，機構買盤強勁，雖外資持續賣超且缺乏財報指標。\n- 支持因素：總淨買入超過2.0億新台幣；12天正向法人流動；價格距離均線距離0.27；投信與自營商持續買超\n- 法人拆解：外資 11 日買超、累計 6428234.0；投信 18 日買超、累計 13394544.0；自營商 8 日買超、累計 1169033.0\n- 基本面補充：月營收年增 None%｜ROE None%｜毛利率 None%\n- 保留因素：外資近20天淨流出6.4億；缺乏ROE與毛利率資料\n- 失效條件：若外資持續賣超超過門檻、若財報指標未達門檻\n\n系統補充：掃描股票數: 47；被硬規則淘汰: 0；訊號不足未進入候選池: 0；進入候選池數量: 47；本版策略不預設排除 ETF，由 LLM 與規則共同挑選今天值得研究的標的。；已先用 FinMind 資料做摘要，再交給 LLM 從前 10 檔候選中判讀。。",
+  "llm_payload": {
+    "strategy_intent": "一個月左右持有，不預設排除 ETF 或個股；先做很輕量的硬規則過濾，再把價格、法人、月營收與財報摘要交給 LLM 挑出今天最值得研究的標的。",
+    "portfolio_snapshot": {
+      "0050": {
+        "name": "元大台灣50",
+        "asset_type": "ETF",
+        "shares": 409,
+        "avg_cost": 69.35,
+        "note": "使用者 A 的核心 ETF"
+      },
+      "2330": {
+        "name": "主動統一台股增長",
+        "asset_type": "ETF",
+        "shares": 4000,
+        "avg_cost": 25.21,
+        "note": "使用者 A 的核心持股"
+      }
+    },
+    "system_result": {
+      "action": "consider",
+      "selection_mode": "llm_assisted",
+      "candidates": [
+        {
+          "asset": "4958",
+          "name": "臻鼎科技控股股份有限公司",
+          "market": "twse",
+          "asset_category": "Stock",
+          "industry": "28",
+          "why": [
+            "近 20 日報酬仍在可接受範圍",
+            "價格未明顯偏離均線，沒有過度追價",
+            "外資近 20 日有 12 日買超，累計買超 13226803",
+            "投信近 20 日有 13 日買超，累計買超 277123",
+            "自營商近 20 日有 13 日買超，累計買超 5079135",
+            "三大法人合計在近 20 日中，有 12 日買超",
+            "三大法人合計買超量達到門檻"
+          ],
+          "risk": [
+            "月營收歷史長度不足",
+            "最新財報 ROE 未達門檻",
+            "最新財報毛利率未達門檻"
+          ],
+          "score": 2.466062,
+          "metrics": {
+            "latest_close": 282.0,
+            "ma_value": 222.105,
+            "lookback_return": 0.346062,
+            "distance_from_ma": 0.26967,
+            "positive_flow_days": 12,
+            "total_net_buy": 18583061.0,
+            "institutional_breakdown": {
+              "foreign_investor": {
+                "label": "外資",
+                "positive_days": 12,
+                "total_net_buy": 13226803.0,
+                "latest_net_buy": 4216794.0,
+                "window_days": 20
+              },
+              "investment_trust": {
+                "label": "投信",
+                "positive_days": 13,
+                "total_net_buy": 277123.0,
+                "latest_net_buy": -545000.0,
+                "window_days": 20
+              },
+              "dealer": {
+                "label": "自營商",
+                "positive_days": 13,
+                "total_net_buy": 5079135.0,
+                "latest_net_buy": 565679.0,
+                "window_days": 20
+              }
+            },
+            "latest_financial_date": "2025-12-31",
+            "roe_percent": null,
+            "gross_margin_percent": null,
+            "operating_margin_percent": null,
+            "eps": 3.12,
+            "financial_snapshot": {
+              "roe_percent": null,
+              "gross_margin_percent": null,
+              "operating_margin_percent": null,
+              "eps": 3.12
+            },
+            "signal_breakdown": {
+              "price": true,
+              "institutional_flow": true,
+              "monthly_revenue": false,
+              "financial_statement": false
+            },
+            "ranking_score": 2.466062,
+            "llm_verdict": "consider",
+            "llm_confidence": 0.7,
+            "llm_summary": "臻鼎科技股價穩定於均線上，外資與投信買超顯著，缺乏財報數據。",
+            "llm_bull_points": [
+              "總淨買入超過1.8億",
+              "12天正向法人流動",
+              "價格距離均線距離0.27",
+              "外資買超13.2億",
+              "投信買超0.28億"
+            ],
+            "llm_bear_points": [
+              "缺乏ROE與毛利率資料"
+            ],
+            "llm_invalidation_conditions": [
+              "若財報指標未達門檻"
+            ]
+          }
+        },
+        {
+          "asset": "8046",
+          "name": "南亞電路板股份有限公司",
+          "market": "twse",
+          "asset_category": "Stock",
+          "industry": "28",
+          "why": [
+            "近 20 日報酬仍在可接受範圍",
+            "價格未明顯偏離均線，沒有過度追價",
+            "外資近 20 日有 11 日買超，累計買超 6428234",
+            "投信近 20 日有 18 日買超，累計買超 13394544",
+            "自營商近 20 日有 8 日買超，累計買超 1169033",
+            "三大法人合計在近 20 日中，有 12 日買超",
+            "三大法人合計買超量達到門檻"
+          ],
+          "risk": [
+            "月營收歷史長度不足",
+            "最新財報 ROE 未達門檻",
+            "最新財報毛利率未達門檻"
+          ],
+          "score": 2.410553,
+          "metrics": {
+            "latest_close": 724.0,
+            "ma_value": 569.975,
+            "lookback_return": 0.290553,
+            "distance_from_ma": 0.270231,
+            "positive_flow_days": 12,
+            "total_net_buy": 20991811.0,
+            "institutional_breakdown": {
+              "foreign_investor": {
+                "label": "外資",
+                "positive_days": 11,
+                "total_net_buy": 6428234.0,
+                "latest_net_buy": -3207341.0,
+                "window_days": 20
+              },
+              "investment_trust": {
+                "label": "投信",
+                "positive_days": 18,
+                "total_net_buy": 13394544.0,
+                "latest_net_buy": 609001.0,
+                "window_days": 20
+              },
+              "dealer": {
+                "label": "自營商",
+                "positive_days": 8,
+                "total_net_buy": 1169033.0,
+                "latest_net_buy": -113585.0,
+                "window_days": 20
+              }
+            },
+            "latest_financial_date": "2025-12-31",
+            "roe_percent": null,
+            "gross_margin_percent": null,
+            "operating_margin_percent": null,
+            "eps": 1.86,
+            "financial_snapshot": {
+              "roe_percent": null,
+              "gross_margin_percent": null,
+              "operating_margin_percent": null,
+              "eps": 1.86
+            },
+            "signal_breakdown": {
+              "price": true,
+              "institutional_flow": true,
+              "monthly_revenue": false,
+              "financial_statement": false
+            },
+            "ranking_score": 2.410553,
+            "llm_verdict": "consider",
+            "llm_confidence": 0.7,
+            "llm_summary": "南亞電路板股價接近均線，機構買盤強勁，雖外資持續賣超且缺乏財報指標。",
+            "llm_bull_points": [
+              "總淨買入超過2.0億新台幣",
+              "12天正向法人流動",
+              "價格距離均線距離0.27",
+              "投信與自營商持續買超"
+            ],
+            "llm_bear_points": [
+              "外資近20天淨流出6.4億",
+              "缺乏ROE與毛利率資料"
+            ],
+            "llm_invalidation_conditions": [
+              "若外資持續賣超超過門檻",
+              "若財報指標未達門檻"
+            ]
+          }
+        }
+      ],
+      "watch_only_candidates": [],
+      "notes": [
+        "掃描股票數: 47",
+        "被硬規則淘汰: 0",
+        "訊號不足未進入候選池: 0",
+        "進入候選池數量: 47",
+        "本版策略不預設排除 ETF，由 LLM 與規則共同挑選今天值得研究的標的。",
+        "已先用 FinMind 資料做摘要，再交給 LLM 從前 10 檔候選中判讀。",
+        "LLM 市場觀察：市場波動持續，機構投資流向仍是主要驅動因素。",
+        "LLM 投組提醒：目前持有兩檔ETF，未與個股重疊，風格分散。",
+        "可進一步思考標的: 2",
+        "僅觀察標的: 0",
+        "LLM 安全模式已啟用：selector 已使用 groq，為降低 rate limit，說明層自動改用 rule_based。",
+        "資料源：official_hybrid（官方日價/法人/營收 + 本地快取財報）。",
+        "stock-limit-mode=liquidity：以 2026-04-17 最新成交金額排序挑選前 50 檔，並保留目前持股。",
+        "本次資料對齊的最新交易日：2026-04-17",
+        "財報資料：使用本地快取，共 6687 筆。",
+        "設定檔：user_a（使用者 A）",
+        "設定檔路徑：/home/hank/Documents/fin/config/profiles/user_a.yaml",
+        "JSON 輸出：daily_result_20260419.json",
+        "Markdown 輸出：daily_report_20260419.md",
+        "HTML 輸出：daily_report_20260419.html",
+        "Discord webhook 已送出報告。"
+      ]
+    }
+  }
+}

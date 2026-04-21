@@ -1,0 +1,747 @@
+{
+  "date": "2026-04-21",
+  "generated_at": "2026-04-21T14:04:14+08:00",
+  "profile_name": "user_a",
+  "profile_display_name": "使用者 A",
+  "strategy": "1M_LLM_Assisted_Discovery_Strategy",
+  "action": "consider",
+  "selection_mode": "llm_assisted",
+  "eligible_candidates": [
+    {
+      "asset": "6285",
+      "name": "啟碁科技股份有限公司",
+      "market": "twse",
+      "asset_category": "Stock",
+      "industry": "27",
+      "why": [
+        "近 20 日報酬仍在可接受範圍",
+        "價格未明顯偏離均線，沒有過度追價",
+        "外資近 20 日有 9 日買超，累計買超 1725365",
+        "投信近 20 日有 11 日買超，累計買超 11534860",
+        "自營商近 20 日有 10 日買超，累計買超 1646941",
+        "三大法人合計在近 20 日中，有 11 日買超",
+        "三大法人合計買超量達到門檻"
+      ],
+      "risk": [
+        "月營收歷史長度不足",
+        "最新財報 ROE 未達門檻",
+        "最新財報毛利率未達門檻"
+      ],
+      "score": 2.613012,
+      "metrics": {
+        "latest_close": 249.5,
+        "ma_value": 202.6,
+        "lookback_return": 0.503012,
+        "distance_from_ma": 0.231491,
+        "positive_flow_days": 11,
+        "total_net_buy": 14907166.0,
+        "institutional_breakdown": {
+          "foreign_investor": {
+            "label": "外資",
+            "positive_days": 9,
+            "total_net_buy": 1725365.0,
+            "latest_net_buy": -6999877.0,
+            "window_days": 20
+          },
+          "investment_trust": {
+            "label": "投信",
+            "positive_days": 11,
+            "total_net_buy": 11534860.0,
+            "latest_net_buy": -75491.0,
+            "window_days": 20
+          },
+          "dealer": {
+            "label": "自營商",
+            "positive_days": 10,
+            "total_net_buy": 1646941.0,
+            "latest_net_buy": -419379.0,
+            "window_days": 20
+          }
+        },
+        "latest_financial_date": "2025-12-31",
+        "roe_percent": null,
+        "gross_margin_percent": null,
+        "operating_margin_percent": null,
+        "eps": 2.06,
+        "financial_snapshot": {
+          "roe_percent": null,
+          "gross_margin_percent": null,
+          "operating_margin_percent": null,
+          "eps": 2.06
+        },
+        "signal_breakdown": {
+          "price": true,
+          "institutional_flow": true,
+          "monthly_revenue": false,
+          "financial_statement": false
+        },
+        "ranking_score": 2.613012,
+        "llm_verdict": "consider",
+        "llm_confidence": 0.72,
+        "llm_summary": "啟碁科技近期法人買超積極，價格相對均線偏高，具短期上漲潛力。",
+        "llm_bull_points": [
+          "近20日法人買超累計超1,490萬，外資、投信、投信皆正向；價格距20日均線距離0.23，未過度追價；EPS 2.06，基本面尚可。"
+        ],
+        "llm_bear_points": [
+          "缺乏最新財報ROE與毛利率；外資最新淨買為負，可能暗示未來調整；若價格跌破20日均線，動能可能消失。"
+        ],
+        "llm_invalidation_conditions": [
+          "若公司財報顯示ROE或毛利率低於門檻；若價格跌破20日均線；若法人流轉為負。"
+        ]
+      }
+    },
+    {
+      "asset": "2308",
+      "name": "台達電子工業股份有限公司",
+      "market": "twse",
+      "asset_category": "Stock",
+      "industry": "28",
+      "why": [
+        "近 20 日報酬仍在可接受範圍",
+        "價格未明顯偏離均線，沒有過度追價",
+        "外資近 20 日有 11 日買超，累計買超 9598863",
+        "投信近 20 日有 11 日買超，累計買超 1702512",
+        "自營商近 20 日有 18 日買超，累計買超 5024331",
+        "三大法人合計在近 20 日中，有 11 日買超",
+        "三大法人合計買超量達到門檻"
+      ],
+      "risk": [
+        "月營收歷史長度不足",
+        "最新財報 ROE 未達門檻",
+        "最新財報毛利率未達門檻"
+      ],
+      "score": 2.539078,
+      "metrics": {
+        "latest_close": 2015.0,
+        "ma_value": 1550.3,
+        "lookback_return": 0.429078,
+        "distance_from_ma": 0.299748,
+        "positive_flow_days": 11,
+        "total_net_buy": 16325706.0,
+        "institutional_breakdown": {
+          "foreign_investor": {
+            "label": "外資",
+            "positive_days": 11,
+            "total_net_buy": 9598863.0,
+            "latest_net_buy": 444883.0,
+            "window_days": 20
+          },
+          "investment_trust": {
+            "label": "投信",
+            "positive_days": 11,
+            "total_net_buy": 1702512.0,
+            "latest_net_buy": 25906.0,
+            "window_days": 20
+          },
+          "dealer": {
+            "label": "自營商",
+            "positive_days": 18,
+            "total_net_buy": 5024331.0,
+            "latest_net_buy": 18742.0,
+            "window_days": 20
+          }
+        },
+        "latest_financial_date": "2025-12-31",
+        "roe_percent": null,
+        "gross_margin_percent": null,
+        "operating_margin_percent": null,
+        "eps": 6.67,
+        "financial_snapshot": {
+          "roe_percent": null,
+          "gross_margin_percent": null,
+          "operating_margin_percent": null,
+          "eps": 6.67
+        },
+        "signal_breakdown": {
+          "price": true,
+          "institutional_flow": true,
+          "monthly_revenue": false,
+          "financial_statement": false
+        },
+        "ranking_score": 2.539078,
+        "llm_verdict": "consider",
+        "llm_confidence": 0.7,
+        "llm_summary": "台達電子工業具備強勁法人買超與高EPS，短期上漲動能明顯。",
+        "llm_bull_points": [
+          "外資、投信、投信皆正向，累計買超超1,600萬；價格距20日均線距離0.30，仍有上漲空間；EPS 6.67，基本面良好。"
+        ],
+        "llm_bear_points": [
+          "缺乏最新財報ROE與毛利率；若價格跌破20日均線，動能可能消失。"
+        ],
+        "llm_invalidation_conditions": [
+          "若公司財報顯示ROE或毛利率低於門檻；若價格跌破20日均線。"
+        ]
+      }
+    },
+    {
+      "asset": "6415",
+      "name": "矽力杰股份有限公司",
+      "market": "twse",
+      "asset_category": "Stock",
+      "industry": "24",
+      "why": [
+        "近 20 日報酬仍在可接受範圍",
+        "價格未明顯偏離均線，沒有過度追價",
+        "外資近 20 日有 13 日買超，累計買超 6223261",
+        "自營商近 20 日有 11 日買超，累計買超 302788",
+        "三大法人合計在近 20 日中，有 10 日買超",
+        "三大法人合計買超量達到門檻"
+      ],
+      "risk": [
+        "投信近 20 日偏賣超，累計淨流出 697951",
+        "月營收歷史長度不足",
+        "最新財報 ROE 未達門檻",
+        "最新財報毛利率未達門檻"
+      ],
+      "score": 2.514722,
+      "metrics": {
+        "latest_close": 394.0,
+        "ma_value": 313.825,
+        "lookback_return": 0.414722,
+        "distance_from_ma": 0.255477,
+        "positive_flow_days": 10,
+        "total_net_buy": 5828098.0,
+        "institutional_breakdown": {
+          "foreign_investor": {
+            "label": "外資",
+            "positive_days": 13,
+            "total_net_buy": 6223261.0,
+            "latest_net_buy": 1816854.0,
+            "window_days": 20
+          },
+          "investment_trust": {
+            "label": "投信",
+            "positive_days": 8,
+            "total_net_buy": -697951.0,
+            "latest_net_buy": -11000.0,
+            "window_days": 20
+          },
+          "dealer": {
+            "label": "自營商",
+            "positive_days": 11,
+            "total_net_buy": 302788.0,
+            "latest_net_buy": 44847.0,
+            "window_days": 20
+          }
+        },
+        "latest_financial_date": "2025-12-31",
+        "roe_percent": null,
+        "gross_margin_percent": null,
+        "operating_margin_percent": null,
+        "eps": 2.09,
+        "financial_snapshot": {
+          "roe_percent": null,
+          "gross_margin_percent": null,
+          "operating_margin_percent": null,
+          "eps": 2.09
+        },
+        "signal_breakdown": {
+          "price": true,
+          "institutional_flow": true,
+          "monthly_revenue": false,
+          "financial_statement": false
+        },
+        "ranking_score": 2.514722,
+        "llm_verdict": "consider",
+        "llm_confidence": 0.68,
+        "llm_summary": "矽力杰股份具備正向法人流與相對均線偏高，短期上漲潛力。",
+        "llm_bull_points": [
+          "外資、投信、投信皆正向，累計買超超600萬；價格距20日均線距離0.26；EPS 2.09。"
+        ],
+        "llm_bear_points": [
+          "缺乏最新財報ROE與毛利率；若價格跌破20日均線，動能可能消失。"
+        ],
+        "llm_invalidation_conditions": [
+          "若公司財報顯示ROE或毛利率低於門檻；若價格跌破20日均線。"
+        ]
+      }
+    },
+    {
+      "asset": "6488",
+      "name": "環球晶圓股份有限公司",
+      "market": "tpex",
+      "asset_category": "Stock",
+      "industry": "24",
+      "why": [
+        "近 20 日報酬仍在可接受範圍",
+        "價格未明顯偏離均線，沒有過度追價",
+        "外資近 20 日有 14 日買超，累計買超 10326636",
+        "投信近 20 日有 10 日買超，累計買超 3678761",
+        "三大法人合計在近 20 日中，有 12 日買超",
+        "三大法人合計買超量達到門檻"
+      ],
+      "risk": [
+        "月營收歷史長度不足",
+        "最新財報 ROE 未達門檻",
+        "最新財報毛利率未達門檻"
+      ],
+      "score": 2.472208,
+      "metrics": {
+        "latest_close": 597.0,
+        "ma_value": 470.05,
+        "lookback_return": 0.352208,
+        "distance_from_ma": 0.270078,
+        "positive_flow_days": 12,
+        "total_net_buy": 14005397.0,
+        "institutional_breakdown": {
+          "foreign_investor": {
+            "label": "外資",
+            "positive_days": 14,
+            "total_net_buy": 10326636.0,
+            "latest_net_buy": 3023174.0,
+            "window_days": 20
+          },
+          "investment_trust": {
+            "label": "投信",
+            "positive_days": 10,
+            "total_net_buy": 3678761.0,
+            "latest_net_buy": 75006.0,
+            "window_days": 20
+          },
+          "dealer": {
+            "label": "自營商",
+            "positive_days": 0,
+            "total_net_buy": 0.0,
+            "latest_net_buy": 0.0,
+            "window_days": 20
+          }
+        },
+        "latest_financial_date": "2025-12-31",
+        "roe_percent": null,
+        "gross_margin_percent": null,
+        "operating_margin_percent": null,
+        "eps": 4.61,
+        "financial_snapshot": {
+          "roe_percent": null,
+          "gross_margin_percent": null,
+          "operating_margin_percent": null,
+          "eps": 4.61
+        },
+        "signal_breakdown": {
+          "price": true,
+          "institutional_flow": true,
+          "monthly_revenue": false,
+          "financial_statement": false
+        },
+        "ranking_score": 2.472208,
+        "llm_verdict": "consider",
+        "llm_confidence": 0.67,
+        "llm_summary": "環球晶圓股份具備正向法人流與相對均線偏高，短期上漲潛力。",
+        "llm_bull_points": [
+          "外資、投信、投信皆正向，累計買超超1,000萬；價格距20日均線距離0.27；EPS 4.61。"
+        ],
+        "llm_bear_points": [
+          "缺乏最新財報ROE與毛利率；若價格跌破20日均線，動能可能消失。"
+        ],
+        "llm_invalidation_conditions": [
+          "若公司財報顯示ROE或毛利率低於門檻；若價格跌破20日均線。"
+        ]
+      }
+    }
+  ],
+  "watch_only_candidates": [],
+  "notes": [
+    "掃描股票數: 47",
+    "被硬規則淘汰: 0",
+    "訊號不足未進入候選池: 0",
+    "進入候選池數量: 47",
+    "本版策略不預設排除 ETF，由 LLM 與規則共同挑選今天值得研究的標的。",
+    "已先用 FinMind 資料做摘要，再交給 LLM 從前 10 檔候選中判讀。",
+    "LLM 市場觀察：市場波動性持續，近20日多數候選標的皆呈現正向法人流，且價格相對於20日均線偏高，顯示短期上漲動能。",
+    "LLM 投組提醒：目前持有ETF 0050、2330，未與個股重疊，風格分散。所有候選個股缺乏完整財報指標，風險偏高，需謹慎評估。",
+    "可進一步思考標的: 4",
+    "僅觀察標的: 0",
+    "LLM 安全模式已啟用：selector 已使用 groq，為降低 rate limit，說明層自動改用 rule_based。",
+    "資料源：official_hybrid（官方日價/法人/營收 + 本地快取財報）。",
+    "stock-limit-mode=liquidity：以 2026-04-21 最新成交金額排序挑選前 50 檔，並保留目前持股。",
+    "本次資料對齊的最新交易日：2026-04-21",
+    "財報資料：使用本地快取，共 6627 筆。",
+    "設定檔：user_a（使用者 A）",
+    "設定檔路徑：/home/hank/Documents/fin/config/profiles/user_a.yaml",
+    "JSON 輸出：daily_result_20260421.json",
+    "Markdown 輸出：daily_report_20260421.md",
+    "HTML 輸出：daily_report_20260421.html",
+    "Discord webhook 已送出報告。"
+  ],
+  "explanation": "策略意圖：一個月左右持有，不預設排除 ETF 或個股；先做很輕量的硬規則過濾，再把價格、法人、月營收與財報摘要交給 LLM 挑出今天最值得研究的標的。\n\n目前庫存股：0050 元大台灣50（ETF，股數 409）、2330 主動統一台股增長（ETF，股數 4000）\n\n今天系統列出 4 檔較值得進一步研究的標的，因此整體動作為『consider』；這仍是研究輔助，不代表直接買賣建議。\n\n1. 6285 啟碁科技股份有限公司（Stock）：\n- 綜合判讀：啟碁科技近期法人買超積極，價格相對均線偏高，具短期上漲潛力。\n- 支持因素：近20日法人買超累計超1,490萬，外資、投信、投信皆正向；價格距20日均線距離0.23，未過度追價；EPS 2.06，基本面尚可。\n- 法人拆解：外資 9 日買超、累計 1725365.0；投信 11 日買超、累計 11534860.0；自營商 10 日買超、累計 1646941.0\n- 基本面補充：月營收年增 None%｜ROE None%｜毛利率 None%\n- 保留因素：缺乏最新財報ROE與毛利率；外資最新淨買為負，可能暗示未來調整；若價格跌破20日均線，動能可能消失。\n- 失效條件：若公司財報顯示ROE或毛利率低於門檻；若價格跌破20日均線；若法人流轉為負。\n\n2. 2308 台達電子工業股份有限公司（Stock）：\n- 綜合判讀：台達電子工業具備強勁法人買超與高EPS，短期上漲動能明顯。\n- 支持因素：外資、投信、投信皆正向，累計買超超1,600萬；價格距20日均線距離0.30，仍有上漲空間；EPS 6.67，基本面良好。\n- 法人拆解：外資 11 日買超、累計 9598863.0；投信 11 日買超、累計 1702512.0；自營商 18 日買超、累計 5024331.0\n- 基本面補充：月營收年增 None%｜ROE None%｜毛利率 None%\n- 保留因素：缺乏最新財報ROE與毛利率；若價格跌破20日均線，動能可能消失。\n- 失效條件：若公司財報顯示ROE或毛利率低於門檻；若價格跌破20日均線。\n\n3. 6415 矽力杰股份有限公司（Stock）：\n- 綜合判讀：矽力杰股份具備正向法人流與相對均線偏高，短期上漲潛力。\n- 支持因素：外資、投信、投信皆正向，累計買超超600萬；價格距20日均線距離0.26；EPS 2.09。\n- 法人拆解：外資 13 日買超、累計 6223261.0；投信 8 日買超、累計 -697951.0；自營商 11 日買超、累計 302788.0\n- 基本面補充：月營收年增 None%｜ROE None%｜毛利率 None%\n- 保留因素：缺乏最新財報ROE與毛利率；若價格跌破20日均線，動能可能消失。\n- 失效條件：若公司財報顯示ROE或毛利率低於門檻；若價格跌破20日均線。\n\n4. 6488 環球晶圓股份有限公司（Stock）：\n- 綜合判讀：環球晶圓股份具備正向法人流與相對均線偏高，短期上漲潛力。\n- 支持因素：外資、投信、投信皆正向，累計買超超1,000萬；價格距20日均線距離0.27；EPS 4.61。\n- 法人拆解：外資 14 日買超、累計 10326636.0；投信 10 日買超、累計 3678761.0；自營商 0 日買超、累計 0.0\n- 基本面補充：月營收年增 None%｜ROE None%｜毛利率 None%\n- 保留因素：缺乏最新財報ROE與毛利率；若價格跌破20日均線，動能可能消失。\n- 失效條件：若公司財報顯示ROE或毛利率低於門檻；若價格跌破20日均線。\n\n系統補充：掃描股票數: 47；被硬規則淘汰: 0；訊號不足未進入候選池: 0；進入候選池數量: 47；本版策略不預設排除 ETF，由 LLM 與規則共同挑選今天值得研究的標的。；已先用 FinMind 資料做摘要，再交給 LLM 從前 10 檔候選中判讀。。",
+  "llm_payload": {
+    "strategy_intent": "一個月左右持有，不預設排除 ETF 或個股；先做很輕量的硬規則過濾，再把價格、法人、月營收與財報摘要交給 LLM 挑出今天最值得研究的標的。",
+    "portfolio_snapshot": {
+      "0050": {
+        "name": "元大台灣50",
+        "asset_type": "ETF",
+        "shares": 409,
+        "avg_cost": 69.35,
+        "note": "使用者 A 的核心 ETF"
+      },
+      "2330": {
+        "name": "主動統一台股增長",
+        "asset_type": "ETF",
+        "shares": 4000,
+        "avg_cost": 25.21,
+        "note": "使用者 A 的核心持股"
+      }
+    },
+    "system_result": {
+      "action": "consider",
+      "selection_mode": "llm_assisted",
+      "candidates": [
+        {
+          "asset": "6285",
+          "name": "啟碁科技股份有限公司",
+          "market": "twse",
+          "asset_category": "Stock",
+          "industry": "27",
+          "why": [
+            "近 20 日報酬仍在可接受範圍",
+            "價格未明顯偏離均線，沒有過度追價",
+            "外資近 20 日有 9 日買超，累計買超 1725365",
+            "投信近 20 日有 11 日買超，累計買超 11534860",
+            "自營商近 20 日有 10 日買超，累計買超 1646941",
+            "三大法人合計在近 20 日中，有 11 日買超",
+            "三大法人合計買超量達到門檻"
+          ],
+          "risk": [
+            "月營收歷史長度不足",
+            "最新財報 ROE 未達門檻",
+            "最新財報毛利率未達門檻"
+          ],
+          "score": 2.613012,
+          "metrics": {
+            "latest_close": 249.5,
+            "ma_value": 202.6,
+            "lookback_return": 0.503012,
+            "distance_from_ma": 0.231491,
+            "positive_flow_days": 11,
+            "total_net_buy": 14907166.0,
+            "institutional_breakdown": {
+              "foreign_investor": {
+                "label": "外資",
+                "positive_days": 9,
+                "total_net_buy": 1725365.0,
+                "latest_net_buy": -6999877.0,
+                "window_days": 20
+              },
+              "investment_trust": {
+                "label": "投信",
+                "positive_days": 11,
+                "total_net_buy": 11534860.0,
+                "latest_net_buy": -75491.0,
+                "window_days": 20
+              },
+              "dealer": {
+                "label": "自營商",
+                "positive_days": 10,
+                "total_net_buy": 1646941.0,
+                "latest_net_buy": -419379.0,
+                "window_days": 20
+              }
+            },
+            "latest_financial_date": "2025-12-31",
+            "roe_percent": null,
+            "gross_margin_percent": null,
+            "operating_margin_percent": null,
+            "eps": 2.06,
+            "financial_snapshot": {
+              "roe_percent": null,
+              "gross_margin_percent": null,
+              "operating_margin_percent": null,
+              "eps": 2.06
+            },
+            "signal_breakdown": {
+              "price": true,
+              "institutional_flow": true,
+              "monthly_revenue": false,
+              "financial_statement": false
+            },
+            "ranking_score": 2.613012,
+            "llm_verdict": "consider",
+            "llm_confidence": 0.72,
+            "llm_summary": "啟碁科技近期法人買超積極，價格相對均線偏高，具短期上漲潛力。",
+            "llm_bull_points": [
+              "近20日法人買超累計超1,490萬，外資、投信、投信皆正向；價格距20日均線距離0.23，未過度追價；EPS 2.06，基本面尚可。"
+            ],
+            "llm_bear_points": [
+              "缺乏最新財報ROE與毛利率；外資最新淨買為負，可能暗示未來調整；若價格跌破20日均線，動能可能消失。"
+            ],
+            "llm_invalidation_conditions": [
+              "若公司財報顯示ROE或毛利率低於門檻；若價格跌破20日均線；若法人流轉為負。"
+            ]
+          }
+        },
+        {
+          "asset": "2308",
+          "name": "台達電子工業股份有限公司",
+          "market": "twse",
+          "asset_category": "Stock",
+          "industry": "28",
+          "why": [
+            "近 20 日報酬仍在可接受範圍",
+            "價格未明顯偏離均線，沒有過度追價",
+            "外資近 20 日有 11 日買超，累計買超 9598863",
+            "投信近 20 日有 11 日買超，累計買超 1702512",
+            "自營商近 20 日有 18 日買超，累計買超 5024331",
+            "三大法人合計在近 20 日中，有 11 日買超",
+            "三大法人合計買超量達到門檻"
+          ],
+          "risk": [
+            "月營收歷史長度不足",
+            "最新財報 ROE 未達門檻",
+            "最新財報毛利率未達門檻"
+          ],
+          "score": 2.539078,
+          "metrics": {
+            "latest_close": 2015.0,
+            "ma_value": 1550.3,
+            "lookback_return": 0.429078,
+            "distance_from_ma": 0.299748,
+            "positive_flow_days": 11,
+            "total_net_buy": 16325706.0,
+            "institutional_breakdown": {
+              "foreign_investor": {
+                "label": "外資",
+                "positive_days": 11,
+                "total_net_buy": 9598863.0,
+                "latest_net_buy": 444883.0,
+                "window_days": 20
+              },
+              "investment_trust": {
+                "label": "投信",
+                "positive_days": 11,
+                "total_net_buy": 1702512.0,
+                "latest_net_buy": 25906.0,
+                "window_days": 20
+              },
+              "dealer": {
+                "label": "自營商",
+                "positive_days": 18,
+                "total_net_buy": 5024331.0,
+                "latest_net_buy": 18742.0,
+                "window_days": 20
+              }
+            },
+            "latest_financial_date": "2025-12-31",
+            "roe_percent": null,
+            "gross_margin_percent": null,
+            "operating_margin_percent": null,
+            "eps": 6.67,
+            "financial_snapshot": {
+              "roe_percent": null,
+              "gross_margin_percent": null,
+              "operating_margin_percent": null,
+              "eps": 6.67
+            },
+            "signal_breakdown": {
+              "price": true,
+              "institutional_flow": true,
+              "monthly_revenue": false,
+              "financial_statement": false
+            },
+            "ranking_score": 2.539078,
+            "llm_verdict": "consider",
+            "llm_confidence": 0.7,
+            "llm_summary": "台達電子工業具備強勁法人買超與高EPS，短期上漲動能明顯。",
+            "llm_bull_points": [
+              "外資、投信、投信皆正向，累計買超超1,600萬；價格距20日均線距離0.30，仍有上漲空間；EPS 6.67，基本面良好。"
+            ],
+            "llm_bear_points": [
+              "缺乏最新財報ROE與毛利率；若價格跌破20日均線，動能可能消失。"
+            ],
+            "llm_invalidation_conditions": [
+              "若公司財報顯示ROE或毛利率低於門檻；若價格跌破20日均線。"
+            ]
+          }
+        },
+        {
+          "asset": "6415",
+          "name": "矽力杰股份有限公司",
+          "market": "twse",
+          "asset_category": "Stock",
+          "industry": "24",
+          "why": [
+            "近 20 日報酬仍在可接受範圍",
+            "價格未明顯偏離均線，沒有過度追價",
+            "外資近 20 日有 13 日買超，累計買超 6223261",
+            "自營商近 20 日有 11 日買超，累計買超 302788",
+            "三大法人合計在近 20 日中，有 10 日買超",
+            "三大法人合計買超量達到門檻"
+          ],
+          "risk": [
+            "投信近 20 日偏賣超，累計淨流出 697951",
+            "月營收歷史長度不足",
+            "最新財報 ROE 未達門檻",
+            "最新財報毛利率未達門檻"
+          ],
+          "score": 2.514722,
+          "metrics": {
+            "latest_close": 394.0,
+            "ma_value": 313.825,
+            "lookback_return": 0.414722,
+            "distance_from_ma": 0.255477,
+            "positive_flow_days": 10,
+            "total_net_buy": 5828098.0,
+            "institutional_breakdown": {
+              "foreign_investor": {
+                "label": "外資",
+                "positive_days": 13,
+                "total_net_buy": 6223261.0,
+                "latest_net_buy": 1816854.0,
+                "window_days": 20
+              },
+              "investment_trust": {
+                "label": "投信",
+                "positive_days": 8,
+                "total_net_buy": -697951.0,
+                "latest_net_buy": -11000.0,
+                "window_days": 20
+              },
+              "dealer": {
+                "label": "自營商",
+                "positive_days": 11,
+                "total_net_buy": 302788.0,
+                "latest_net_buy": 44847.0,
+                "window_days": 20
+              }
+            },
+            "latest_financial_date": "2025-12-31",
+            "roe_percent": null,
+            "gross_margin_percent": null,
+            "operating_margin_percent": null,
+            "eps": 2.09,
+            "financial_snapshot": {
+              "roe_percent": null,
+              "gross_margin_percent": null,
+              "operating_margin_percent": null,
+              "eps": 2.09
+            },
+            "signal_breakdown": {
+              "price": true,
+              "institutional_flow": true,
+              "monthly_revenue": false,
+              "financial_statement": false
+            },
+            "ranking_score": 2.514722,
+            "llm_verdict": "consider",
+            "llm_confidence": 0.68,
+            "llm_summary": "矽力杰股份具備正向法人流與相對均線偏高，短期上漲潛力。",
+            "llm_bull_points": [
+              "外資、投信、投信皆正向，累計買超超600萬；價格距20日均線距離0.26；EPS 2.09。"
+            ],
+            "llm_bear_points": [
+              "缺乏最新財報ROE與毛利率；若價格跌破20日均線，動能可能消失。"
+            ],
+            "llm_invalidation_conditions": [
+              "若公司財報顯示ROE或毛利率低於門檻；若價格跌破20日均線。"
+            ]
+          }
+        },
+        {
+          "asset": "6488",
+          "name": "環球晶圓股份有限公司",
+          "market": "tpex",
+          "asset_category": "Stock",
+          "industry": "24",
+          "why": [
+            "近 20 日報酬仍在可接受範圍",
+            "價格未明顯偏離均線，沒有過度追價",
+            "外資近 20 日有 14 日買超，累計買超 10326636",
+            "投信近 20 日有 10 日買超，累計買超 3678761",
+            "三大法人合計在近 20 日中，有 12 日買超",
+            "三大法人合計買超量達到門檻"
+          ],
+          "risk": [
+            "月營收歷史長度不足",
+            "最新財報 ROE 未達門檻",
+            "最新財報毛利率未達門檻"
+          ],
+          "score": 2.472208,
+          "metrics": {
+            "latest_close": 597.0,
+            "ma_value": 470.05,
+            "lookback_return": 0.352208,
+            "distance_from_ma": 0.270078,
+            "positive_flow_days": 12,
+            "total_net_buy": 14005397.0,
+            "institutional_breakdown": {
+              "foreign_investor": {
+                "label": "外資",
+                "positive_days": 14,
+                "total_net_buy": 10326636.0,
+                "latest_net_buy": 3023174.0,
+                "window_days": 20
+              },
+              "investment_trust": {
+                "label": "投信",
+                "positive_days": 10,
+                "total_net_buy": 3678761.0,
+                "latest_net_buy": 75006.0,
+                "window_days": 20
+              },
+              "dealer": {
+                "label": "自營商",
+                "positive_days": 0,
+                "total_net_buy": 0.0,
+                "latest_net_buy": 0.0,
+                "window_days": 20
+              }
+            },
+            "latest_financial_date": "2025-12-31",
+            "roe_percent": null,
+            "gross_margin_percent": null,
+            "operating_margin_percent": null,
+            "eps": 4.61,
+            "financial_snapshot": {
+              "roe_percent": null,
+              "gross_margin_percent": null,
+              "operating_margin_percent": null,
+              "eps": 4.61
+            },
+            "signal_breakdown": {
+              "price": true,
+              "institutional_flow": true,
+              "monthly_revenue": false,
+              "financial_statement": false
+            },
+            "ranking_score": 2.472208,
+            "llm_verdict": "consider",
+            "llm_confidence": 0.67,
+            "llm_summary": "環球晶圓股份具備正向法人流與相對均線偏高，短期上漲潛力。",
+            "llm_bull_points": [
+              "外資、投信、投信皆正向，累計買超超1,000萬；價格距20日均線距離0.27；EPS 4.61。"
+            ],
+            "llm_bear_points": [
+              "缺乏最新財報ROE與毛利率；若價格跌破20日均線，動能可能消失。"
+            ],
+            "llm_invalidation_conditions": [
+              "若公司財報顯示ROE或毛利率低於門檻；若價格跌破20日均線。"
+            ]
+          }
+        }
+      ],
+      "watch_only_candidates": [],
+      "notes": [
+        "掃描股票數: 47",
+        "被硬規則淘汰: 0",
+        "訊號不足未進入候選池: 0",
+        "進入候選池數量: 47",
+        "本版策略不預設排除 ETF，由 LLM 與規則共同挑選今天值得研究的標的。",
+        "已先用 FinMind 資料做摘要，再交給 LLM 從前 10 檔候選中判讀。",
+        "LLM 市場觀察：市場波動性持續，近20日多數候選標的皆呈現正向法人流，且價格相對於20日均線偏高，顯示短期上漲動能。",
+        "LLM 投組提醒：目前持有ETF 0050、2330，未與個股重疊，風格分散。所有候選個股缺乏完整財報指標，風險偏高，需謹慎評估。",
+        "可進一步思考標的: 4",
+        "僅觀察標的: 0",
+        "LLM 安全模式已啟用：selector 已使用 groq，為降低 rate limit，說明層自動改用 rule_based。",
+        "資料源：official_hybrid（官方日價/法人/營收 + 本地快取財報）。",
+        "stock-limit-mode=liquidity：以 2026-04-21 最新成交金額排序挑選前 50 檔，並保留目前持股。",
+        "本次資料對齊的最新交易日：2026-04-21",
+        "財報資料：使用本地快取，共 6627 筆。",
+        "設定檔：user_a（使用者 A）",
+        "設定檔路徑：/home/hank/Documents/fin/config/profiles/user_a.yaml",
+        "JSON 輸出：daily_result_20260421.json",
+        "Markdown 輸出：daily_report_20260421.md",
+        "HTML 輸出：daily_report_20260421.html",
+        "Discord webhook 已送出報告。"
+      ]
+    }
+  }
+}
