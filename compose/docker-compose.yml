@@ -10,7 +10,8 @@ services:
     volumes:
       - ../workspace:/app/workspace
     env_file:
-      - ../.env.local
+      - path: ../.env.local
+        required: false
     restart: unless-stopped
 
   prometheus:
