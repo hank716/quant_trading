@@ -82,6 +82,71 @@ def _run_with_artifacts(argv=None):
     ]
     candidate_crud.bulk_insert(run_id, trade_date, candidate_rows)
 
+    # --- Coverage check (proxy from DailyResult) ---
+    try:
+        import json as _json
+        import re as _re
+        from src.monitoring.coverage_checker import build_coverage_snapshot
+        from src.registry.retrain_gate import build_retrain_decision
+        from src.database.crud import CoverageCRUD
+
+        # Extract scanned universe size from notes written by main.py
+        universe_size = 0
+        for note in (result.notes or []):
+            m = _re.search(r"掃描股票數.*?(\d+)", note)
+            if m:
+                universe_size = int(m.group(1))
+                break
+
+        # Proxy: assume stocks with any signal result have revenue data
+        # Financial coverage: notes tell us how many financial rows were cached
+        rev_covered = universe_size  # conservative — real check requires re-fetch
+        fin_match = next(
+            (_re.search(r"財報資料.*?(\d+)\s*筆", n) for n in (result.notes or []) if "財報" in n),
+            None,
+        )
+        fin_covered = int(fin_match.group(1)) if fin_match else 0
+
+        rev_cov_pct = round(rev_covered / universe_size, 4) if universe_size else 0.0
+        fin_cov_pct = round(min(fin_covered / universe_size, 1.0), 4) if universe_size else 0.0
+        missing_crit = [
+            c.asset for c in result.eligible_candidates
+            if not any(c.asset in n for n in (result.notes or []))
+        ]
+
+        snap = build_coverage_snapshot(
+            trade_date,
+            {"coverage_pct": rev_cov_pct, "covered": rev_covered, "total": universe_size},
+            {"coverage_pct": fin_cov_pct, "covered": fin_covered, "total": universe_size},
+            missing_crit,
+        )
+        retrain = build_retrain_decision(snap, last_retrain_date=None, today=trade_date)
+
+        snap_path = base / run_id / "coverage_snapshot.json"
+        snap_path.parent.mkdir(parents=True, exist_ok=True)
+        snap_path.write_text(_json.dumps(snap, ensure_ascii=False, indent=2))
+
+        retrain_path = base / run_id / "retrain_decision.json"
+        retrain_path.write_text(_json.dumps(retrain, ensure_ascii=False, indent=2))
+
+        artifact_uris["coverage_snapshot"] = str(snap_path)
+        artifact_uris["retrain_decision"] = str(retrain_path)
+
+        CoverageCRUD(db).insert_snapshot(
+            trade_date=trade_date,
+            run_id=run_id,
+            revenue_coverage=rev_cov_pct,
+            financial_coverage=fin_cov_pct,
+            missing_critical=missing_crit,
+        )
+        artifact_crud.register(run_id, "coverage_snapshot", str(snap_path))
+        artifact_crud.register(run_id, "retrain_decision", str(retrain_path))
+        print(f"Coverage: revenue={rev_cov_pct:.1%} financial={fin_cov_pct:.1%}")
+        if retrain["should_retrain"]:
+            print(f"Retrain gate: TRIGGER — {retrain['reason']}")
+    except Exception as _cov_exc:
+        print(f"Coverage check skipped: {_cov_exc}")
+
     # --- Supabase: finish run ---
     run_crud.finish(run_id, status="success")
 

@@ -2,6 +2,20 @@
 
 每次啟動請在此檔最上方新增一筆：
 
+## 2026-04-21 22:30
+- 啟動時所在 branch：develop（接續 Phase 3 merge 後）
+- 使用 agents：fin-pipeline-engineer（主實作）+ fin-test-engineer（測試）協同
+- 完成的子任務：Phase 4 全部（4.1–4.8）
+  - src/monitoring/coverage_checker.py（4 個純函式）
+  - src/registry/retrain_gate.py（should_trigger_retrain、build_retrain_decision）
+  - tests/unit/test_coverage_checker.py（12 cases）+ test_retrain_gate.py（9 cases）
+  - src/orchestration/run_daily.py：串入 coverage check + write coverage_snapshot.json / retrain_decision.json
+  - src/ui/app.py：Coverage 頁強化（metrics、折線圖、缺件名單、retrain gate 狀態）
+  - compose/grafana/.../coverage-health.json（5 panels）
+  - 88 unit tests pass
+- 遇到的卡點：run_daily.py 整合改為 proxy coverage（避免重複 data fetch），真實覆蓋率需 sync 後再算
+- 下次繼續：Phase 5a（feature engineering，feat/phase5a-feature-engineering）
+
 ## 2026-04-21 21:00
 - 啟動時所在 branch：feat/phase3-supabase（含 ghost rebase 狀態，已清除）
 - 完成的子任務：Phase 3 全部（3.1–3.11）

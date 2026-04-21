@@ -153,18 +153,58 @@ elif page == "📦 庫存股":
 # Coverage
 # ================================================================== #
 elif page == "📊 Coverage":
+    import json
+    import pandas as pd
+    from pathlib import Path as _Path
+
     st.title("資料覆蓋率")
     _, _, coverage_crud = get_crud()
     snapshots = coverage_crud.latest(limit=30)
+
+    # ---- Retrain gate status (load from latest run artifact) ----
+    retrain_decision = None
+    runs_dir = _Path(os.getenv("CACHE_DIR", "workspace/hotdata")).parent / "runs"
+    if runs_dir.exists():
+        run_dirs = sorted(runs_dir.iterdir(), reverse=True)
+        for rd in run_dirs[:5]:
+            rp = rd / "retrain_decision.json"
+            if rp.exists():
+                try:
+                    retrain_decision = json.loads(rp.read_text())
+                except Exception:
+                    pass
+                break
+
+    col1, col2, col3 = st.columns(3)
     if snapshots:
-        import pandas as pd
+        latest = snapshots[0]
+        col1.metric("月營收覆蓋率", f"{latest.get('revenue_coverage', 0):.1%}")
+        col2.metric("財報覆蓋率", f"{latest.get('financial_coverage', 0):.1%}")
+    if retrain_decision:
+        status = "🔴 需要 Retrain" if retrain_decision.get("should_retrain") else "🟢 不需要 Retrain"
+        col3.metric("Retrain Gate", status)
+        with st.expander("Retrain 決策詳情"):
+            st.json(retrain_decision)
+
+    # ---- 30-day coverage trend ----
+    if snapshots:
         df = pd.DataFrame(snapshots)
         if "trade_date" in df.columns:
             df = df.sort_values("trade_date")
-            st.line_chart(df.set_index("trade_date")[["revenue_coverage", "financial_coverage"]])
-        st.dataframe(df, use_container_width=True)
+            st.subheader("30 日覆蓋率趨勢")
+            chart_cols = [c for c in ["revenue_coverage", "financial_coverage"] if c in df.columns]
+            if chart_cols:
+                st.line_chart(df.set_index("trade_date")[chart_cols])
+
+        # ---- Missing critical stocks ----
+        latest_missing = snapshots[0].get("missing_critical", [])
+        if latest_missing:
+            st.subheader(f"⚠️ 缺件標的（{len(latest_missing)} 檔）")
+            st.dataframe(pd.DataFrame({"stock_id": latest_missing}), use_container_width=True)
+        else:
+            st.success("無缺件標的")
     else:
-        st.info("尚無 coverage 記錄")
+        st.info("尚無 coverage 記錄（執行 run_daily.py 後才會產生）")
 
 
 # ================================================================== #
