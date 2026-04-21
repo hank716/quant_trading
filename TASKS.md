@@ -877,42 +877,42 @@ feat(phase0): add docker-compose skeleton with quant-ui service
 **不需要：** 外部 credentials
 
 ### 4.1 Coverage checker
-- [ ] 建立 `src/monitoring/__init__.py`
-- [ ] 建立 `src/monitoring/coverage_checker.py`：
+- [x] 建立 `src/monitoring/__init__.py`
+- [x] 建立 `src/monitoring/coverage_checker.py`：
   - `compute_revenue_coverage(universe, revenue_df, trade_date) -> dict`
   - `compute_financial_coverage(universe, financial_df, trade_date) -> dict`
   - `find_missing_critical(universe, coverage, critical_ids) -> list`
   - `build_coverage_snapshot(trade_date, rev_cov, fin_cov) -> dict`
 
 ### 4.2 Coverage 測試
-- [ ] 建立 `tests/unit/test_coverage_checker.py`：100%、50%、空資料、critical 未覆蓋
+- [x] 建立 `tests/unit/test_coverage_checker.py`：100%、50%、空資料、critical 未覆蓋
 
 ### 4.3 串入 pipeline
-- [ ] 修改 `src/orchestration/run_daily.py`：結束前呼叫 coverage checker + 寫入 Supabase
+- [x] 修改 `src/orchestration/run_daily.py`：結束前呼叫 coverage checker + 寫入 Supabase
 
 ### 4.4 Retrain gate
-- [ ] 建立 `src/registry/__init__.py`
-- [ ] 建立 `src/registry/retrain_gate.py`：
+- [x] 建立 `src/registry/__init__.py`
+- [x] 建立 `src/registry/retrain_gate.py`：
   - `should_trigger_retrain(snapshot, last_retrain, ...) -> (bool, str)`
   - `build_retrain_decision(snapshot, last_retrain, today) -> dict`
 
 ### 4.5 Retrain gate 測試
-- [ ] 建立 `tests/unit/test_retrain_gate.py`：至少 6 個 case
+- [x] 建立 `tests/unit/test_retrain_gate.py`：至少 6 個 case
 
 ### 4.6 Streamlit Coverage 頁
-- [ ] 在 `src/ui/app.py` 新增 Coverage 頁：
+- [x] 在 `src/ui/app.py` 新增 Coverage 頁：
   - 30 天 coverage 折線圖
   - 缺件名單 datatable
   - retrain gate 狀態
 
 ### 4.7 Grafana Coverage dashboard
-- [ ] 建立 `compose/grafana/provisioning/dashboards/coverage-health.json`
+- [x] 建立 `compose/grafana/provisioning/dashboards/coverage-health.json`
 
 ### 4.8 Phase 4 驗收
-- [ ] pytest 通過
-- [ ] `coverage_snapshot.json` 和 `retrain_decision.json` 正確產生
-- [ ] UI 顯示 coverage
-- [ ] 建立 PR → develop，自動 merge
+- [x] pytest 通過
+- [x] `coverage_snapshot.json` 和 `retrain_decision.json` 正確產生
+- [x] UI 顯示 coverage
+- [x] 建立 PR → develop，自動 merge
 
 ---
 
