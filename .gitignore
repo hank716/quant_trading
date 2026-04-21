@@ -41,4 +41,6 @@ workspace/runs/*/
 
 # --- Claude Code ---
 .claude/
+!.claude/agents/
+!.claude/agents/*.md
 BLOCKED.md

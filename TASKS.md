@@ -144,9 +144,9 @@ feat(phase0): add docker-compose skeleton with quant-ui service
 **目標：** 建立分支策略、CI 保護、文件基礎
 
 ### -1.1 確認 Git 狀態
-- [ ] 執行 `git remote -v` 確認遠端存在
-- [ ] 執行 `git branch -a` 確認有 `main`
-- [ ] 如果沒有 `develop` 分支：
+- [x] 執行 `git remote -v` 確認遠端存在
+- [x] 執行 `git branch -a` 確認有 `main`
+- [x] 如果沒有 `develop` 分支：
   ```bash
   git checkout main
   git pull origin main
@@ -155,7 +155,7 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   ```
 
 ### -1.2 建立 .gitignore 補充
-- [ ] 確認 `.gitignore` 包含：
+- [x] 確認 `.gitignore` 包含：
   ```
   # Env
   .env
@@ -183,7 +183,7 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   ```
 
 ### -1.3 建立 BLOCKED.md 範本
-- [ ] 建立 `docs/BLOCKED.template.md`（版控用）：
+- [x] 建立 `docs/BLOCKED.template.md`（版控用）：
   ```markdown
   # BLOCKED — 待人工確認
 
@@ -199,7 +199,7 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   ```
 
 ### -1.4 建立 Claude Code 工作紀錄
-- [ ] 建立 `docs/claude-code-log.md`：
+- [x] 建立 `docs/claude-code-log.md`：
   ```markdown
   # Claude Code 工作紀錄
 
@@ -213,7 +213,7 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   ```
 
 ### -1.5 建立 GitHub PR 模板
-- [ ] 建立 `.github/pull_request_template.md`：
+- [x] 建立 `.github/pull_request_template.md`：
   ```markdown
   ## Phase
   Phase _N_: _標題_
@@ -222,9 +222,9 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   -
 
   ## 測試
-  - [ ] `pytest -q` 通過
-  - [ ] Docker build 通過（若適用）
-  - [ ] 手動驗證步驟：
+  - [x] `pytest -q` 通過
+  - [x] Docker build 通過（若適用）
+  - [x] 手動驗證步驟：
 
   ## 需要人工確認
   -
@@ -236,9 +236,9 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   ```
 
 ### -1.6 Phase -1 驗收
-- [ ] `git branch -a` 顯示 `main` 和 `develop`
-- [ ] 上述檔案都已 commit 到 develop
-- [ ] **把這份 TASKS.md 複製到 repo 根目錄**，commit 到 develop
+- [x] `git branch -a` 顯示 `main` 和 `develop`
+- [x] 上述檔案都已 commit 到 develop
+- [x] **把這份 TASKS.md 複製到 repo 根目錄**，commit 到 develop
 
 ---
 
@@ -249,7 +249,7 @@ feat(phase0): add docker-compose skeleton with quant-ui service
 **不需要：** 任何外部 credentials
 
 ### 0.1 建立新目錄結構
-- [ ] 建立以下目錄（每個放 `.gitkeep`）：
+- [x] 建立以下目錄（每個放 `.gitkeep`）：
   ```
   workspace/hotdata/
   workspace/runs/
@@ -270,11 +270,11 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   tests/contract/
   tests/integration/
   ```
-- [ ] 每個 `src/` 子目錄放 `__init__.py`
-- [ ] 每個 `tests/` 子目錄放 `__init__.py`
+- [x] 每個 `src/` 子目錄放 `__init__.py`
+- [x] 每個 `tests/` 子目錄放 `__init__.py`
 
 ### 0.2 建立 docker/app.Dockerfile
-- [ ] 建立 `docker/app.Dockerfile`：
+- [x] 建立 `docker/app.Dockerfile`：
   ```dockerfile
   FROM python:3.11-slim
 
@@ -297,10 +297,10 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   ENV OUTPUT_DIR=/app/workspace/outputs
   ENV LOG_DIR=/app/workspace/logs
   ```
-- [ ] 驗證：`docker build -f docker/app.Dockerfile -t fin-app:test .` 成功
+- [x] 驗證：`docker build -f docker/app.Dockerfile -t fin-app:test .` 成功
 
 ### 0.3 建立 docker/ui.Dockerfile
-- [ ] 建立 `docker/ui.Dockerfile`：
+- [x] 建立 `docker/ui.Dockerfile`：
   ```dockerfile
   FROM fin-app:test
 
@@ -313,7 +313,7 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   ```
 
 ### 0.4 建立最小 Streamlit app
-- [ ] 建立 `src/ui/app.py`：
+- [x] 建立 `src/ui/app.py`：
   ```python
   """Streamlit UI 入口 - Phase 0 骨架版"""
   import streamlit as st
@@ -333,7 +333,7 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   ```
 
 ### 0.5 建立 compose/docker-compose.yml
-- [ ] 建立 `compose/docker-compose.yml`：
+- [x] 建立 `compose/docker-compose.yml`：
   ```yaml
   services:
     quant-ui:
@@ -378,7 +378,7 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   ```
 
 ### 0.6 建立 compose/prometheus.yml
-- [ ] 建立 `compose/prometheus.yml`：
+- [x] 建立 `compose/prometheus.yml`：
   ```yaml
   global:
     scrape_interval: 30s
@@ -391,7 +391,7 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   ```
 
 ### 0.7 建立 Grafana datasource provisioning
-- [ ] 建立 `compose/grafana/provisioning/datasources/prometheus.yml`：
+- [x] 建立 `compose/grafana/provisioning/datasources/prometheus.yml`：
   ```yaml
   apiVersion: 1
   datasources:
@@ -403,7 +403,7 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   ```
 
 ### 0.8 建立 .env.example 更新版
-- [ ] 更新 `.env.example`（增量新增，不移除現有欄位）：
+- [x] 更新 `.env.example`（增量新增，不移除現有欄位）：
   ```bash
   # === Core ===
   USE_MOCK_DATA=1
@@ -433,8 +433,8 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   ```
 
 ### 0.9 建立 pCloud client 骨架（mock-first）
-- [ ] 建立 `src/storage/__init__.py`
-- [ ] 建立 `src/storage/pcloud_client.py`：
+- [x] 建立 `src/storage/__init__.py`
+- [x] 建立 `src/storage/pcloud_client.py`：
   ```python
   """pCloud API client - Phase 0 mock skeleton"""
   import os
@@ -488,7 +488,7 @@ feat(phase0): add docker-compose skeleton with quant-ui service
               return None
           raise NotImplementedError("Real API impl in Phase 2")
   ```
-- [ ] 建立 `tests/unit/test_pcloud_client.py`：
+- [x] 建立 `tests/unit/test_pcloud_client.py`：
   ```python
   from src.storage.pcloud_client import PCloudClient
 
@@ -512,10 +512,10 @@ feat(phase0): add docker-compose skeleton with quant-ui service
       result = c.upload_file(local, "/remote/f.txt")
       assert result["mock"] is True
   ```
-- [ ] 執行 `pytest tests/unit/test_pcloud_client.py -q` 通過
+- [x] 執行 `pytest tests/unit/test_pcloud_client.py -q` 通過
 
 ### 0.10 建立 Windows/Linux 啟動腳本
-- [ ] 建立 `scripts/windows/start_services.ps1`：
+- [x] 建立 `scripts/windows/start_services.ps1`：
   ```powershell
   $ErrorActionPreference = "Stop"
   Set-Location (Split-Path $PSScriptRoot -Parent | Split-Path -Parent)
@@ -525,19 +525,19 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   Write-Host "  Prometheus: http://localhost:9090"
   Write-Host "  Grafana:    http://localhost:3000 (admin/admin)"
   ```
-- [ ] 建立 `scripts/windows/stop_services.ps1`
-- [ ] 建立 `scripts/linux/start_services.sh`
+- [x] 建立 `scripts/windows/stop_services.ps1`
+- [x] 建立 `scripts/linux/start_services.sh`
 
 ### 0.11 建立 Phase 0 文件
-- [ ] 建立 `docs/phase0-setup.md`：說明如何啟動、各服務 port、排錯
+- [x] 建立 `docs/phase0-setup.md`：說明如何啟動、各服務 port、排錯
 
 ### 0.12 Phase 0 驗收
-- [ ] `pytest -q` 全部通過
-- [ ] `docker build -f docker/app.Dockerfile -t fin-app:test .` 成功
-- [ ] `docker build -f docker/ui.Dockerfile -t fin-ui:latest .` 成功
-- [ ] `docker compose -f compose/docker-compose.yml config` 無錯
-- [ ] 建立 PR → develop，title：`Phase 0: Docker Skeleton & Workspace Structure`
-- [ ] 自動 merge 到 develop
+- [x] `pytest -q` 全部通過
+- [x] `docker build -f docker/app.Dockerfile -t fin-app:test .` 成功
+- [x] `docker build -f docker/ui.Dockerfile -t fin-ui:latest .` 成功
+- [x] `docker compose -f compose/docker-compose.yml config` 無錯
+- [x] 建立 PR → develop，title：`Phase 0: Docker Skeleton & Workspace Structure`
+- [x] 自動 merge 到 develop
 
 ---
 
@@ -548,7 +548,7 @@ feat(phase0): add docker-compose skeleton with quant-ui service
 **不需要：** 外部 credentials（用 mock mode）
 
 ### 1.1 新增 one-shot 容器服務
-- [ ] 編輯 `compose/docker-compose.yml`，新增：
+- [x] 編輯 `compose/docker-compose.yml`，新增：
   ```yaml
     quant-sync:
       image: fin-app:test
@@ -581,36 +581,36 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   ```
 
 ### 1.2 重構 cache 路徑
-- [ ] 搜尋：`grep -rn "\.cache" --include="*.py" .`
-- [ ] 每處改為：
+- [x] 搜尋：`grep -rn "\.cache" --include="*.py" .`
+- [x] 每處改為：
   ```python
   CACHE_DIR = Path(os.getenv("CACHE_DIR", ".cache"))
   ```
-- [ ] 確認 `test/test_decision_system.py` 不受影響
+- [x] 確認 `test/test_decision_system.py` 不受影響
 
 ### 1.3 重構 outputs 路徑
-- [ ] 改為讀 `OUTPUT_DIR` 環境變數，預設 `outputs/`
+- [x] 改為讀 `OUTPUT_DIR` 環境變數，預設 `outputs/`
 
 ### 1.4 Windows Task Scheduler 腳本
-- [ ] 建立 `scripts/windows/run_sync.ps1`：
+- [x] 建立 `scripts/windows/run_sync.ps1`：
   ```powershell
   Set-Location (Split-Path $PSScriptRoot -Parent | Split-Path -Parent)
   docker compose -f compose/docker-compose.yml --profile jobs run --rm quant-sync
   ```
-- [ ] 建立 `scripts/windows/run_daily.ps1`
-- [ ] 建立 `scripts/windows/run_financials.ps1`
+- [x] 建立 `scripts/windows/run_daily.ps1`
+- [x] 建立 `scripts/windows/run_financials.ps1`
 
 ### 1.5 Linux 啟動腳本
-- [ ] 建立 `scripts/linux/run_sync.sh`
-- [ ] 建立 `scripts/linux/run_daily.sh`
-- [ ] 建立 `scripts/linux/run_financials.sh`
-- [ ] 全部 `chmod +x`
+- [x] 建立 `scripts/linux/run_sync.sh`
+- [x] 建立 `scripts/linux/run_daily.sh`
+- [x] 建立 `scripts/linux/run_financials.sh`
+- [x] 全部 `chmod +x`
 
 ### 1.6 Task Scheduler 設定文件
-- [ ] 建立 `docs/windows-task-scheduler-setup.md`：排程教學、範例
+- [x] 建立 `docs/windows-task-scheduler-setup.md`：排程教學、範例
 
 ### 1.7 整合測試
-- [ ] 建立 `tests/integration/test_docker_smoke.py`：
+- [x] 建立 `tests/integration/test_docker_smoke.py`：
   ```python
   import subprocess
   import pytest
@@ -623,7 +623,7 @@ feat(phase0): add docker-compose skeleton with quant-ui service
       )
       assert result.returncode == 0, result.stderr
   ```
-- [ ] 在 `pytest.ini` 設定 markers：
+- [x] 在 `pytest.ini` 設定 markers：
   ```ini
   [pytest]
   markers =
@@ -632,16 +632,16 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   ```
 
 ### 1.8 環境變數文件
-- [ ] 建立 `docs/env-variables.md`
+- [x] 建立 `docs/env-variables.md`
 
 ### 1.9 Quickstart 文件
-- [ ] 建立 `docs/quickstart.md`
+- [x] 建立 `docs/quickstart.md`
 
 ### 1.10 Phase 1 驗收
-- [ ] `pytest -q -m "not integration"` 通過
-- [ ] `docker compose --profile jobs run --rm quant-daily` 跑完不報錯
-- [ ] `workspace/outputs/` 有新檔案
-- [ ] 建立 PR → develop，自動 merge
+- [x] `pytest -q -m "not integration"` 通過
+- [x] `docker compose --profile jobs run --rm quant-daily` 跑完不報錯
+- [x] `workspace/outputs/` 有新檔案
+- [x] 建立 PR → develop，自動 merge
 
 ---
 
@@ -652,8 +652,8 @@ feat(phase0): add docker-compose skeleton with quant-ui service
 **需要：** pCloud token（若無則用 mock 仍可完成程式架構）
 
 ### 2.1 SignalRecord schema
-- [ ] 建立 `src/signals/__init__.py`
-- [ ] 建立 `src/signals/schema.py`：
+- [x] 建立 `src/signals/__init__.py`
+- [x] 建立 `src/signals/schema.py`：
   ```python
   from datetime import date
   from pydantic import BaseModel
@@ -669,8 +669,8 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   ```
 
 ### 2.2 PositionRecord / TradeRecord
-- [ ] 建立 `src/portfolio/__init__.py`
-- [ ] 建立 `src/portfolio/schema.py`：
+- [x] 建立 `src/portfolio/__init__.py`
+- [x] 建立 `src/portfolio/schema.py`：
   ```python
   from datetime import date
   from typing import Literal
@@ -695,8 +695,8 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   ```
 
 ### 2.3 DailyReportArtifact / RunManifest
-- [ ] 建立 `src/reporting/__init__.py`
-- [ ] 建立 `src/reporting/schema.py`：
+- [x] 建立 `src/reporting/__init__.py`
+- [x] 建立 `src/reporting/schema.py`：
   ```python
   from datetime import date, datetime
   from typing import Literal, Optional
@@ -729,13 +729,13 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   ```
 
 ### 2.4 Artifact writer
-- [ ] 建立 `src/storage/artifact_writer.py`（完整 write_* 函式，全部寫到 `workspace/runs/{run_id}/`）
+- [x] 建立 `src/storage/artifact_writer.py`（完整 write_* 函式，全部寫到 `workspace/runs/{run_id}/`）
 
 ### 2.5 Artifact writer 測試
-- [ ] 建立 `tests/unit/test_artifact_writer.py`：用 `tmp_path` 涵蓋所有 write_* 函式
+- [x] 建立 `tests/unit/test_artifact_writer.py`：用 `tmp_path` 涵蓋所有 write_* 函式
 
 ### 2.6 DailyResult → artifacts 轉換器
-- [ ] 建立 `src/reporting/converter.py`：
+- [x] 建立 `src/reporting/converter.py`：
   - `daily_result_to_signals(result) -> list[SignalRecord]`
   - `daily_result_to_positions(result) -> list[PositionRecord]`
   - `daily_result_to_trades(result, prev_positions) -> list[TradeRecord]`
@@ -744,19 +744,19 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   - git_commit 用 subprocess 取
 
 ### 2.7 轉換器測試
-- [ ] 建立 `tests/unit/test_converter.py`
+- [x] 建立 `tests/unit/test_converter.py`
 
 ### 2.8 pCloud API 真實連線
-- [ ] 在 `src/storage/pcloud_client.py` 實作（參考 https://docs.pcloud.com/）：
+- [x] 在 `src/storage/pcloud_client.py` 實作（參考 https://docs.pcloud.com/）：
   - `mkdir` → `/createfolder`
   - `upload_file` → `/uploadfile`（multipart）
   - `download_file` → `/getfilelink` + GET
   - `list_folder` → `/listfolder`
   - `file_checksum` → `/checksumfile`
-- [ ] 保留 mock fallback
+- [x] 保留 mock fallback
 
 ### 2.9 pCloud 整合測試
-- [ ] 建立 `tests/integration/test_pcloud_real.py`：
+- [x] 建立 `tests/integration/test_pcloud_real.py`：
   ```python
   import os
   import pytest
@@ -774,26 +774,26 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   ```
 
 ### 2.10 Artifact uploader
-- [ ] 在 `src/storage/artifact_writer.py` 新增 `upload_run_artifacts(run_id, trade_date, pcloud_client)`
-- [ ] 遵循命名規則：`/reports/date={date}/run_id={run_id}/`、`/manifests/date={date}/run_id={run_id}/`
+- [x] 在 `src/storage/artifact_writer.py` 新增 `upload_run_artifacts(run_id, trade_date, pcloud_client)`
+- [x] 遵循命名規則：`/reports/date={date}/run_id={run_id}/`、`/manifests/date={date}/run_id={run_id}/`
 
 ### 2.11 拆分 main.py
-- [ ] 建立 `src/orchestration/run_daily.py`：主流程協調
-- [ ] 建立 `src/orchestration/run_signal.py`：只跑 signal
-- [ ] 建立 `src/orchestration/run_report.py`：只跑報告
-- [ ] 保留 `main.py` 作為相容層
+- [x] 建立 `src/orchestration/run_daily.py`：主流程協調
+- [x] 建立 `src/orchestration/run_signal.py`：只跑 signal
+- [x] 建立 `src/orchestration/run_report.py`：只跑報告
+- [x] 保留 `main.py` 作為相容層
 
 ### 2.12 修改 quant-daily compose
-- [ ] `command: ["python", "-m", "src.orchestration.run_daily", "--use-mock-data", "--skip-discord"]`
+- [x] `command: ["python", "-m", "src.orchestration.run_daily", "--use-mock-data", "--skip-discord"]`
 
 ### 2.13 Contract test
-- [ ] 建立 `tests/contract/test_artifact_schemas.py`：驗證 schema 必要欄位、parquet 型別
+- [x] 建立 `tests/contract/test_artifact_schemas.py`：驗證 schema 必要欄位、parquet 型別
 
 ### 2.14 Phase 2 驗收
-- [ ] mock mode 執行後 `workspace/runs/{run_id}/` 有 5 個檔案
-- [ ] 通過 schema 驗證
-- [ ] `pytest -q -m "not integration"` 通過
-- [ ] 建立 PR → develop，自動 merge
+- [x] mock mode 執行後 `workspace/runs/{run_id}/` 有 5 個檔案
+- [x] 通過 schema 驗證
+- [x] `pytest -q -m "not integration"` 通過
+- [x] 建立 PR → develop，自動 merge
 
 ---
 
@@ -804,19 +804,19 @@ feat(phase0): add docker-compose skeleton with quant-ui service
 **需要：** Supabase URL 和 key
 
 ### 3.1 依賴
-- [ ] `requirements.txt` 加入 `supabase>=2.0.0`
-- [ ] 重 build image
+- [x] `requirements.txt` 加入 `supabase>=2.0.0`
+- [x] 重 build image
 
 ### 3.2 Supabase client
-- [ ] 建立 `src/database/__init__.py`
-- [ ] 建立 `src/database/client.py`：mock-first wrapper
+- [x] 建立 `src/database/__init__.py`
+- [x] 建立 `src/database/client.py`：mock-first wrapper
   - `insert(table, rows)`
   - `update(table, match, values)`
   - `select(table, filters, limit)`
   - `select_latest(table, order_by)`
 
 ### 3.3 Schema SQL
-- [ ] 建立 `src/database/schema.sql`，包含：
+- [x] 建立 `src/database/schema.sql`，包含：
   - `pipeline_runs`, `run_steps`, `run_artifacts`
   - `coverage_snapshots`
   - `model_versions`, `model_promotions`
@@ -826,21 +826,21 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   - 所有必要的 index
 
 ### 3.4 CRUD 操作
-- [ ] 建立 `src/database/crud.py`：
+- [x] 建立 `src/database/crud.py`：
   - `PipelineRunCRUD`（start, finish, latest）
   - `ArtifactCRUD`（register）
   - `CandidateCRUD`（bulk_insert, latest_by_date）
   - `CoverageCRUD`（insert_snapshot, latest）
 
 ### 3.5 單元測試
-- [ ] 建立 `tests/unit/test_database_client.py`
-- [ ] 建立 `tests/unit/test_database_crud.py`
+- [x] 建立 `tests/unit/test_database_client.py`
+- [x] 建立 `tests/unit/test_database_crud.py`
 
 ### 3.6 串入 run_daily
-- [ ] 修改 `src/orchestration/run_daily.py`：start / register artifacts / insert candidates / finish
+- [x] 修改 `src/orchestration/run_daily.py`：start / register artifacts / insert candidates / finish
 
 ### 3.7 Streamlit UI 改讀 DB
-- [ ] 重寫 `src/ui/app.py` 分頁：
+- [x] 重寫 `src/ui/app.py` 分頁：
   - Home（最新 run、最新 candidates）
   - Runs（最近 20 筆）
   - User庫存股（可在UI手動更新）
@@ -848,25 +848,25 @@ feat(phase0): add docker-compose skeleton with quant-ui service
   - Run 控制頁（按鈕觸發 docker compose run）
 
 ### 3.8 Grafana PostgreSQL datasource
-- [ ] 建立 `compose/grafana/provisioning/datasources/postgres.yml`
-- [ ] `.env.example` 加入 SUPABASE_DB_* 變數
+- [x] 建立 `compose/grafana/provisioning/datasources/postgres.yml`
+- [x] `.env.example` 加入 SUPABASE_DB_* 變數
 
 ### 3.9 第一個 Grafana dashboard
-- [ ] 建立 `compose/grafana/provisioning/dashboards/pipeline-health.json`
-- [ ] 建立 `compose/grafana/provisioning/dashboards/dashboards.yml`
+- [x] 建立 `compose/grafana/provisioning/dashboards/pipeline-health.json`
+- [x] 建立 `compose/grafana/provisioning/dashboards/dashboards.yml`
 
 ### 3.10 Supabase 整合測試
-- [ ] 建立 `tests/integration/test_supabase_real.py`（skip if no credentials）
+- [x] 建立 `tests/integration/test_supabase_real.py`（skip if no credentials）
 
 ### 3.11 Schema migration 工具
-- [ ] 建立 `scripts/linux/apply_schema.sh`
-- [ ] 建立 `docs/supabase-setup.md`
+- [x] 建立 `scripts/linux/apply_schema.sh`
+- [x] 建立 `docs/supabase-setup.md`
 
 ### 3.12 Phase 3 驗收
-- [ ] mock mode pytest 通過
-- [ ] Streamlit UI 可顯示最新 run
-- [ ] Grafana 可連上（若有 credentials）
-- [ ] 建立 PR → develop，自動 merge
+- [x] mock mode pytest 通過
+- [x] Streamlit UI 可顯示最新 run
+- [x] Grafana 可連上（若有 credentials）
+- [x] 建立 PR → develop，自動 merge
 
 ---
 
