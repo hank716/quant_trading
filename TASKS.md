@@ -135,7 +135,7 @@ feat(phase0): add docker-compose skeleton with quant-ui service
 | 3 | Supabase 控制面接入 | Supabase | 12 | ✅ Done |
 | 4 | Coverage checker 與 retrain gate | 無 | 8 | ✅ Done |
 | 5 | 模型平台化（LightGBM + SHAP） | 無 | 15 | ✅ Done |
-| **6** | **Qlib 基礎 + TW 資料層** | 無 | **10** | 🚧 Planned |
+| **6** | **Qlib 基礎 + TW 資料層** | 無 | **10** | ✅ Done |
 | 7 | TW 特徵 / 標籤 DataHandler | 無 | 8 | 🚧 Planned |
 | 8 | Qlib 訓練 + MLflow Registry | 無 | 8 | 🚧 Planned |
 | 9 | Backtest、Strategy、Analysis | 無 | 7 | 🚧 Planned |
@@ -1041,47 +1041,47 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
 - legacy `main.py --use-mock-data` 仍可跑通（沒有 regression）
 
 ### 6.1 依賴與 Dockerfile
-- [ ] `requirements.txt` 加入 `pyqlib>=0.9.5`
-- [ ] 建立 `docker/qlib.Dockerfile`：含 Cython + Qlib build
-- [ ] 決定 image 策略：`fin-qlib:latest`（與 `fin-app` 分離，因 Qlib 重）
+- [x] `requirements.txt` 加入 `pyqlib>=0.9.5`
+- [x] 建立 `docker/qlib.Dockerfile`：含 Cython + Qlib build
+- [x] 決定 image 策略：`fin-qlib:latest`（與 `fin-app` 分離，因 Qlib 重）
 
 ### 6.2 目錄骨架
-- [ ] 建立 `qlib_ext/__init__.py`
-- [ ] 建立 `qlib_ext/data_collector/__init__.py`
-- [ ] 建立 `qlib_ext/handlers/__init__.py`
-- [ ] 建立 `qlib_ext/strategies/__init__.py`
-- [ ] 建立 `qlib_ext/workflows/` 目錄（存放 YAML）
+- [x] 建立 `qlib_ext/__init__.py`
+- [x] 建立 `qlib_ext/data_collector/__init__.py`
+- [x] 建立 `qlib_ext/handlers/__init__.py`
+- [x] 建立 `qlib_ext/strategies/__init__.py`
+- [x] 建立 `qlib_ext/workflows/` 目錄（存放 YAML）
 
 ### 6.3 TW 資料 Collector — OHLCV
-- [ ] 建立 `qlib_ext/data_collector/twse_collector.py`：
+- [x] 建立 `qlib_ext/data_collector/twse_collector.py`：
   - 讀 `data/official_hybrid_client` 的 TWSE 價格資料
   - 輸出 `calendars/day.txt`（台灣交易日清單）
   - 輸出 `instruments/twse.txt`（`code<TAB>start<TAB>end`）
   - 輸出 `features/{symbol}/{open,high,low,close,volume,factor}.day.bin`
   - `factor = adjusted_close / original_close`（用現有還原價回推）
   - 停牌日全欄 NaN
-- [ ] 建立 `qlib_ext/data_collector/tpex_collector.py`（TPEx 上櫃同邏輯）
-- [ ] 建立 `qlib_ext/data_collector/merge_universe.py`：合併兩者 → `instruments/all.txt`
+- [x] 建立 `qlib_ext/data_collector/tpex_collector.py`（TPEx 上櫃同邏輯）
+- [x] 建立 `qlib_ext/data_collector/merge_universe.py`：合併兩者 → `instruments/all.txt`
 
 ### 6.4 TW 資料 Collector — 基本面
-- [ ] 建立 `qlib_ext/data_collector/financial_collector.py`：
+- [x] 建立 `qlib_ext/data_collector/financial_collector.py`：
   - 月營收 → `features/{symbol}/revenue.day.bin`（前向填補到日頻）
   - 季財報 (ROE / gross margin) → `features/{symbol}/{roe,gm}.day.bin`
   - 用 TWSE announcement date 為生效日（point-in-time 正確）
 
 ### 6.5 Qlib 初始化 helper
-- [ ] 建立 `qlib_ext/__init__.py` 的 `init_tw_qlib(provider_uri)`:
+- [x] 建立 `qlib_ext/__init__.py` 的 `init_tw_qlib(provider_uri)`:
   - 呼叫 `qlib.init(provider_uri=..., region=REG_TW)`
   - 預設 `provider_uri = workspace/qlib_data`
 
 ### 6.6 Nightly data sync job
-- [ ] 建立 `app/orchestration/sync_qlib_data.py`：排程跑 collectors → 更新 bin
-- [ ] `compose/docker-compose.yml` 新增 `qlib-sync` service（profiles: jobs）
-- [ ] 建立 `scripts/linux/run_qlib_sync.sh`
+- [x] 建立 `app/orchestration/sync_qlib_data.py`：排程跑 collectors → 更新 bin
+- [x] `compose/docker-compose.yml` 新增 `qlib-sync` service（profiles: jobs）
+- [x] 建立 `scripts/linux/run_qlib_sync.sh`
 
 ### 6.7 煙霧測試
-- [ ] 建立 `tests/unit/test_twse_collector.py`（mock price df → 驗證 bin 結構）
-- [ ] 建立 `tests/integration/test_qlib_init.py`（skip if no bin data）：
+- [x] 建立 `tests/unit/test_twse_collector.py`（mock price df → 驗證 bin 結構）
+- [x] 建立 `tests/integration/test_qlib_init.py`（skip if no bin data）：
   ```python
   def test_features_read():
       from qlib_ext import init_tw_qlib
@@ -1092,17 +1092,17 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
   ```
 
 ### 6.8 pCloud 備份策略
-- [ ] 建立 `app/orchestration/backup_qlib_data.py`：每週上傳 bin snapshot 到 `/qlib_data/snapshot={date}/`
+- [x] 建立 `app/orchestration/backup_qlib_data.py`：每週上傳 bin snapshot 到 `/qlib_data/snapshot={date}/`
 
 ### 6.9 文件
-- [ ] 建立 `docs/qlib-data-format.md`：說明 bin 結構、factor 規則、停牌處理
-- [ ] 建立 `docs/qlib-setup.md`：本機初始化流程
+- [x] 建立 `docs/qlib-data-format.md`：說明 bin 結構、factor 規則、停牌處理
+- [x] 建立 `docs/qlib-setup.md`：本機初始化流程
 
 ### 6.10 Phase 6 驗收
-- [ ] collectors 跑完產出完整 TW bin（上市 + 上櫃 + 財務）
-- [ ] Qlib 能初始化並讀資料
-- [ ] `pytest -q -m "not integration"` 全過
-- [ ] PR → develop 自動 merge
+- [x] collectors 跑完產出完整 TW bin（上市 + 上櫃 + 財務）
+- [x] Qlib 能初始化並讀資料
+- [x] `pytest -q -m "not integration"` 全過
+- [x] PR → develop 自動 merge
 
 ---
 
