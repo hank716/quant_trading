@@ -2,6 +2,29 @@
 
 每次啟動請在此檔最上方新增一筆：
 
+## 2026-04-22 (Phase 8 — Qlib Training + MLflow Registry)
+- 啟動時所在 branch：feat/phase7-qlib-handlers（Phase 7 PR 已 open，先補 TASKS.md 標記 [x] 再 merge）
+- 使用 agents：fin-pipeline-engineer（Phase 8 全部實作）
+- 完成的子任務：
+  - Phase 7 收尾：TASKS.md 補 [x]、PR #13 squash merge → develop
+  - Phase 8 全部（8.1–8.8）：
+  - `qlib_ext/workflows/daily_lgbm.yaml`：正式訓練 workflow（2020–2024，LGBModel TW 參數）
+  - `qlib_ext/workflows/retrain.yaml`：全量 retrain（2020–2025）
+  - `qlib_ext/workflows/quick_debug.yaml`：快速開發用（2022–2023，num_threads:4）
+  - `app/control/mlflow_helper.py`：list_experiments / get_run_metrics / get_recorder
+  - `qlib_ext/__init__.py`：init_tw_qlib 加入 MLFLOW_TRACKING_URI setdefault
+  - `env.example`：新增 MLFLOW_TRACKING_URI
+  - `app/orchestration/run_training.py`：--workflow 參數，呼叫 qrun subprocess，寫 Supabase qlib_runs
+  - `src/database/schema.sql`：qlib_runs 表 + 3 indexes
+  - `src/database/qlib_crud.py`：QlibRunCRUD（register / update_status / get_by_run_id / list_by_family）
+  - `app/control/champion.py`：get_champion / promote / list_candidates（MLflow tag-based）
+  - `compose/docker-compose.yml`：quant-trainer command → app.orchestration.run_training
+  - `tests/unit/test_mlflow_helper.py`（4 tests）+ `tests/unit/test_qlib_crud.py`（7 tests）
+  - `tests/integration/test_qrun_smoke.py`（skipif no workspace/qlib_data）
+  - 199 passed, 6 deselected
+- 遇到的卡點：端到端 qrun 驗收（8.8）需要真實 workspace/qlib_data；待 qlib-sync job 跑完後手動驗證
+- 下次繼續：Phase 9（Backtest + Strategy，feat/phase9-qlib-backtest）
+
 ## 2026-04-22 (Phase 7 — TW DataHandlers)
 - 啟動時所在 branch：feat/phase7-qlib-handlers（從 develop 開出）
 - 使用 agents：直接實作（無子 agent）
