@@ -34,19 +34,14 @@ pytest -q -m "not integration"
 docker build -f docker/app.Dockerfile -t fin-app:test .
 docker build -f docker/ui.Dockerfile  -t fin-ui:latest .
 
-# 驗證 compose 設定
-docker compose -f compose/docker-compose.yml config
-
-# 啟動 UI + Prometheus + Grafana
+# 啟動 Streamlit UI
 ./scripts/linux/start_services.sh      # Linux/WSL
 .\scripts\windows\start_services.ps1   # Windows PowerShell
 ```
 
-| 服務 | URL | 帳密 |
-|------|-----|------|
-| Streamlit UI | http://localhost:8501 | — |
-| Grafana | http://localhost:3000 | admin / admin |
-| Prometheus | http://localhost:9090 | — |
+| 服務 | URL |
+|------|-----|
+| Streamlit UI | http://localhost:8501 |
 
 ## 4. 執行分析工作
 
@@ -63,7 +58,7 @@ docker compose -f compose/docker-compose.yml config
 
 ## 5. Supabase 設定（Phase 3+）
 
-如需啟用 DB 狀態追蹤與 Grafana 連線，見 [`supabase-setup.md`](supabase-setup.md)。  
+如需啟用 DB 狀態追蹤，見 [`supabase-setup.md`](supabase-setup.md)。  
 若未設定 `SUPABASE_URL`，系統自動使用 mock mode，不影響主流程。
 
 ## 常見問題

@@ -2,7 +2,7 @@
 
 個人台股選股系統。每日分析 TWSE/TPEx 全市場 (~2000 檔)，透過規則過濾、量化訊號、選用 LLM 說明，產生投資候選清單與研究報告。
 
-## 系統架構
+## 系統架構（目前）
 
 ```
 每日 pipeline
@@ -13,12 +13,16 @@
   SupabaseClient (pipeline state)            DiscordNotifier (webhook)
       ↓
   PCloudClient (cold artifact storage)
+  ModelRegistry (LightGBM champion) → Predictor → SHAP Explainer
 
 UI / 監控
-  Streamlit  → 控制台（Run 觸發、候選標的、庫存股管理）
+  Streamlit  → 控制台（Run 觸發、候選標的、庫存股管理、模型 champion）
   Grafana    → Pipeline health dashboard（連接 Supabase PostgreSQL）
   Prometheus → 服務監控
 ```
+
+> **遷移中：** Phase 6–11 正在把核心替換為 Microsoft Qlib（Strangler Fig 策略）。
+> 詳見 [`docs/decisions/ADR-001-qlib-integration.md`](docs/decisions/ADR-001-qlib-integration.md) 和 [`docs/architecture.md`](docs/architecture.md)。
 
 ## 快速開始
 
@@ -86,8 +90,14 @@ docker build -f docker/ui.Dockerfile  -t fin-ui:latest .
 | 1 | 現有 CLI 工具容器化 | ✅ 完成 |
 | 2 | Artifact-first 重構（parquet schemas、pCloud） | ✅ 完成 |
 | 3 | Supabase 控制面、Streamlit UI、Grafana | ✅ 完成 |
-| 4 | Coverage Checker 與 Retrain Gate | 🔲 待開始 |
-| 5 | 模型平台化（LightGBM + SHAP） | 🔲 待開始 |
+| 4 | Coverage Checker 與 Retrain Gate | ✅ 完成 |
+| 5 | 模型平台化（LightGBM + SHAP） | ✅ 完成 |
+| **6** | **Qlib 基礎 + TW 資料層** | 🔲 下一個 |
+| 7 | TW 特徵 / 標籤 DataHandler | 🔲 待開始 |
+| 8 | Qlib 訓練 + MLflow Registry | 🔲 待開始 |
+| 9 | Backtest、Strategy、Analysis | 🔲 待開始 |
+| 10 | Orchestration Cutover（★ Cutover Day） | 🔲 待開始 |
+| 11 | Legacy 清理 + 文件重寫 | 🔲 待開始 |
 
 詳細子任務見 [`TASKS.md`](TASKS.md)。
 
@@ -97,9 +107,10 @@ docker build -f docker/ui.Dockerfile  -t fin-ui:latest .
 |------|------|
 | [`CLAUDE.md`](CLAUDE.md) | Claude Code 架構參考（模組表、pipeline 流程、git 規則） |
 | [`TASKS.md`](TASKS.md) | 開發任務清單（Claude Code 工作指令） |
+| [`docs/architecture.md`](docs/architecture.md) | 架構全景：現況 → Qlib 目標 → Strangler Fig 時程 |
+| [`docs/decisions/ADR-001-qlib-integration.md`](docs/decisions/ADR-001-qlib-integration.md) | 全面遷移 Qlib 的架構決策 |
 | [`docs/quickstart.md`](docs/quickstart.md) | 5 分鐘上手指南 |
 | [`docs/env-variables.md`](docs/env-variables.md) | 所有環境變數說明 |
 | [`docs/supabase-setup.md`](docs/supabase-setup.md) | Supabase schema 部署指南 |
 | [`docs/windows-task-scheduler-setup.md`](docs/windows-task-scheduler-setup.md) | Windows 排程設定 |
-| [`docs/decisions/`](docs/decisions/) | Architecture Decision Records (ADR) |
 | [`CLAUDE_CODE_SETUP.md`](CLAUDE_CODE_SETUP.md) | Claude Code 首次設定指南 |

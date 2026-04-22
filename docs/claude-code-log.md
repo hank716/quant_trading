@@ -2,6 +2,17 @@
 
 每次啟動請在此檔最上方新增一筆：
 
+## 2026-04-22 (Pre-Qlib 文件整理)
+- 啟動時所在 branch：develop（PR #10 docs/adr-001-qlib-migration 尚未合併）
+- 任務：在 Phase 6 開工前同步文件、整理目錄結構說明
+- 產出：
+  - `README.md`：修正 Phase 4/5 狀態（標為 ✅），新增 Phase 6–11 行，補 ADR / architecture 文件連結
+  - `CLAUDE.md`：補 Phase 4/5 模組表（coverage_checker, retrain_gate, labeler, trainer, predictor, explainer_shap）；新增「Qlib Migration」一節（Strangler Fig 表格 + rollback tags）；目錄結構標記 legacy vs new
+  - `docs/architecture.md`：新建；含現況架構圖、目標架構圖、Strangler Fig 時程表、資料流、相關 ADR 索引
+  - `TASKS.md`：Phase 6–11 各加入「前置條件」與具體「完成定義」checklist；底部結構圖改為 Strangler Fig 版本（標 legacy / keep / new）
+- 未做（留 Slice C）：run_daily.py ML scoring 修正、trainer __main__ 補寫
+- 下次繼續：merge PR #10 + PR（此次）→ 建立 v0.5-legacy tag → 開 feat/phase6-qlib-foundation
+
 ## 2026-04-22 (Qlib 全面遷移 — Option C 改版)
 - 啟動時所在 branch：develop（Phase 5d merge 後）
 - 使用者決策：推翻 Option A（backtest-only），改採 **Option C 全面遷移到 Qlib**，理由「最合適、最沒技術債」
