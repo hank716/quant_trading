@@ -924,42 +924,42 @@ feat(phase0): add docker-compose skeleton with quant-ui service
 ### 5a — Feature Engineering
 **Sub-branch：** `feat/phase5a-feature-engineering`
 
-- [ ] 5a.1 建立 `src/features/__init__.py`
-- [ ] 5a.2 建立 `src/features/tech_features.py`：
+- [x] 5a.1 建立 `src/features/__init__.py`
+- [x] 5a.2 建立 `src/features/tech_features.py`：
   - `ma_return(price_df, windows)` → `tech_ma{N}_ret`
   - `volume_features(price_df, windows)` → `tech_vol{N}_ratio`
   - `institutional_flow_features(flow_df, windows)` → `tech_fi_net{N}_ratio`
-- [ ] 5a.3 建立 `src/features/fund_features.py`：
+- [x] 5a.3 建立 `src/features/fund_features.py`：
   - `revenue_momentum(revenue_df)` → `fund_rev_yoy, fund_rev_mom, fund_rev_consec_pos`
   - `roe_feature(financial_df)` → `fund_roe, fund_roe_yoy`
   - `gross_margin_feature(financial_df)` → `fund_gm, fund_gm_yoy`
-- [ ] 5a.4 建立 `src/features/feature_builder.py`：
+- [x] 5a.4 建立 `src/features/feature_builder.py`：
   - `build_feature_matrix(universe, price_map, flow_map, revenue_map, financial_map, trade_date)`
   - 索引 `(trade_date, instrument)`，欄位 `tech_*`, `fund_*`
   - NaN 處理：前向填補或中位數
-- [ ] 5a.5 測試：
+- [x] 5a.5 測試：
   - `tests/unit/test_tech_features.py`
   - `tests/unit/test_fund_features.py`
   - `tests/unit/test_feature_builder.py`
-- [ ] 5a.6 PR → develop
+- [x] 5a.6 PR → develop
 
 ### 5b — LightGBM Trainer
 **Sub-branch：** `feat/phase5b-lightgbm-trainer`
 
-- [ ] 5b.1 `requirements.txt`：`lightgbm>=4.0.0`, `scikit-learn>=1.3.0`
-- [ ] 5b.2 建立 `src/signals/labeler.py`：
+- [x] 5b.1 `requirements.txt`：`lightgbm>=4.0.0`, `scikit-learn>=1.3.0`
+- [x] 5b.2 建立 `src/signals/labeler.py`：
   - `compute_forward_return(price_df, horizon_days=20)`
   - `binary_label(forward_return, threshold=0.0)`
-- [ ] 5b.3 建立 `src/signals/trainer.py`：
+- [x] 5b.3 建立 `src/signals/trainer.py`：
   - `walk_forward_split(df, date_col, n_splits=3)`
   - `train(feature_matrix, label, params, output_dir)` → `(model, metrics)`
   - `save_model(model, model_id, output_dir)` → Path
-- [ ] 5b.4 建立 `docker/trainer.Dockerfile`
-- [ ] 5b.5 新增 compose `quant-trainer` service（profiles: jobs）
-- [ ] 5b.6 測試：
+- [x] 5b.4 建立 `docker/trainer.Dockerfile`
+- [x] 5b.5 新增 compose `quant-trainer` service（profiles: jobs）
+- [x] 5b.6 測試：
   - `tests/unit/test_labeler.py`
   - `tests/unit/test_trainer.py`（dummy dataset）
-- [ ] 5b.7 PR → develop
+- [x] 5b.7 PR → develop
 
 ### 5c — Model Registry
 **Sub-branch：** `feat/phase5c-model-registry`
