@@ -23,12 +23,14 @@ port_analysis_config: &port_analysis_config
             time_per_step: "day"
             generate_portfolio_metrics: True
     strategy:
-        class: TopkDropoutStrategy
-        module_path: qlib.contrib.strategy
+        class: TwTopkFilteredStrategy
+        module_path: qlib_ext.strategies.tw_topk_filtered
         kwargs:
             signal: <PRED>
             topk: 50
             n_drop: 5
+            min_price: 10.0
+            min_listing_days: 180
     backtest:
         start_time: "2025-01-01"
         end_time: "2025-12-31"
