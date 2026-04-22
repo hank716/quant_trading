@@ -2,6 +2,23 @@
 
 每次啟動請在此檔最上方新增一筆：
 
+## 2026-04-22 (Phase 9 — Backtest, Strategy & Analysis)
+- 啟動時所在 branch：develop（Phase 8 已 merge）
+- 使用 agents：fin-pipeline-engineer（Phase 9 全部實作）
+- 完成的子任務：Phase 9 全部（9.1–9.7）
+  - `qlib_ext/strategies/tw_topk_filtered.py`：TwTopkFilteredStrategy（monkey-patch signal.get_signal 注入 filter，無需複製 parent 100 行邏輯）
+    - 三層 filter：exclude_symbols、min_price（D.features $close）、min_listing_days（instruments/all.txt）
+  - `qlib_ext/strategies/__init__.py`：export TwTopkFilteredStrategy
+  - `qlib_ext/data_collector/benchmark_collector.py`：BenchmarkCollector（TAIEX/OTC → bin，對齊 calendar）
+  - `qlib_ext/workflows/daily_lgbm.yaml` / `retrain.yaml` / `quick_debug.yaml`：strategy 改為 TwTopkFilteredStrategy
+  - `app/orchestration/render_backtest_report.py`：從 MLflow recorder 讀 sig_analysis + report_normal_1day.pkl，matplotlib 2-panel PNG + backtest_metrics.json + pCloud 上傳
+  - `app/orchestration/run_backtest.py`：--mlflow-run-id / --score-csv CLI
+  - `requirements.txt`：新增 matplotlib>=3.8.0
+  - `tests/unit/test_tw_strategy.py`（4 tests）+ `tests/unit/test_benchmark_collector.py`（2 tests）
+  - 205 passed, 6 deselected
+- 遇到的卡點：plotly 未安裝（qlib.contrib.report 需要），改用 matplotlib 自製報告；9.3 YAML records 已在 Phase 8 補完，直接沿用
+- 下次繼續：Phase 10（Cutover，feat/phase10-cutover）— 需先有 ≥3 天穩定 daily run 才能 merge
+
 ## 2026-04-22 (Phase 8 — Qlib Training + MLflow Registry)
 - 啟動時所在 branch：feat/phase7-qlib-handlers（Phase 7 PR 已 open，先補 TASKS.md 標記 [x] 再 merge）
 - 使用 agents：fin-pipeline-engineer（Phase 8 全部實作）
