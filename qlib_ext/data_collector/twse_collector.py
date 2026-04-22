@@ -90,21 +90,71 @@ class TWSECollector:
         return written
 
     def dump_to_bin(self) -> None:
-        """Call DumpDataAll on the staging CSVs → write to provider_uri."""
-        try:
-            from qlib.data.dump_bin import DumpDataAll
-        except ImportError:
-            logger.error("pyqlib is not installed — skipping dump_to_bin")
+        """Convert staging CSVs to Qlib binary format (little-endian float32).
+
+        Builds calendars/day.txt, instruments/all.txt, and per-field .day.bin
+        files under provider_uri/features/{symbol}/.  This avoids DumpDataAll
+        which was removed from pyqlib 0.9.8+.
+        """
+        import numpy as np
+
+        csv_files = sorted(self._staging_dir.glob("*.csv"))
+        if not csv_files:
+            logger.warning("[%s] No staging CSVs found — nothing to dump", self.MARKET_TYPE)
             return
 
         self._provider_uri.mkdir(parents=True, exist_ok=True)
-        dumper = DumpDataAll(
-            csv_path=str(self._staging_dir),
-            qlib_dir=str(self._provider_uri),
-            max_workers=4,
-            date_field_name="date",
-            symbol_field_name=None,
-            include_fields=["open", "high", "low", "close", "volume", "factor"],
+
+        # 1. Collect all trading dates across every symbol
+        all_dates: set[str] = set()
+        frames: dict[str, pd.DataFrame] = {}
+        for csv_path in csv_files:
+            symbol = csv_path.stem  # e.g. "2330.TW"
+            df = pd.read_csv(csv_path, parse_dates=["date"])
+            df["date"] = df["date"].dt.strftime("%Y-%m-%d")
+            df = df.sort_values("date").drop_duplicates("date")
+            frames[symbol] = df
+            all_dates.update(df["date"].tolist())
+
+        calendar: list[str] = sorted(all_dates)
+        date_to_idx: dict[str, int] = {d: i for i, d in enumerate(calendar)}
+
+        # 2. Write calendars/day.txt
+        cal_dir = self._provider_uri / "calendars"
+        cal_dir.mkdir(parents=True, exist_ok=True)
+        (cal_dir / "day.txt").write_text("\n".join(calendar) + "\n")
+
+        # 3. Write instruments/all.txt (append-safe merge)
+        inst_dir = self._provider_uri / "instruments"
+        inst_dir.mkdir(parents=True, exist_ok=True)
+        inst_path = inst_dir / "all.txt"
+        existing: dict[str, str] = {}
+        if inst_path.exists():
+            for line in inst_path.read_text().splitlines():
+                parts = line.split("\t")
+                if parts:
+                    existing[parts[0]] = line
+        for symbol, df in frames.items():
+            start = df["date"].iloc[0]
+            end = df["date"].iloc[-1]
+            existing[symbol] = f"{symbol}\t{start}\t{end}"
+        inst_path.write_text("\n".join(sorted(existing.values())) + "\n")
+
+        # 4. Write feature bin files
+        fields = ["open", "high", "low", "close", "volume", "factor"]
+        for symbol, df in frames.items():
+            feat_dir = self._provider_uri / "features" / symbol.lower()
+            feat_dir.mkdir(parents=True, exist_ok=True)
+            for field in fields:
+                if field not in df.columns:
+                    continue
+                start_idx = date_to_idx[df["date"].iloc[0]]
+                values = df[field].astype("float32").to_numpy()
+                # Qlib bin layout: [start_index_f32, val0, val1, ...]
+                payload = np.concatenate([[np.float32(start_idx)], values])
+                payload.astype("<f4").tofile(feat_dir / f"{field}.day.bin")
+
+        logger.info(
+            "[%s] dump_to_bin: %d symbols, %d calendar days → %s",
+            self.MARKET_TYPE, len(frames), len(calendar), self._provider_uri,
         )
-        dumper.dump(calc_features_and_dump_day=False)
-        logger.info("[%s] dump_to_bin completed → %s", self.MARKET_TYPE, self._provider_uri)

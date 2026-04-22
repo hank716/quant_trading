@@ -1117,43 +1117,43 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
 - `pytest -q -m "not integration"` 全過
 
 ### 7.1 TW Alpha Handler（技術面）
-- [ ] 建立 `qlib_ext/handlers/tw_alpha.py`：繼承 `DataHandlerLP`
+- [x] 建立 `qlib_ext/handlers/tw_alpha.py`：繼承 `DataHandlerLP`
   - 用 Qlib Expression 重寫 `ma_return`：`Mean($close, N) / $close - 1`
   - 重寫 `volume_features`：`$volume / Mean($volume, N)`
   - 重寫 `institutional_flow_features`（需先在 Phase 6.4 把外資/投信買賣超 dump 進 bin）
-- [ ] 特徵命名統一用 `TECH_MA5_RET` / `TECH_VOL20_RATIO` 等，方便 MLflow tracking
+- [x] 特徵命名統一用 `TECH_MA5_RET` / `TECH_VOL20_RATIO` 等，方便 MLflow tracking
 
 ### 7.2 TW Fundamental Handler
-- [ ] 建立 `qlib_ext/handlers/tw_fundamental.py`：
+- [x] 建立 `qlib_ext/handlers/tw_fundamental.py`：
   - `fund_rev_yoy`、`fund_rev_mom`、`fund_rev_consec_pos`
   - `fund_roe`、`fund_roe_yoy`、`fund_gm`、`fund_gm_yoy`
 
 ### 7.3 Combined Handler
-- [ ] 建立 `qlib_ext/handlers/tw_combined.py`：繼承 `DataHandlerLP`，合併 alpha + fundamental + label
+- [x] 建立 `qlib_ext/handlers/tw_combined.py`：繼承 `DataHandlerLP`，合併 alpha + fundamental + label
 
 ### 7.4 Label 定義
-- [ ] 在 `tw_combined.py` 或 separate file 定義 label expression：
+- [x] 在 `tw_combined.py` 或 separate file 定義 label expression：
   ```python
   label = "Ref($close, -20) / $close - 1"  # 20-day forward return
   label_binary = "Gt(Ref($close, -20) / $close, 1.0)"
   ```
 
 ### 7.5 Handler YAML config
-- [ ] 建立 `qlib_ext/workflows/handler_config.yaml`：可直接餵給 qrun 的 handler 片段
+- [x] 建立 `qlib_ext/workflows/handler_config.yaml`：可直接餵給 qrun 的 handler 片段
 
 ### 7.6 等價性驗證測試
-- [ ] 建立 `tests/unit/test_handler_equivalence.py`：
+- [x] 建立 `tests/unit/test_handler_equivalence.py`：
   - 用固定小型 bin
   - 分別跑 legacy `build_feature_matrix` 與 new handler
   - 比較同 `(date, instrument)` 上的數值差 < 1e-6
 
 ### 7.7 SHAP 與 handler 相容
-- [ ] 調整 `src/signals/explainer_shap.py`：能接 Qlib handler 產的 feature 名稱
+- [x] 調整 `src/signals/explainer_shap.py`：能接 Qlib handler 產的 feature 名稱
 
 ### 7.8 Phase 7 驗收
-- [ ] Handler 可獨立初始化並 `fetch()` 出 DataFrame
-- [ ] 等價性測試通過
-- [ ] PR → develop 自動 merge
+- [x] Handler 可獨立初始化並 `fetch()` 出 DataFrame
+- [x] 等價性測試通過
+- [x] PR → develop 自動 merge
 
 ---
 

@@ -83,6 +83,29 @@ def compute_shap_summary(
     }
 
 
+def prepare_feature_matrix_from_handler(
+    handler_df: "pd.DataFrame",
+    feature_col_prefix: tuple[str, ...] = ("TECH_", "FUND_"),
+) -> pd.DataFrame:
+    """Flatten a Qlib DataHandler fetch() output for SHAP analysis.
+
+    Qlib handlers return a MultiIndex DataFrame (date, instrument).  This
+    helper drops the index and filters to only feature columns (those whose
+    names start with TECH_ or FUND_), returning a plain 2-D DataFrame ready
+    for :func:`compute_shap_summary`.
+
+    Args:
+        handler_df: DataFrame from ``handler.fetch(data_key="infer")``.
+        feature_col_prefix: tuple of accepted column prefixes; others are dropped.
+
+    Returns:
+        Flat DataFrame of feature values with no MultiIndex.
+    """
+    df = handler_df.reset_index(drop=True)
+    feature_cols = [c for c in df.columns if c.startswith(feature_col_prefix)]
+    return df[feature_cols].copy()
+
+
 def write_shap_summary(
     summary: dict,
     run_id: str,
