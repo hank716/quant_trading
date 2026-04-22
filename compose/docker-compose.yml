@@ -71,6 +71,19 @@ services:
         required: false
     command: ["python", "-m", "src.orchestration.run_daily", "--use-mock-data", "--skip-discord"]
 
+  quant-trainer:
+    build:
+      context: ..
+      dockerfile: docker/trainer.Dockerfile
+    image: fin-trainer:latest
+    profiles: ["jobs"]
+    volumes:
+      - ../workspace:/app/workspace
+    env_file:
+      - path: ../.env.local
+        required: false
+    command: ["python", "-m", "src.signals.trainer"]
+
 volumes:
   prometheus-data:
   grafana-data:

@@ -2,6 +2,20 @@
 
 每次啟動請在此檔最上方新增一筆：
 
+## 2026-04-22
+- 啟動時所在 branch：feat/phase5b-lightgbm-trainer
+- 完成的子任務：Phase 5b 全部（5b.1–5b.7）
+  - requirements.txt：lightgbm>=4.0.0、scikit-learn>=1.3.0（已存在，確認）
+  - src/signals/labeler.py：compute_forward_return、binary_label（已存在，確認）
+  - src/signals/trainer.py：walk_forward_split、train、save_model（已存在，確認）
+  - docker/trainer.Dockerfile：新增 LightGBM trainer image
+  - compose/docker-compose.yml：新增 quant-trainer service（profiles: jobs）
+  - tests/unit/test_labeler.py：7 cases（forward return + binary label）
+  - tests/unit/test_trainer.py：9 cases（walk_forward_split + train + save_model）
+  - 132 tests pass
+- 遇到的卡點：無
+- 下次繼續：Phase 5c（Model Registry，feat/phase5c-model-registry）
+
 ## 2026-04-21 23:15
 - 啟動時所在 branch：develop（Phase 4 merge 後）
 - 使用 agents：fin-pipeline-engineer（tech/fund/builder 實作）+ fin-test-engineer（3 個測試檔）協同
