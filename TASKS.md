@@ -1248,7 +1248,7 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
 - `pytest -q -m "not integration"` 全過
 
 ### 9.1 TW TopkDropout Strategy（帶 hard rules）
-- [ ] 建立 `qlib_ext/strategies/tw_topk_filtered.py`：繼承 `TopkDropoutStrategy`
+- [x] 建立 `qlib_ext/strategies/tw_topk_filtered.py`：繼承 `TopkDropoutStrategy`
   - `filter_universe(pred_score, trade_date)`：
     - 排除關鍵字（ETF / 權證 / 變更交易）
     - 價格底線（`$close >= min_price`）
@@ -1256,31 +1256,31 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
     - 合併 user portfolio（既有持股優先保留）
 
 ### 9.2 Benchmark 設定
-- [ ] 建立 `qlib_ext/data_collector/benchmark_collector.py`：TAIEX / OTC 指數 → bin
-- [ ] `daily_lgbm.yaml` 的 `benchmark:` 指向 TAIEX
+- [x] 建立 `qlib_ext/data_collector/benchmark_collector.py`：TAIEX / OTC 指數 → bin
+- [x] `daily_lgbm.yaml` 的 `benchmark:` 指向 TAIEX
 
 ### 9.3 PortAnaRecord + SigAnaRecord
-- [ ] 在 workflow YAML 的 `record:` 區塊加入 `SigAnaRecord`（IC / Rank IC）與 `PortAnaRecord`（策略指標）
+- [x] 在 workflow YAML 的 `record:` 區塊加入 `SigAnaRecord`（IC / Rank IC）與 `PortAnaRecord`（策略指標）
 
 ### 9.4 Report rendering
-- [ ] 建立 `app/orchestration/render_backtest_report.py`：
+- [x] 建立 `app/orchestration/render_backtest_report.py`：
   - 從 MLflow run_id 讀 record 產出的 pickle
-  - 用 `qlib.contrib.report.analysis_position.report_graph` 產 PNG
+  - 用 matplotlib 產 PNG（plotly 未安裝）
   - 輸出到 `workspace/runs/{run_id}/backtest/`
 
 ### 9.5 Run backtest CLI
-- [ ] 建立 `app/orchestration/run_backtest.py`：
+- [x] 建立 `app/orchestration/run_backtest.py`：
   - 參數：`--mlflow-run-id X`（既有 qrun）或 `--score-csv Y`（臨時 score）
   - 只跑 backtest（跳過 training）
   - 可比對多個 run_id
 
 ### 9.6 pCloud 上傳
-- [ ] 上傳 report/positions/trades 到 `/backtest/date={date}/mlflow_run_id={id}/`
+- [x] 上傳 report/positions/trades 到 `/backtest/date={date}/mlflow_run_id={id}/`
 
 ### 9.7 Phase 9 驗收
-- [ ] 一次 qrun 後可自動產出 IC / Rank IC / Sharpe / MDD / Turnover + PNG
-- [ ] 結果可在 MLflow UI 查看
-- [ ] PR → develop 自動 merge
+- [x] 一次 qrun 後可自動產出 IC / Rank IC / Sharpe / MDD / Turnover + PNG
+- [x] 結果可在 MLflow UI 查看
+- [x] PR → develop 自動 merge
 
 ---
 
