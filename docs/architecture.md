@@ -43,9 +43,7 @@
          └─────────────────────────────────────────┘
 
 UI / 監控
-  src/ui/app.py (Streamlit)   → reads Supabase + workspace artifacts
-  Grafana                     → reads Supabase PostgreSQL
-  Prometheus                  → service metrics
+  src/ui/app.py (Streamlit)   → reads Supabase + workspace artifacts（唯一 UI，port 8501）
 ```
 
 **已知 tech debt（Strangler Fig 期間仍會存在）：**
@@ -95,10 +93,13 @@ UI / 監控
          │  Supabase qlib_runs (mlflow_run_id index only)      │
          └──────────────┬──────────────────────────────────────┘
                         │
-         ┌──────────────▼────────────────────┐
-         │  app/ui/app.py (Streamlit)        │
-         │  mlflow.search_runs() + Supabase  │
-         └───────────────────────────────────┘
+         ┌──────────────────────────────────────────────────────────┐
+         │  app/ui/app.py  —  唯一 UI（port 8501）               │
+         │  streamlit-authenticator login                         │
+         │  今日報告 / 我的持股 / 策略設定 / 模型狀態             │
+         │  回測分析 / 監控 & 告警                                │
+         │  reads: MLflow + Supabase qlib_runs + config/ YAML     │
+         └──────────────────────────────────────────────────────────┘
 ```
 
 **削減的模組（Phase 11 刪除，共 ~3000 行）：**

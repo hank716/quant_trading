@@ -52,10 +52,17 @@
 | `SUPABASE_URL` | Supabase project URL |
 | `SUPABASE_ANON_KEY` | Supabase anon key（唯讀查詢） |
 | `SUPABASE_SERVICE_KEY` | Supabase service key（後端寫入用） |
-| `SUPABASE_DB_HOST` | 直連 DB hostname（Grafana datasource 用），格式：`db.<id>.supabase.co` |
-| `SUPABASE_DB_PORT` | 直連 DB port，預設 `5432` |
-| `SUPABASE_DB_NAME` | 資料庫名稱，預設 `postgres` |
-| `SUPABASE_DB_USER` | 資料庫使用者，預設 `postgres` |
-| `SUPABASE_DB_PASSWORD` | 資料庫密碼（Supabase Settings → Database） |
 
 詳細部署步驟見 [`docs/supabase-setup.md`](supabase-setup.md)。
+
+## MLflow（Phase 8+）
+
+| 變數 | 說明 |
+|------|------|
+| `MLFLOW_TRACKING_URI` | MLflow 追蹤 URI，預設 `file:workspace/mlruns` |
+
+## UI 認證（Phase 10+）
+
+| 變數 | 說明 |
+|------|------|
+| `AUTH_COOKIE_KEY` | Streamlit authenticator cookie 簽署 key（32 字元隨機字串，必填） |

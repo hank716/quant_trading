@@ -74,6 +74,8 @@ Predictor                → predict_from_champion → score DataFrame
 SHAPExplainer            → top-N feature importances → /shap/date={date}/run_id={run_id}/
 ```
 
+**UI：** 單一 Streamlit 網頁（`http://localhost:8501`）。用戶登入後在此頁面完成所有操作——查看選股、管理持股、調整策略、監控告警，不需碰任何程式碼。Grafana / Prometheus 已移除。
+
 ### Module Map
 
 #### Legacy core (will be deleted in Phase 11)

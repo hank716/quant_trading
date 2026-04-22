@@ -21,13 +21,6 @@
 SUPABASE_URL=https://<project-id>.supabase.co
 SUPABASE_ANON_KEY=<anon-key>
 SUPABASE_SERVICE_KEY=<service-role-key>
-
-# Grafana PostgreSQL datasource（Settings → Database → Connection string）
-SUPABASE_DB_HOST=db.<project-id>.supabase.co
-SUPABASE_DB_PORT=5432
-SUPABASE_DB_NAME=postgres
-SUPABASE_DB_USER=postgres
-SUPABASE_DB_PASSWORD=<database-password>
 ```
 
 ### 3. 套用 Schema
@@ -64,7 +57,3 @@ pytest tests/integration/test_supabase_real.py -v
 | 查看最近 runs | `psql $DATABASE_URL -c "SELECT run_id, trade_date, status FROM pipeline_runs ORDER BY started_at DESC LIMIT 10;"` |
 | 清除測試資料 | `psql $DATABASE_URL -c "DELETE FROM pipeline_runs WHERE run_id LIKE 'test_%';"` |
 
-## Grafana 連線
-
-Grafana datasource 設定檔已預先寫入 `compose/grafana/provisioning/datasources/postgres.yml`。
-啟動服務後，環境變數 `SUPABASE_DB_*` 會自動注入。Dashboard 在 `compose/grafana/provisioning/dashboards/pipeline-health.json`。
