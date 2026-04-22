@@ -5,6 +5,8 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
+import pandas as pd
+
 
 def _run_with_artifacts(argv=None):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -146,6 +148,23 @@ def _run_with_artifacts(argv=None):
             print(f"Retrain gate: TRIGGER — {retrain['reason']}")
     except Exception as _cov_exc:
         print(f"Coverage check skipped: {_cov_exc}")
+
+    # --- ML scoring (champion model, optional) ---
+    try:
+        from src.registry.model_registry import ModelRegistry
+        from src.signals.predictor import predict_from_champion
+
+        registry = ModelRegistry(db=db)
+        ml_scores = predict_from_champion(
+            pd.DataFrame(),  # real feature matrix comes from Phase 5c full wiring
+            family="lgbm_binary",
+            registry=registry,
+            cache_dir=base / "models",
+        )
+        if ml_scores is not None:
+            print(f"ML scoring: {len(ml_scores)} instruments scored by champion model")
+    except Exception as _ml_exc:
+        print(f"ML scoring skipped: {_ml_exc}")
 
     # --- Supabase: finish run ---
     run_crud.finish(run_id, status="success")

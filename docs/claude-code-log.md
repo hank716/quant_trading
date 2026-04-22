@@ -2,7 +2,19 @@
 
 每次啟動請在此檔最上方新增一筆：
 
-## 2026-04-22
+## 2026-04-22 (Phase 5c)
+- 啟動時所在 branch：develop → feat/phase5c-model-registry
+- 完成的子任務：Phase 5c 全部（5c.1–5c.5）
+  - src/registry/model_registry.py：register / get_champion / list_candidates / promote / download_model
+  - src/signals/predictor.py：predict + predict_from_champion（in-process model cache）
+  - src/orchestration/run_daily.py：ML scoring hook（有 champion 則打分，否則 skip）
+  - tests/unit/test_model_registry.py：12 cases（mock DB + mock pCloud）
+  - tests/unit/test_predictor.py：8 cases（module-level pickle-safe stub）
+  - 152 tests pass
+- 遇到的卡點：test_predictor 中 local class 無法 joblib pickle → 改用 module-level stub class
+- 下次繼續：Phase 5d（SHAP Explainer，feat/phase5d-shap）
+
+## 2026-04-22 (Phase 5b)
 - 啟動時所在 branch：feat/phase5b-lightgbm-trainer
 - 完成的子任務：Phase 5b 全部（5b.1–5b.7）
   - requirements.txt：lightgbm>=4.0.0、scikit-learn>=1.3.0（已存在，確認）
