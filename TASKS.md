@@ -1169,7 +1169,7 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
 - `pytest -q -m "not integration"` 全過
 
 ### 8.1 qrun YAML workflow
-- [ ] 建立 `qlib_ext/workflows/daily_lgbm.yaml`：
+- [x] 建立 `qlib_ext/workflows/daily_lgbm.yaml`：
   ```yaml
   qlib_init:
       provider_uri: "workspace/qlib_data"
@@ -1184,22 +1184,22 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
           - SigAnaRecord
           - PortAnaRecord
   ```
-- [ ] 建立 `qlib_ext/workflows/retrain.yaml`（差異：全量資料 retrain）
-- [ ] 建立 `qlib_ext/workflows/quick_debug.yaml`（小 universe，便於開發）
+- [x] 建立 `qlib_ext/workflows/retrain.yaml`（差異：全量資料 retrain）
+- [x] 建立 `qlib_ext/workflows/quick_debug.yaml`（小 universe，便於開發）
 
 ### 8.2 MLflow 設定
-- [ ] `.env.example` 加入 `MLFLOW_TRACKING_URI=file:workspace/mlruns`
-- [ ] `qlib_ext/__init__.py` 在 init 時設定 MLflow tracking URI
-- [ ] 寫 helper `app/control/mlflow_helper.py`：`list_experiments()`、`get_recorder(run_id)`、`get_metrics(run_id)`
+- [x] `.env.example` 加入 `MLFLOW_TRACKING_URI=file:workspace/mlruns`
+- [x] `qlib_ext/__init__.py` 在 init 時設定 MLflow tracking URI
+- [x] 寫 helper `app/control/mlflow_helper.py`：`list_experiments()`、`get_recorder(run_id)`、`get_metrics(run_id)`
 
 ### 8.3 訓練 orchestration
-- [ ] 建立 `app/orchestration/run_training.py`：
+- [x] 建立 `app/orchestration/run_training.py`：
   - 接受 `--workflow` 參數 (預設 `daily_lgbm.yaml`)
   - 呼叫 `qrun workflow.yaml`
   - 抓 MLflow run_id，寫 Supabase `qlib_runs` 表
 
 ### 8.4 Supabase schema 簡化
-- [ ] 在 `src/database/schema.sql` 加 `qlib_runs` 表：
+- [x] 在 `src/database/schema.sql` 加 `qlib_runs` 表：
   ```sql
   CREATE TABLE qlib_runs (
       id BIGSERIAL PRIMARY KEY,
@@ -1212,21 +1212,21 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
       created_at TIMESTAMPTZ DEFAULT now()
   );
   ```
-- [ ] 建立 `src/database/qlib_crud.py`：`QlibRunCRUD.register(mlflow_run_id, ...)`
-- [ ] 註記：Phase 11 會把舊的 `model_versions` / `model_promotions` / `pipeline_runs` / `run_steps` 表 drop
+- [x] 建立 `src/database/qlib_crud.py`：`QlibRunCRUD.register(mlflow_run_id, ...)`
+- [x] 註記：Phase 11 會把舊的 `model_versions` / `model_promotions` / `pipeline_runs` / `run_steps` 表 drop
 
 ### 8.5 Champion 機制（MLflow tag）
-- [ ] 用 MLflow tag 標示 champion（`model.stage = 'Production'`）
-- [ ] 實作 `app/control/champion.py`：`get_champion(family)`、`promote(run_id, reason)`、`list_candidates(family)`
-- [ ] 取代 `src/registry/model_registry.py`
+- [x] 用 MLflow tag 標示 champion（`model.stage = 'Production'`）
+- [x] 實作 `app/control/champion.py`：`get_champion(family)`、`promote(run_id, reason)`、`list_candidates(family)`
+- [x] 取代 `src/registry/model_registry.py`
 
 ### 8.6 Quant-trainer service 更新
-- [ ] `compose/docker-compose.yml` 的 `quant-trainer.command` 改為 `python -m app.orchestration.run_training --workflow qlib_ext/workflows/daily_lgbm.yaml`
+- [x] `compose/docker-compose.yml` 的 `quant-trainer.command` 改為 `python -m app.orchestration.run_training --workflow qlib_ext/workflows/daily_lgbm.yaml`
 
 ### 8.7 測試
-- [ ] 建立 `tests/unit/test_mlflow_helper.py`（mock mlflow）
-- [ ] 建立 `tests/unit/test_qlib_crud.py`
-- [ ] 建立 `tests/integration/test_qrun_smoke.py`（跑最小 qrun，skip if no data）
+- [x] 建立 `tests/unit/test_mlflow_helper.py`（mock mlflow）
+- [x] 建立 `tests/unit/test_qlib_crud.py`
+- [x] 建立 `tests/integration/test_qrun_smoke.py`（跑最小 qrun，skip if no data）
 
 ### 8.8 Phase 8 驗收
 - [ ] qrun 可跑完一次完整 training
