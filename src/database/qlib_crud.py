@@ -42,7 +42,8 @@ class QlibRunCRUD:
 
     def get_by_run_id(self, mlflow_run_id: str) -> dict | None:
         """Return the qlib_runs row for the given mlflow_run_id, or None."""
-        return self._client.select_one("qlib_runs", {"mlflow_run_id": mlflow_run_id})
+        rows = self._client.select("qlib_runs", filters={"mlflow_run_id": mlflow_run_id}, limit=1)
+        return rows[0] if rows else None
 
     def list_by_family(self, family: str, limit: int = 20) -> list[dict]:
         """Return recent runs for a model family, newest first."""
