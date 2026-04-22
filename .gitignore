@@ -23,8 +23,8 @@ htmlcov/
 .env.test
 
 # --- 資料與輸出 ---
-outputs/*.json
-!outputs/daily_result.json
+outputs/
+!outputs/.gitkeep
 
 # --- 系統檔案 ---
 .DS_Store
@@ -35,6 +35,9 @@ workspace/hotdata/
 workspace/tmp/
 workspace/logs/
 workspace/runs/*/
+workspace/qlib_data/
+workspace/qlib_data_csv/
+workspace/mlruns/
 
 # --- Docker ---
 .docker-cache/
