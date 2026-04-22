@@ -192,7 +192,45 @@ pCloud /mlruns/snapshot={date}/ (nightly backup)
 
 ---
 
-## 5. 相關決策文件
+## 5. 用戶介面設計（Phase 10 目標）
+
+### 設計原則
+
+> 用戶登入後只需操作這一個 Streamlit 網頁，不需碰程式碼、YAML 檔、MLflow UI 或 Grafana。
+
+### 認證
+
+- 套件：`streamlit-authenticator>=0.3.0`（bcrypt + cookie session）
+- 帳密：`config/auth_users.yaml`（gitignored；密碼 bcrypt hash）
+- 用戶 → profile 對應：`hank → user_a`、`friend1 → user_b`（各自的策略設定與持股互相獨立）
+
+### 頁面結構
+
+```
+sidebar
+├── 今日報告        ← 預設首頁；當日 Top-K 候選 + LLM 論述 + 一鍵加持股
+├── 我的持股        ← 新增 / 刪除 / 備注；直接寫 config/portfolio_{profile}.yaml
+├── 策略設定        ← 過濾規則 / 訊號閾值 / LLM on-off；存檔即生效
+├── 模型狀態        ← Champion IC/Sharpe、SHAP 圖、Promote 按鈕、觸發 Retrain
+├── 回測分析        ← IC / Rank IC / Sharpe / MDD / PNG；多 run 對比
+├── 監控 & 告警     ← 資料健康度、pipeline 狀態、Discord 紀錄、告警閾值設定
+└── (系統)          ← sidebar 底部：手動觸發 run / sync、服務燈號
+```
+
+### 關鍵互動
+
+| 用戶動作 | 系統反應 |
+|---------|---------|
+| 按「加入持股」 | `portfolio_editor.add_holding()` → 寫 config YAML |
+| 修改策略設定後「儲存」 | 寫 `config/strategy_1m.yaml` / `profiles/{profile}.yaml` → 下次 run 生效 |
+| 按「觸發 Retrain」 | 呼叫 `run_training.py`；log stream 顯示在頁面 |
+| 按「手動 Run」 | 呼叫 `run_daily.py`；即時顯示進度 |
+| 按「測試 Discord 推播」 | 發送測試訊息到 webhook |
+| 按「Promote 模型」 | `app/control/champion.py` 設定 MLflow tag |
+
+---
+
+## 6. 相關決策文件
 
 | ADR | 標題 | 狀態 |
 |-----|------|------|
