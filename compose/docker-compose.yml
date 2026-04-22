@@ -61,3 +61,16 @@ services:
       - path: ../.env.local
         required: false
     command: ["python", "-m", "src.signals.trainer"]
+
+  qlib-sync:
+    build:
+      context: ..
+      dockerfile: docker/qlib.Dockerfile
+    image: fin-qlib:latest
+    profiles: ["jobs"]
+    volumes:
+      - ../workspace:/app/workspace
+    env_file:
+      - path: ../.env.local
+        required: false
+    command: ["python", "-m", "app.orchestration.sync_qlib_data", "--lookback-days", "5"]
