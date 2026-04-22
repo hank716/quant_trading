@@ -139,3 +139,22 @@ CREATE TABLE IF NOT EXISTS system_alerts (
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_system_alerts_resolved ON system_alerts (resolved, created_at DESC);
+
+-- ------------------------------------------------------------------ --
+-- Phase 8: Qlib training run registry
+-- Note: model_versions, model_promotions, pipeline_runs, run_steps will be dropped in Phase 11
+-- ------------------------------------------------------------------ --
+CREATE TABLE IF NOT EXISTS qlib_runs (
+    id BIGSERIAL PRIMARY KEY,
+    mlflow_run_id TEXT UNIQUE NOT NULL,
+    experiment_name TEXT,
+    family TEXT,
+    workflow_config TEXT,
+    status TEXT CHECK (status IN ('running', 'success', 'failed')),
+    metrics JSONB,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS ix_qlib_runs_family ON qlib_runs (family);
+CREATE INDEX IF NOT EXISTS ix_qlib_runs_status ON qlib_runs (status);
+CREATE INDEX IF NOT EXISTS ix_qlib_runs_created_at ON qlib_runs (created_at DESC);
