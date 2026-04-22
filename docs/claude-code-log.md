@@ -2,6 +2,24 @@
 
 每次啟動請在此檔最上方新增一筆：
 
+## 2026-04-22 (Phase 7 — TW DataHandlers)
+- 啟動時所在 branch：feat/phase7-qlib-handlers（從 develop 開出）
+- 使用 agents：直接實作（無子 agent）
+- 完成的子任務：Phase 7 全部（7.1–7.8）
+  - fix(phase6)：先修 `dump_to_bin()` — DumpDataAll 在 pyqlib 0.9.8+ 已移除，改用直接 numpy float32 binary write；新增 2 個 bin 格式驗證測試（共 10 tests）
+  - requirements.txt：`pyqlib @ git+https://github.com/microsoft/qlib.git`（改用 GitHub URL）
+  - `qlib_ext/handlers/tw_alpha.py`：TWAlphaHandler（TECH_MAn_RET / TECH_VOLn_RATIO / TECH_RETnD / TECH_STDnD / TECH_HL_RANGE，共 14 技術特徵）
+  - `qlib_ext/handlers/tw_fundamental.py`：TWFundamentalHandler（FUND_REV_YOY/MOM/POS_RATIO + FUND_ROE/ROE_YOY + FUND_GM/GM_YOY，共 7 基本面特徵）
+  - `qlib_ext/handlers/tw_combined.py`：TWCombinedHandler（合併 tech + fundamental + label；`include_fundamental=False` 可降級）
+  - Label 定義：`LABEL_RET20D`（Ref($close,-20)/$close-1）+ `LABEL_BIN20D`（Gt(..., 0)）
+  - `qlib_ext/workflows/handler_config.yaml`：可餵 qrun 的 handler YAML 片段（含 tech-only 與 combined 兩種設定）
+  - `qlib_ext/handlers/__init__.py`：export 三個 handler class
+  - `tests/unit/test_handler_equivalence.py`：16 cases（feature count、名稱前綴、label 一致性、no duplicate）
+  - `src/signals/explainer_shap.py`：新增 `prepare_feature_matrix_from_handler()`（MultiIndex → 2D，按 TECH_/FUND_ 前綴過濾）
+  - 188 passed, 5 deselected
+- 遇到的卡點：DumpDataAll 不存在（已在 Phase 6 fix commit 解決）；DataHandlerLP 需要 `data_loader` dict config，不能直接傳 fields list
+- 下次繼續：Phase 8（Qlib Training + MLflow，feat/phase8-qlib-training）
+
 ## 2026-04-22 (Phase 6 — Qlib Foundation)
 - 啟動時所在 branch：feat/phase6-qlib-foundation（從 develop 開出）
 - 使用 agents：fin-pipeline-engineer（全部實作）
