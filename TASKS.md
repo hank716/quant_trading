@@ -1033,8 +1033,12 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
 ## Phase 6：Qlib 基礎 + TW 資料層
 
 **Branch：** `feat/phase6-qlib-foundation`
-**目標：** Qlib 能讀台股日頻資料；與 legacy 並行運作。
-**驗證：** `D.features(["2330.TW"], ["$close", "$volume"], start_time=...)` 回傳正確資料。
+**前置條件：** Phase 5 全部 ✅；`v0.5-legacy` tag 已建立（`git tag v0.5-legacy develop && git push origin v0.5-legacy`）
+**目標：** Qlib 能讀台股日頻資料；與 legacy 並行運作（legacy prod 不受影響）。
+**完成定義：**
+- `D.features(["2330.TW"], ["$close", "$volume"], start_time="2024-01-01", end_time="2024-01-31")` 回傳非空 DataFrame
+- `pytest -q -m "not integration"` 全過
+- legacy `main.py --use-mock-data` 仍可跑通（沒有 regression）
 
 ### 6.1 依賴與 Dockerfile
 - [ ] `requirements.txt` 加入 `pyqlib>=0.9.5`
@@ -1105,8 +1109,12 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
 ## Phase 7：TW 特徵 / 標籤 DataHandler
 
 **Branch：** `feat/phase7-qlib-handlers`
+**前置條件：** Phase 6 ✅；`workspace/qlib_data/` 已有至少 1 年 TWSE + TPEx bin（可用 6.6 nightly sync 建立）
 **目標：** 用 Qlib Expression Engine + DataHandlerLP 取代 `src/features/` 與 `src/signals/labeler.py`。
-**驗證：** 新 handler 輸出的 feature matrix 與 legacy `build_feature_matrix` 在相同日期/標的下數值一致（允許 1e-6 誤差）。
+**完成定義：**
+- `tw_combined.py` handler 可 `fetch()` 出同時含技術面、基本面、label 的 DataFrame
+- `test_handler_equivalence.py`：handler 與 legacy `build_feature_matrix` 同日期/標的差 < 1e-6
+- `pytest -q -m "not integration"` 全過
 
 ### 7.1 TW Alpha Handler（技術面）
 - [ ] 建立 `qlib_ext/handlers/tw_alpha.py`：繼承 `DataHandlerLP`
@@ -1152,8 +1160,13 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
 ## Phase 8：Qlib 訓練 + MLflow Registry
 
 **Branch：** `feat/phase8-qlib-training`
+**前置條件：** Phase 7 ✅；`tw_combined.py` handler 已驗證等價性
 **目標：** 用 qrun workflow 訓練；MLflow 取代 `src/registry/model_registry.py` 成為 model registry。
-**驗證：** 一次 qrun 執行後，`mlflow ui` 可看到 experiment / run / metrics / 模型 artifact；Supabase 有對應的 index row。
+**完成定義：**
+- `python -m app.orchestration.run_training --workflow qlib_ext/workflows/daily_lgbm.yaml` 跑完不報錯
+- `mlflow ui --backend-store-uri file:workspace/mlruns` 可看到 experiment / run / metrics / 模型 artifact
+- Supabase `qlib_runs` 表有對應 row（`mlflow_run_id`、`status=success`、`metrics` JSON）
+- `pytest -q -m "not integration"` 全過
 
 ### 8.1 qrun YAML workflow
 - [ ] 建立 `qlib_ext/workflows/daily_lgbm.yaml`：
@@ -1226,8 +1239,13 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
 ## Phase 9：Backtest、Strategy、Analysis
 
 **Branch：** `feat/phase9-qlib-backtest`
+**前置條件：** Phase 8 ✅；至少一個 MLflow run 已成功訓練（`qlib_runs` 有 row）
 **目標：** 用 Qlib 原生 backtest；把 legacy `core/filter_engine.py` 的 hard rules 寫成 Qlib Strategy 的 filter。
-**驗證：** 任一 qlib_run 產出完整回測報告（IC、Rank IC、Sharpe、MDD、Turnover、分位數累積收益圖）。
+**完成定義：**
+- 一次完整 qrun 後，`workspace/runs/{run_id}/backtest/` 有 IC、Rank IC、Sharpe、MDD、Turnover 數值 + 分位數累積收益 PNG
+- `TwTopkFilteredStrategy` 正確排除：ETF / 權證 / 變更交易關鍵字、價格 < 10 元、上市 < 180 日
+- 結果可在 MLflow UI 查看（metrics + artifact PNG）
+- `pytest -q -m "not integration"` 全過
 
 ### 9.1 TW TopkDropout Strategy（帶 hard rules）
 - [ ] 建立 `qlib_ext/strategies/tw_topk_filtered.py`：繼承 `TopkDropoutStrategy`
@@ -1269,9 +1287,17 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
 ## Phase 10：Orchestration Cutover + UI / LLM / Discord 重接（★Cutover Day）
 
 **Branch：** `feat/phase10-cutover`
+**前置條件：** Phase 9 ✅；Qlib pipeline 已穩定跑 ≥ 3 天 daily run 無 crash
 **目標：** 新 `app.orchestration.run_daily` 成為 prod 路徑；UI / LLM / Discord 全部改讀 Qlib recorders；legacy 仍在但 compose 不再呼叫。
-**風險：** 最高。要先在 staging 跑 3 天再 merge。
-**Rollback：** `git revert` + redeploy，`v0.5-legacy` tag 確保可 checkout 舊版。
+**風險：** ★ 最高。要先在 staging 同時跑 3 天再 merge。
+**Rollback：** `git checkout v0.5-legacy` + redeploy，`v0.5-legacy` tag 確保可回到 Phase 5 狀態。
+**完成定義：**
+- `python -m app.orchestration.run_daily --profile user_a` 完整跑通（data sync → qrun → LLM → Discord）
+- Discord 收到推送，內含 IC / Rank IC / Sharpe 數值
+- Streamlit UI 所有頁從 MLflow + Supabase `qlib_runs` 讀資料
+- 3 天 shadow run 驗證：Top-20 候選重疊率 ≥ 70%，分數 correlation ≥ 0.6
+- `docs/phase10-shadow-report.md` 寫入比對結果
+- `pytest -q` 全過
 
 ### 10.1 新 orchestration
 - [ ] 建立 `app/orchestration/run_daily.py`：
@@ -1334,7 +1360,17 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
 ## Phase 11：Legacy 清理 + 文件重寫
 
 **Branch：** `feat/phase11-cleanup`
-**目標：** 刪除 legacy 模組，更新所有文件到新架構。僅在 Phase 10 穩定運行 >= 2 週後執行。
+**前置條件：** Phase 10 ✅；新 pipeline 穩定運行 ≥ 2 週無重大問題
+**目標：** 刪除 legacy 模組，更新所有文件到新架構。
+**完成定義（即 v1.1 release criteria）：**
+- `pytest -q` 全過（legacy tests 已隨 code 一起刪除）
+- `grep -rn "from core\." src/ app/ qlib_ext/ tests/` → 0 行
+- `grep -rn "from src\.signals\.trainer\|from src\.signals\.predictor\|from src\.registry\.model_registry"` → 0 行
+- Docker image build 成功，image size < 1.5 GB
+- `CLAUDE.md`、`README.md`、`docs/architecture.md` 全部反映新架構
+- ADR-001 status 更新為 `Implemented`；ADR-002 + ADR-003 新增
+- `v1.1-cleanup` tag 推到 origin
+- develop → main PR 人工 review 後 merge
 
 ### 11.1 刪除 legacy 程式
 - [ ] 刪除 `core/`（decision_engine, filter_engine, signal_engine, universe, models, strategy_loader, report_renderer）
@@ -1410,31 +1446,61 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
 
 ---
 
-## 📌 現有 repo 結構（保留不動）
+## 📌 現有 repo 結構（Phase 5 完成後）
+
+> ★ Strangler Fig 策略：Phase 6–9 新增 `qlib_ext/` + `app/`，legacy 繼續 prod。Phase 10 切換。Phase 11 刪 legacy。
 
 ```
 fin/
-├── core/           # ← 保留，逐步移到 src/
-├── data/           # ← 保留
-├── llm/            # ← 保留
-├── notifications/  # ← 保留
-├── config/         # ← 保留
-├── test/           # ← 保留向後相容
-├── outputs/        # ← 保留向後相容
-├── main.py         # ← 保留作相容層
-├── sync_data.py    # ← 保留
-├── sync_financials_slow.py  # ← 保留
-└── requirements.txt  # ← 追加新依賴
-```
-
-**新增結構（Phase 0+）：**
-```
-fin/
-├── docker/
-├── compose/
-├── scripts/{windows,linux}/
-├── docs/{decisions,claude-code-log.md}
-├── src/{orchestration,signals,portfolio,features,reporting,storage,database,monitoring,registry,ui}
-├── tests/{unit,contract,integration}
-└── workspace/{hotdata,runs,outputs,logs,tmp}
+│
+│  ── legacy（Phase 11 刪除）─────────────────────────────
+├── core/                    ← decision_engine, filter_engine, signal_engine, models, universe
+├── data/                    ← official_hybrid_client, finmind_client
+├── llm/                     ← selector, explainer, openai_compat（Phase 10 改介面）
+├── notifications/            ← discord_notifier（Phase 10 搬到 app/notify/）
+├── main.py                  ← legacy CLI entry（Phase 11 刪）
+├── sync_data.py             ← Phase 11 刪
+├── sync_financials_slow.py  ← Phase 11 刪
+│
+│  ── src/（Phase 2–5 建立，部分 Phase 11 刪）────────────
+├── src/
+│   ├── orchestration/run_daily.py  ← legacy pipeline（Phase 11 刪）
+│   ├── database/                    ← 保留，schema 精簡化（Phase 11）
+│   ├── storage/pcloud_client.py     ← 保留（MLruns backup）
+│   ├── storage/artifact_writer.py   ← Phase 11 刪
+│   ├── reporting/                   ← Phase 11 刪
+│   ├── signals/labeler.py + trainer.py + predictor.py  ← Phase 11 刪
+│   ├── signals/explainer_shap.py    ← 保留（post-processor）
+│   ├── features/                    ← Phase 11 刪（被 handlers/ 取代）
+│   ├── registry/model_registry.py   ← Phase 11 刪（被 MLflow 取代）
+│   ├── registry/retrain_gate.py     ← 保留（純商業規則）
+│   ├── monitoring/coverage_checker.py ← 保留
+│   └── ui/app.py                    ← Phase 10 搬到 app/ui/（大改）
+│
+│  ── 永久保留 ──────────────────────────────────────────
+├── config/                  ← strategy YAML, profiles, portfolios
+├── docker/                  ← app/ui/trainer.Dockerfile（Phase 11 刪 app.Dockerfile）
+├── compose/                 ← docker-compose.yml, grafana provisioning
+├── scripts/                 ← linux/ + windows/
+├── tests/                   ← unit/ contract/ integration/
+├── docs/                    ← architecture.md, ADRs, quickstart, env-variables, ...
+└── workspace/               ← runtime data（gitignored）
+    ├── hotdata/
+    ├── runs/
+    ├── qlib_data/           ← Phase 6+ Qlib bin
+    └── mlruns/              ← Phase 8+ MLflow file store
+│
+│  ── NEW Phase 6–10 ───────────────────────────────────
+├── qlib_ext/                ← TW-specific Qlib extensions（Phase 6+）
+│   ├── data_collector/      ← TWSE / TPEx / financial → bin
+│   ├── handlers/            ← DataHandlerLP subclasses（features + labels）
+│   ├── strategies/          ← TwTopkFilteredStrategy（hard rules）
+│   └── workflows/           ← qrun YAML configs
+│
+└── app/                     ← post-Qlib thin layers（Phase 6+）
+    ├── orchestration/       ← run_daily.py（active from Phase 10）, sync_qlib_data.py
+    ├── control/             ← mlflow_helper.py, champion.py, supabase_index.py
+    ├── notify/              ← discord_notifier.py（post-cutover home）
+    ├── llm/                 ← reads Qlib SignalRecord（Phase 10 rewrite）
+    └── ui/                  ← Streamlit（reads MLflow + Supabase，Phase 10 rewrite）
 ```
