@@ -1,4 +1,5 @@
 """Streamlit UI - fin 量化研究工作站"""
+import os
 import subprocess
 from datetime import datetime
 
@@ -21,9 +22,9 @@ def get_crud():
 
 
 # ---- Sidebar nav ----
-pages = ["🏠 Home", "📋 Runs", "📦 庫存股", "📊 Coverage", "📁 Reports", "⚙️ Run Control"]
+pages = ["🏠 Home", "📋 Runs", "📦 庫存股", "📊 Coverage", "🤖 模型", "📁 Reports", "⚙️ Run Control"]
 page = st.sidebar.radio("導覽", pages)
-st.sidebar.caption(f"v7 Phase 3 | {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+st.sidebar.caption(f"v7 Phase 5d | {datetime.now().strftime('%Y-%m-%d %H:%M')}")
 
 
 # ================================================================== #
@@ -205,6 +206,112 @@ elif page == "📊 Coverage":
             st.success("無缺件標的")
     else:
         st.info("尚無 coverage 記錄（執行 run_daily.py 後才會產生）")
+
+
+# ================================================================== #
+# 模型 (Model)
+# ================================================================== #
+elif page == "🤖 模型":
+    import json as _json
+    import pandas as pd
+
+    st.title("模型管理")
+
+    @st.cache_resource
+    def get_registry():
+        from src.registry.model_registry import ModelRegistry
+        return ModelRegistry(db=get_db())
+
+    registry = get_registry()
+
+    # ---- Champion ----
+    st.subheader("Champion 模型")
+    profile_key = os.getenv("DEFAULT_PROFILE", "user_a")
+    family = st.selectbox("模型族", ["lgbm_binary"], key="model_family")
+    champion = registry.get_champion(family)
+
+    if champion:
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Model ID", champion.get("model_id", "—"))
+        col2.metric("Feature Set", champion.get("feature_set_version", "—"))
+        metrics = champion.get("metrics") or {}
+        col3.metric("AUC", f"{metrics.get('auc', '—')}")
+        with st.expander("完整 metrics"):
+            st.json(metrics)
+    else:
+        st.info("尚無 champion 模型（請先執行訓練流程）")
+
+    st.divider()
+
+    # ---- Per-user LightGBM params ----
+    st.subheader("訓練參數（個人化）")
+    st.caption("調整後儲存，下次 quant-trainer 服務啟動時生效。")
+
+    param_key = f"lgbm_params_{profile_key}"
+    defaults = {"n_estimators": 100, "num_leaves": 31, "learning_rate": 0.05, "min_child_samples": 5}
+    if param_key not in st.session_state:
+        st.session_state[param_key] = defaults.copy()
+    p = st.session_state[param_key]
+
+    c1, c2, c3, c4 = st.columns(4)
+    p["n_estimators"]      = c1.number_input("n_estimators",      min_value=10,  max_value=1000, value=int(p["n_estimators"]),      step=10)
+    p["num_leaves"]        = c2.number_input("num_leaves",        min_value=4,   max_value=256,  value=int(p["num_leaves"]),         step=4)
+    p["learning_rate"]     = c3.number_input("learning_rate",     min_value=0.001, max_value=0.5, value=float(p["learning_rate"]),  step=0.005, format="%.3f")
+    p["min_child_samples"] = c4.number_input("min_child_samples", min_value=1,   max_value=100,  value=int(p["min_child_samples"]), step=1)
+    if st.button("💾 儲存訓練參數"):
+        st.success(f"已儲存參數至 session（profile: {profile_key}）")
+
+    st.divider()
+
+    # ---- Candidates ----
+    st.subheader("Candidate 模型")
+    candidates = registry.list_candidates(family)
+    if candidates:
+        cdf = pd.DataFrame(candidates)
+        show_cols = [c for c in ["model_id", "feature_set_version", "metrics", "created_at"] if c in cdf.columns]
+        st.dataframe(cdf[show_cols], use_container_width=True)
+
+        st.subheader("Promote Candidate")
+        cand_ids = [c["model_id"] for c in candidates]
+        promote_id = st.selectbox("選擇 Candidate", cand_ids, key="promote_select")
+        promote_reason = st.text_input("原因", placeholder="e.g. AUC improvement 0.72 → 0.78")
+        if st.button("⬆️ Promote 為 Champion", type="primary"):
+            ok = registry.promote(promote_id, reason=promote_reason)
+            if ok:
+                st.success(f"已將 {promote_id} 提升為 champion！請重新整理頁面。")
+                st.cache_resource.clear()
+            else:
+                st.error("Promote 失敗，請確認 model_id 存在。")
+    else:
+        st.info("目前無 candidate 模型")
+
+    st.divider()
+
+    # ---- SHAP top features ----
+    st.subheader("SHAP 特徵重要度")
+    runs_dir_str = os.path.join(os.getenv("CACHE_DIR", "workspace/hotdata"), "..", "runs")
+    import pathlib as _pl
+    runs_dir = _pl.Path(runs_dir_str).resolve()
+    shap_data = None
+    if runs_dir.exists():
+        for rd in sorted(runs_dir.iterdir(), reverse=True)[:10]:
+            sp = rd / "shap_summary.json"
+            if sp.exists():
+                try:
+                    shap_data = _json.loads(sp.read_text())
+                    st.caption(f"來源：{sp}")
+                    break
+                except Exception:
+                    pass
+
+    if shap_data and shap_data.get("top_features"):
+        top = shap_data["top_features"]
+        shap_df = pd.DataFrame(top).set_index("feature")
+        st.bar_chart(shap_df["mean_abs_shap"])
+        with st.expander("原始數值"):
+            st.dataframe(shap_df, use_container_width=True)
+    else:
+        st.info("尚無 SHAP 摘要（執行含 champion 模型的 run_daily 後產生）")
 
 
 # ================================================================== #
