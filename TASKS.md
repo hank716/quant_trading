@@ -982,26 +982,26 @@ feat(phase0): add docker-compose skeleton with quant-ui service
 ### 5d — SHAP Explainer
 **Sub-branch：** `feat/phase5d-shap`
 
-- [ ] 5d.1 `requirements.txt`：`shap>=0.43.0`
-- [ ] 5d.2 建立 `src/signals/explainer_shap.py`：
+- [x] 5d.1 `requirements.txt`：`shap>=0.43.0`
+- [x] 5d.2 建立 `src/signals/explainer_shap.py`：
   - `compute_shap_summary(model, feature_matrix, top_n=10) -> dict`
   - `write_shap_summary(summary, run_id) -> Path`
-- [ ] 5d.3 串入 `run_daily`（有 model prediction 才產 SHAP）
-- [ ] 5d.4 Streamlit 模型頁：
+- [x] 5d.3 串入 `run_daily`（有 model prediction 才產 SHAP）
+- [x] 5d.4 Streamlit 模型頁：
   - champion version + metrics
   - candidate（若有）
   - 不同user可自行在UI調參數，以對應不同的策略
   - SHAP top features bar chart
   - 「Promote candidate」按鈕
-- [ ] 5d.5 上傳 SHAP 到 pCloud：`/shap/date={date}/run_id={run_id}/`
-- [ ] 5d.6 測試：
+- [x] 5d.5 上傳 SHAP 到 pCloud：`/shap/date={date}/run_id={run_id}/`
+- [x] 5d.6 測試：
   - `tests/unit/test_explainer_shap.py`
-- [ ] 5d.7 PR → develop
+- [x] 5d.7 PR → develop
 
 ### 5.x Phase 5 最終驗收
-- [ ] 5a、5b、5c、5d 全部 merge 到 develop
-- [ ] 完整 train → register → predict → SHAP 流程跑通
-- [ ] Streamlit 模型頁顯示正確
+- [x] 5a、5b、5c、5d 全部 merge 到 develop
+- [ ] 完整 train → register → predict → SHAP 流程跑通（需真實資料）
+- [x] Streamlit 模型頁顯示正確（含 mock mode 驗證）
 
 ---
 

@@ -2,6 +2,18 @@
 
 每次啟動請在此檔最上方新增一筆：
 
+## 2026-04-22 (Phase 5d)
+- 啟動時所在 branch：develop → feat/phase5d-shap
+- 完成的子任務：Phase 5d 全部（5d.1–5d.7）+ Phase 5.x 部分驗收
+  - requirements.txt：shap>=0.43.0
+  - src/signals/explainer_shap.py：compute_shap_summary（TreeExplainer + generic fallback）、write_shap_summary
+  - src/orchestration/run_daily.py：SHAP hook（champion + non-empty feature matrix 才觸發）+ pCloud upload
+  - src/ui/app.py：新增「🤖 模型」頁（champion metrics、per-user 訓練參數、候選列表、Promote 按鈕、SHAP bar chart）；補 import os
+  - tests/unit/test_explainer_shap.py：10 cases（mock shap module）
+  - 162 tests pass
+- 遇到的卡點：test fallback mock 鏈設置錯誤（`gen_exp_result(X).values` 未正確接線），修正 mock 結構解決
+- 下次繼續：完整 end-to-end 流程驗證（train → register → predict → SHAP），需真實資料
+
 ## 2026-04-22 (Phase 5c)
 - 啟動時所在 branch：develop → feat/phase5c-model-registry
 - 完成的子任務：Phase 5c 全部（5c.1–5c.5）

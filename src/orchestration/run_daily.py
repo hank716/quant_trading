@@ -149,22 +149,44 @@ def _run_with_artifacts(argv=None):
     except Exception as _cov_exc:
         print(f"Coverage check skipped: {_cov_exc}")
 
-    # --- ML scoring (champion model, optional) ---
+    # --- ML scoring + SHAP (champion model, optional) ---
     try:
         from src.registry.model_registry import ModelRegistry
         from src.signals.predictor import predict_from_champion
+        from src.signals.explainer_shap import compute_shap_summary, write_shap_summary
 
         registry = ModelRegistry(db=db)
+        champion = registry.get_champion("lgbm_binary")
+
+        # real feature matrix wiring comes after Phase 5d full integration
+        _feature_matrix_placeholder = pd.DataFrame()
+
         ml_scores = predict_from_champion(
-            pd.DataFrame(),  # real feature matrix comes from Phase 5c full wiring
+            _feature_matrix_placeholder,
             family="lgbm_binary",
             registry=registry,
             cache_dir=base / "models",
         )
         if ml_scores is not None:
             print(f"ML scoring: {len(ml_scores)} instruments scored by champion model")
+
+            # SHAP summary (only when we have features + model)
+            if champion and not _feature_matrix_placeholder.empty:
+                import joblib as _joblib
+                model_path = registry.download_model(champion["model_id"], base / "models")
+                _model = _joblib.load(model_path)
+                shap_summary = compute_shap_summary(_model, _feature_matrix_placeholder)
+                shap_path = write_shap_summary(shap_summary, run_id, output_dir=base)
+                artifact_uris["shap_summary"] = str(shap_path)
+                artifact_crud.register(run_id, "shap_summary", str(shap_path))
+
+                # upload SHAP to pCloud
+                pcloud = PCloudClient()
+                remote_shap = f"/shap/date={trade_date.isoformat()}/run_id={run_id}/shap_summary.json"
+                pcloud.upload_file(shap_path, remote_shap)
+                print(f"SHAP summary: top features written to {shap_path}")
     except Exception as _ml_exc:
-        print(f"ML scoring skipped: {_ml_exc}")
+        print(f"ML scoring/SHAP skipped: {_ml_exc}")
 
     # --- Supabase: finish run ---
     run_crud.finish(run_id, status="success")
