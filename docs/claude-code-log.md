@@ -2,6 +2,28 @@
 
 每次啟動請在此檔最上方新增一筆：
 
+## 2026-04-22 (Phase 6 — Qlib Foundation)
+- 啟動時所在 branch：feat/phase6-qlib-foundation（從 develop 開出）
+- 使用 agents：fin-pipeline-engineer（全部實作）
+- 完成的子任務：Phase 6 全部（6.1–6.10）
+  - requirements.txt：pyqlib>=0.9.5
+  - docker/qlib.Dockerfile：multi-stage build（gcc/g++/cython3 → slim runtime）
+  - qlib_ext/ 骨架 + app/ 骨架（orchestration/control/notify/llm/ui）
+  - qlib_ext/data_collector/twse_collector.py：TWSECollector（CSV staging → DumpDataAll）
+  - qlib_ext/data_collector/tpex_collector.py：TPExCollector（subclass）
+  - qlib_ext/data_collector/merge_universe.py：instruments/all.txt
+  - qlib_ext/data_collector/financial_collector.py：月營收 + 季財報 → daily ffill
+  - app/orchestration/sync_qlib_data.py：CLI（--lookback-days）
+  - compose/docker-compose.yml：新增 qlib-sync service（profiles: jobs）
+  - scripts/linux/run_qlib_sync.sh
+  - app/orchestration/backup_qlib_data.py：zip → pCloud
+  - tests/unit/test_twse_collector.py：7 cases（importorskip qlib）
+  - tests/integration/test_qlib_init.py
+  - docs/qlib-data-format.md + docs/qlib-setup.md
+  - 162 passed, 1 skipped
+- 遇到的卡點：pyqlib 未安裝時 unit test 用 importorskip 跳過
+- 下次繼續：Phase 7（feat/phase7-qlib-handlers，需先跑 sync_qlib_data 建立 bin）
+
 ## 2026-04-22 (Pre-Qlib 文件整理)
 - 啟動時所在 branch：develop（PR #10 docs/adr-001-qlib-migration 尚未合併）
 - 任務：在 Phase 6 開工前同步文件、整理目錄結構說明
