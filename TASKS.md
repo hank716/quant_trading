@@ -964,19 +964,20 @@ feat(phase0): add docker-compose skeleton with quant-ui service
 ### 5c — Model Registry
 **Sub-branch：** `feat/phase5c-model-registry`
 
-- [ ] 5c.1 建立 `src/registry/model_registry.py`：
+- [x] 5c.1 建立 `src/registry/model_registry.py`：
   - `register(model_path, model_id, family, metrics, feature_set_version) -> str`
   - `get_champion(family) -> Optional[dict]`
   - `list_candidates(family) -> list[dict]`
   - `promote(candidate_id, reason) -> bool`
   - `download_model(model_id, local_dir) -> Path`
-- [ ] 5c.2 建立 `src/signals/predictor.py`：
+- [x] 5c.2 建立 `src/signals/predictor.py`：
   - `predict(feature_matrix, model_id, registry) -> pd.DataFrame`
-- [ ] 5c.3 修改 `run_daily`：若有 champion，用 predictor；沒有則 fallback 到 rule-based
-- [ ] 5c.4 測試：
+  - `predict_from_champion(feature_matrix, family, registry) -> Optional[pd.DataFrame]`
+- [x] 5c.3 修改 `run_daily`：若有 champion，用 predictor；沒有則 fallback 到 rule-based
+- [x] 5c.4 測試：
   - `tests/unit/test_model_registry.py`（mock DB + mock pCloud）
   - `tests/unit/test_predictor.py`
-- [ ] 5c.5 PR → develop
+- [x] 5c.5 PR → develop
 
 ### 5d — SHAP Explainer
 **Sub-branch：** `feat/phase5d-shap`
