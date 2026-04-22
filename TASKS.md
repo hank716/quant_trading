@@ -126,15 +126,28 @@ feat(phase0): add docker-compose skeleton with quant-ui service
 
 ## 📋 Phase 列表（總覽）
 
-| Phase | 標題 | 需要 credentials | 子任務數 |
-|-------|------|-----------------|---------|
-| -1 | 環境設定與 Git Workflow | 無 | 6 |
-| 0 | Windows Docker 基礎盤 | 無（可 mock） | 12 |
-| 1 | 現有 CLI 工具容器化 | 無 | 10 |
-| 2 | Artifact-first 重構 | pCloud（選用） | 14 |
-| 3 | Supabase 控制面接入 | Supabase | 12 |
-| 4 | Coverage checker 與 retrain gate | 無 | 8 |
-| 5 | 模型平台化（LightGBM + SHAP） | 無 | 15 |
+| Phase | 標題 | 需要 credentials | 子任務數 | 狀態 |
+|-------|------|-----------------|---------|------|
+| -1 | 環境設定與 Git Workflow | 無 | 6 | ✅ Done |
+| 0 | Windows Docker 基礎盤 | 無（可 mock） | 12 | ✅ Done |
+| 1 | 現有 CLI 工具容器化 | 無 | 10 | ✅ Done |
+| 2 | Artifact-first 重構 | pCloud（選用） | 14 | ✅ Done |
+| 3 | Supabase 控制面接入 | Supabase | 12 | ✅ Done |
+| 4 | Coverage checker 與 retrain gate | 無 | 8 | ✅ Done |
+| 5 | 模型平台化（LightGBM + SHAP） | 無 | 15 | ✅ Done |
+| **6** | **Qlib 基礎 + TW 資料層** | 無 | **10** | 🚧 Planned |
+| 7 | TW 特徵 / 標籤 DataHandler | 無 | 8 | 🚧 Planned |
+| 8 | Qlib 訓練 + MLflow Registry | 無 | 8 | 🚧 Planned |
+| 9 | Backtest、Strategy、Analysis | 無 | 7 | 🚧 Planned |
+| 10 | Orchestration Cutover + UI / LLM / Discord 重接 | 無 | 10 | 🚧 Planned |
+| 11 | Legacy 清理 + 文件重寫 | 無 | 7 | 🚧 Planned |
+
+**遷移決策：** `docs/decisions/ADR-001-qlib-integration.md`（Option C — Full Migration，Strangler Fig）
+
+**里程碑 tag：**
+- `v0.5-legacy`：Phase 6 開工前，保留 rollback 點
+- `v1.0-qlib-cutover`：Phase 10 merge 後，prod 切換日
+- `v1.1-cleanup`：Phase 11 merge 後，legacy 刪完
 
 ---
 
@@ -1002,6 +1015,370 @@ feat(phase0): add docker-compose skeleton with quant-ui service
 - [x] 5a、5b、5c、5d 全部 merge 到 develop
 - [ ] 完整 train → register → predict → SHAP 流程跑通（需真實資料）
 - [x] Streamlit 模型頁顯示正確（含 mock mode 驗證）
+
+---
+
+## ⚠️ Phase 6–11：Full Qlib Migration（Strangler Fig）
+
+**決策文件：** `docs/decisions/ADR-001-qlib-integration.md`
+**策略：** Phase 6–9 新舊並行；Phase 10 cutover；Phase 11 刪 legacy。每個 Phase 都可獨立 merge 且不破壞 prod。
+**前置動作（在 Phase 6 開工前做）：**
+```bash
+git checkout develop && git pull
+git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0.5-legacy
+```
+
+---
+
+## Phase 6：Qlib 基礎 + TW 資料層
+
+**Branch：** `feat/phase6-qlib-foundation`
+**目標：** Qlib 能讀台股日頻資料；與 legacy 並行運作。
+**驗證：** `D.features(["2330.TW"], ["$close", "$volume"], start_time=...)` 回傳正確資料。
+
+### 6.1 依賴與 Dockerfile
+- [ ] `requirements.txt` 加入 `pyqlib>=0.9.5`
+- [ ] 建立 `docker/qlib.Dockerfile`：含 Cython + Qlib build
+- [ ] 決定 image 策略：`fin-qlib:latest`（與 `fin-app` 分離，因 Qlib 重）
+
+### 6.2 目錄骨架
+- [ ] 建立 `qlib_ext/__init__.py`
+- [ ] 建立 `qlib_ext/data_collector/__init__.py`
+- [ ] 建立 `qlib_ext/handlers/__init__.py`
+- [ ] 建立 `qlib_ext/strategies/__init__.py`
+- [ ] 建立 `qlib_ext/workflows/` 目錄（存放 YAML）
+
+### 6.3 TW 資料 Collector — OHLCV
+- [ ] 建立 `qlib_ext/data_collector/twse_collector.py`：
+  - 讀 `data/official_hybrid_client` 的 TWSE 價格資料
+  - 輸出 `calendars/day.txt`（台灣交易日清單）
+  - 輸出 `instruments/twse.txt`（`code<TAB>start<TAB>end`）
+  - 輸出 `features/{symbol}/{open,high,low,close,volume,factor}.day.bin`
+  - `factor = adjusted_close / original_close`（用現有還原價回推）
+  - 停牌日全欄 NaN
+- [ ] 建立 `qlib_ext/data_collector/tpex_collector.py`（TPEx 上櫃同邏輯）
+- [ ] 建立 `qlib_ext/data_collector/merge_universe.py`：合併兩者 → `instruments/all.txt`
+
+### 6.4 TW 資料 Collector — 基本面
+- [ ] 建立 `qlib_ext/data_collector/financial_collector.py`：
+  - 月營收 → `features/{symbol}/revenue.day.bin`（前向填補到日頻）
+  - 季財報 (ROE / gross margin) → `features/{symbol}/{roe,gm}.day.bin`
+  - 用 TWSE announcement date 為生效日（point-in-time 正確）
+
+### 6.5 Qlib 初始化 helper
+- [ ] 建立 `qlib_ext/__init__.py` 的 `init_tw_qlib(provider_uri)`:
+  - 呼叫 `qlib.init(provider_uri=..., region=REG_TW)`
+  - 預設 `provider_uri = workspace/qlib_data`
+
+### 6.6 Nightly data sync job
+- [ ] 建立 `app/orchestration/sync_qlib_data.py`：排程跑 collectors → 更新 bin
+- [ ] `compose/docker-compose.yml` 新增 `qlib-sync` service（profiles: jobs）
+- [ ] 建立 `scripts/linux/run_qlib_sync.sh`
+
+### 6.7 煙霧測試
+- [ ] 建立 `tests/unit/test_twse_collector.py`（mock price df → 驗證 bin 結構）
+- [ ] 建立 `tests/integration/test_qlib_init.py`（skip if no bin data）：
+  ```python
+  def test_features_read():
+      from qlib_ext import init_tw_qlib
+      import qlib.data as D
+      init_tw_qlib()
+      df = D.features(["2330.TW"], ["$close"], start_time="2024-01-01", end_time="2024-01-31")
+      assert not df.empty
+  ```
+
+### 6.8 pCloud 備份策略
+- [ ] 建立 `app/orchestration/backup_qlib_data.py`：每週上傳 bin snapshot 到 `/qlib_data/snapshot={date}/`
+
+### 6.9 文件
+- [ ] 建立 `docs/qlib-data-format.md`：說明 bin 結構、factor 規則、停牌處理
+- [ ] 建立 `docs/qlib-setup.md`：本機初始化流程
+
+### 6.10 Phase 6 驗收
+- [ ] collectors 跑完產出完整 TW bin（上市 + 上櫃 + 財務）
+- [ ] Qlib 能初始化並讀資料
+- [ ] `pytest -q -m "not integration"` 全過
+- [ ] PR → develop 自動 merge
+
+---
+
+## Phase 7：TW 特徵 / 標籤 DataHandler
+
+**Branch：** `feat/phase7-qlib-handlers`
+**目標：** 用 Qlib Expression Engine + DataHandlerLP 取代 `src/features/` 與 `src/signals/labeler.py`。
+**驗證：** 新 handler 輸出的 feature matrix 與 legacy `build_feature_matrix` 在相同日期/標的下數值一致（允許 1e-6 誤差）。
+
+### 7.1 TW Alpha Handler（技術面）
+- [ ] 建立 `qlib_ext/handlers/tw_alpha.py`：繼承 `DataHandlerLP`
+  - 用 Qlib Expression 重寫 `ma_return`：`Mean($close, N) / $close - 1`
+  - 重寫 `volume_features`：`$volume / Mean($volume, N)`
+  - 重寫 `institutional_flow_features`（需先在 Phase 6.4 把外資/投信買賣超 dump 進 bin）
+- [ ] 特徵命名統一用 `TECH_MA5_RET` / `TECH_VOL20_RATIO` 等，方便 MLflow tracking
+
+### 7.2 TW Fundamental Handler
+- [ ] 建立 `qlib_ext/handlers/tw_fundamental.py`：
+  - `fund_rev_yoy`、`fund_rev_mom`、`fund_rev_consec_pos`
+  - `fund_roe`、`fund_roe_yoy`、`fund_gm`、`fund_gm_yoy`
+
+### 7.3 Combined Handler
+- [ ] 建立 `qlib_ext/handlers/tw_combined.py`：繼承 `DataHandlerLP`，合併 alpha + fundamental + label
+
+### 7.4 Label 定義
+- [ ] 在 `tw_combined.py` 或 separate file 定義 label expression：
+  ```python
+  label = "Ref($close, -20) / $close - 1"  # 20-day forward return
+  label_binary = "Gt(Ref($close, -20) / $close, 1.0)"
+  ```
+
+### 7.5 Handler YAML config
+- [ ] 建立 `qlib_ext/workflows/handler_config.yaml`：可直接餵給 qrun 的 handler 片段
+
+### 7.6 等價性驗證測試
+- [ ] 建立 `tests/unit/test_handler_equivalence.py`：
+  - 用固定小型 bin
+  - 分別跑 legacy `build_feature_matrix` 與 new handler
+  - 比較同 `(date, instrument)` 上的數值差 < 1e-6
+
+### 7.7 SHAP 與 handler 相容
+- [ ] 調整 `src/signals/explainer_shap.py`：能接 Qlib handler 產的 feature 名稱
+
+### 7.8 Phase 7 驗收
+- [ ] Handler 可獨立初始化並 `fetch()` 出 DataFrame
+- [ ] 等價性測試通過
+- [ ] PR → develop 自動 merge
+
+---
+
+## Phase 8：Qlib 訓練 + MLflow Registry
+
+**Branch：** `feat/phase8-qlib-training`
+**目標：** 用 qrun workflow 訓練；MLflow 取代 `src/registry/model_registry.py` 成為 model registry。
+**驗證：** 一次 qrun 執行後，`mlflow ui` 可看到 experiment / run / metrics / 模型 artifact；Supabase 有對應的 index row。
+
+### 8.1 qrun YAML workflow
+- [ ] 建立 `qlib_ext/workflows/daily_lgbm.yaml`：
+  ```yaml
+  qlib_init:
+      provider_uri: "workspace/qlib_data"
+      region: tw
+  market: &market all
+  benchmark: &benchmark TAIEX
+  task:
+      model: {class: LGBModel, module_path: qlib.contrib.model.gbdt, kwargs: {...}}
+      dataset: {class: DatasetH, module_path: qlib.data.dataset, kwargs: {handler: <TW_Combined>, segments: {train, valid, test}}}
+      record:
+          - SignalRecord
+          - SigAnaRecord
+          - PortAnaRecord
+  ```
+- [ ] 建立 `qlib_ext/workflows/retrain.yaml`（差異：全量資料 retrain）
+- [ ] 建立 `qlib_ext/workflows/quick_debug.yaml`（小 universe，便於開發）
+
+### 8.2 MLflow 設定
+- [ ] `.env.example` 加入 `MLFLOW_TRACKING_URI=file:workspace/mlruns`
+- [ ] `qlib_ext/__init__.py` 在 init 時設定 MLflow tracking URI
+- [ ] 寫 helper `app/control/mlflow_helper.py`：`list_experiments()`、`get_recorder(run_id)`、`get_metrics(run_id)`
+
+### 8.3 訓練 orchestration
+- [ ] 建立 `app/orchestration/run_training.py`：
+  - 接受 `--workflow` 參數 (預設 `daily_lgbm.yaml`)
+  - 呼叫 `qrun workflow.yaml`
+  - 抓 MLflow run_id，寫 Supabase `qlib_runs` 表
+
+### 8.4 Supabase schema 簡化
+- [ ] 在 `src/database/schema.sql` 加 `qlib_runs` 表：
+  ```sql
+  CREATE TABLE qlib_runs (
+      id BIGSERIAL PRIMARY KEY,
+      mlflow_run_id TEXT UNIQUE NOT NULL,
+      experiment_name TEXT,
+      family TEXT,              -- e.g. 'lgbm_binary_tw'
+      workflow_config TEXT,     -- YAML path
+      status TEXT,              -- 'success' / 'failed' / 'running'
+      metrics JSONB,
+      created_at TIMESTAMPTZ DEFAULT now()
+  );
+  ```
+- [ ] 建立 `src/database/qlib_crud.py`：`QlibRunCRUD.register(mlflow_run_id, ...)`
+- [ ] 註記：Phase 11 會把舊的 `model_versions` / `model_promotions` / `pipeline_runs` / `run_steps` 表 drop
+
+### 8.5 Champion 機制（MLflow tag）
+- [ ] 用 MLflow tag 標示 champion（`model.stage = 'Production'`）
+- [ ] 實作 `app/control/champion.py`：`get_champion(family)`、`promote(run_id, reason)`、`list_candidates(family)`
+- [ ] 取代 `src/registry/model_registry.py`
+
+### 8.6 Quant-trainer service 更新
+- [ ] `compose/docker-compose.yml` 的 `quant-trainer.command` 改為 `python -m app.orchestration.run_training --workflow qlib_ext/workflows/daily_lgbm.yaml`
+
+### 8.7 測試
+- [ ] 建立 `tests/unit/test_mlflow_helper.py`（mock mlflow）
+- [ ] 建立 `tests/unit/test_qlib_crud.py`
+- [ ] 建立 `tests/integration/test_qrun_smoke.py`（跑最小 qrun，skip if no data）
+
+### 8.8 Phase 8 驗收
+- [ ] qrun 可跑完一次完整 training
+- [ ] MLflow UI (`mlflow ui --backend-store-uri file:workspace/mlruns`) 可看到結果
+- [ ] Supabase `qlib_runs` 表有對應 row
+- [ ] PR → develop 自動 merge
+
+---
+
+## Phase 9：Backtest、Strategy、Analysis
+
+**Branch：** `feat/phase9-qlib-backtest`
+**目標：** 用 Qlib 原生 backtest；把 legacy `core/filter_engine.py` 的 hard rules 寫成 Qlib Strategy 的 filter。
+**驗證：** 任一 qlib_run 產出完整回測報告（IC、Rank IC、Sharpe、MDD、Turnover、分位數累積收益圖）。
+
+### 9.1 TW TopkDropout Strategy（帶 hard rules）
+- [ ] 建立 `qlib_ext/strategies/tw_topk_filtered.py`：繼承 `TopkDropoutStrategy`
+  - `filter_universe(pred_score, trade_date)`：
+    - 排除關鍵字（ETF / 權證 / 變更交易）
+    - 價格底線（`$close >= min_price`）
+    - 上市滿 N 日
+    - 合併 user portfolio（既有持股優先保留）
+
+### 9.2 Benchmark 設定
+- [ ] 建立 `qlib_ext/data_collector/benchmark_collector.py`：TAIEX / OTC 指數 → bin
+- [ ] `daily_lgbm.yaml` 的 `benchmark:` 指向 TAIEX
+
+### 9.3 PortAnaRecord + SigAnaRecord
+- [ ] 在 workflow YAML 的 `record:` 區塊加入 `SigAnaRecord`（IC / Rank IC）與 `PortAnaRecord`（策略指標）
+
+### 9.4 Report rendering
+- [ ] 建立 `app/orchestration/render_backtest_report.py`：
+  - 從 MLflow run_id 讀 record 產出的 pickle
+  - 用 `qlib.contrib.report.analysis_position.report_graph` 產 PNG
+  - 輸出到 `workspace/runs/{run_id}/backtest/`
+
+### 9.5 Run backtest CLI
+- [ ] 建立 `app/orchestration/run_backtest.py`：
+  - 參數：`--mlflow-run-id X`（既有 qrun）或 `--score-csv Y`（臨時 score）
+  - 只跑 backtest（跳過 training）
+  - 可比對多個 run_id
+
+### 9.6 pCloud 上傳
+- [ ] 上傳 report/positions/trades 到 `/backtest/date={date}/mlflow_run_id={id}/`
+
+### 9.7 Phase 9 驗收
+- [ ] 一次 qrun 後可自動產出 IC / Rank IC / Sharpe / MDD / Turnover + PNG
+- [ ] 結果可在 MLflow UI 查看
+- [ ] PR → develop 自動 merge
+
+---
+
+## Phase 10：Orchestration Cutover + UI / LLM / Discord 重接（★Cutover Day）
+
+**Branch：** `feat/phase10-cutover`
+**目標：** 新 `app.orchestration.run_daily` 成為 prod 路徑；UI / LLM / Discord 全部改讀 Qlib recorders；legacy 仍在但 compose 不再呼叫。
+**風險：** 最高。要先在 staging 跑 3 天再 merge。
+**Rollback：** `git revert` + redeploy，`v0.5-legacy` tag 確保可 checkout 舊版。
+
+### 10.1 新 orchestration
+- [ ] 建立 `app/orchestration/run_daily.py`：
+  1. Sync Qlib data（call Phase 6 collectors）
+  2. 執行 qrun (`daily_lgbm.yaml`)
+  3. 從 MLflow recorder 拿 signal + backtest 結果
+  4. 交給 LLM selector（若 profile 設定）
+  5. Render Chinese thesis（LLM explainer）
+  6. Discord push
+  7. Supabase `qlib_runs` / Discord 狀態
+
+### 10.2 Compose 改動
+- [ ] `quant-daily.command` 改為 `python -m app.orchestration.run_daily --profile user_a`
+- [ ] 刪除（或保留注解）`python -m src.orchestration.run_daily`
+
+### 10.3 LLM Selector 改介面
+- [ ] `llm/selector.py`：參數從 `DailyResult` 改成 `pd.DataFrame`（Qlib SignalRecord 格式）+ universe metadata
+- [ ] 保留 rule-based selector（改為讀 Qlib score DataFrame）
+
+### 10.4 LLM Explainer 改介面
+- [ ] `llm/explainer.py`：接 signal row + 基本面 context，產中文論述
+- [ ] Cache 格式不變（SHA256-by-request）
+
+### 10.5 Discord 通知
+- [ ] `app/notify/discord_notifier.py`：從 Qlib PortAnaRecord 讀 Sharpe / Turnover 放進推送訊息
+- [ ] `notifications/discord_notifier.py` → 搬遷到 `app/notify/`（保留 re-export 一個 sprint 供 rollback）
+
+### 10.6 Streamlit UI 大改
+- [ ] `app/ui/app.py`（從 `src/ui/app.py` 搬，大幅改寫）：
+  - Home：`mlflow.search_runs()` + Supabase `qlib_runs`
+  - Runs：改讀 MLflow experiment
+  - Coverage：保留（讀 Supabase `coverage_snapshots`）
+  - 模型：改成 MLflow champion + candidates，promote 寫 MLflow tag
+  - 回測：直接顯示 MLflow 的 PortAnaRecord 結果
+  - 報告：讀 pCloud backtest PNG
+  - 庫存股：不變
+
+### 10.7 Portfolio YAML 讀取層
+- [ ] 新 strategy filter 需要讀 `config/portfolio_{profile}.yaml`；接上去
+
+### 10.8 3 天 shadow run 驗證
+- [ ] 每日同時跑 legacy 與 new pipeline，比對：
+  - Top 20 候選標的重疊率 >= 70%
+  - 個別分數 correlation >= 0.6
+- [ ] 驗證過程寫入 `docs/phase10-shadow-report.md`
+
+### 10.9 Cutover
+- [ ] Shadow run 通過後，`v1.0-qlib-cutover` tag
+- [ ] compose 切到新路徑
+- [ ] 實跑 1 週無重大問題
+
+### 10.10 Phase 10 驗收
+- [ ] 新 pipeline daily 跑通
+- [ ] Discord 能收到通知（含 Sharpe / IC）
+- [ ] Streamlit UI 所有頁讀 MLflow
+- [ ] PR → develop 自動 merge，tag `v1.0-qlib-cutover`
+
+---
+
+## Phase 11：Legacy 清理 + 文件重寫
+
+**Branch：** `feat/phase11-cleanup`
+**目標：** 刪除 legacy 模組，更新所有文件到新架構。僅在 Phase 10 穩定運行 >= 2 週後執行。
+
+### 11.1 刪除 legacy 程式
+- [ ] 刪除 `core/`（decision_engine, filter_engine, signal_engine, universe, models, strategy_loader, report_renderer）
+- [ ] 刪除 `src/features/`
+- [ ] 刪除 `src/signals/labeler.py`、`trainer.py`、`predictor.py`
+- [ ] 刪除 `src/registry/model_registry.py`（保留 `retrain_gate.py`）
+- [ ] 刪除 `src/reporting/`、`src/storage/artifact_writer.py`
+- [ ] 刪除 `src/orchestration/run_daily.py`、`run_signal.py`、`run_report.py`
+- [ ] 刪除 `main.py`、`sync_data.py`、`sync_financials_slow.py`
+- [ ] 刪除 `test/test_decision_system.py`
+- [ ] 移除 `docker/app.Dockerfile`（由 `docker/qlib.Dockerfile` 取代）
+
+### 11.2 Supabase schema 縮表
+- [ ] drop 表：`pipeline_runs`、`run_steps`、`run_artifacts`、`model_versions`、`model_promotions`、`daily_candidates`、`daily_positions`、`daily_trades`、`daily_reports_index`
+- [ ] 保留：`qlib_runs`、`backtest_runs`、`coverage_snapshots`、`system_alerts`
+- [ ] 建立 `scripts/sql/001_drop_legacy.sql`
+- [ ] 更新 `src/database/schema.sql`
+
+### 11.3 Requirements 清理
+- [ ] 刪 `requirements.txt` 重複或無用套件（重新審核每一行）
+
+### 11.4 文件大改
+- [ ] 重寫 `CLAUDE.md`（Project Overview、Module Map、Directory Structure 全部換）
+- [ ] 重寫 `README.md`
+- [ ] 新增 `docs/architecture.md`（新架構 diagram + data flow）
+- [ ] 更新 `docs/quickstart.md`、`docs/env-variables.md`
+- [ ] Archive 舊文件到 `docs/archive/legacy/`
+
+### 11.5 ADR 補記
+- [ ] 新增 `docs/decisions/ADR-002-supabase-as-index-only.md`
+- [ ] 新增 `docs/decisions/ADR-003-mlflow-filestore-choice.md`
+- [ ] 標記 `docs/decisions/ADR-001` 的 Status: Implemented
+
+### 11.6 Tag & release note
+- [ ] `v1.1-cleanup` tag
+- [ ] 寫 `docs/migration-retrospective.md`（回顧哪些順利、哪些卡）
+
+### 11.7 Phase 11 驗收
+- [ ] `pytest -q` 全過（legacy 測試已隨 code 刪除）
+- [ ] Docker image < 1.5 GB
+- [ ] `grep -rn "from core\." src/ app/ qlib_ext/` 回 0 行
+- [ ] `grep -rn "from src.signals.trainer\|from src.signals.predictor\|from src.registry.model_registry"` 回 0 行
+- [ ] PR → develop merge 後，`v1.1-cleanup` tag 推到 origin
+- [ ] 直接 merge develop → main（人工 review）
 
 ---
 

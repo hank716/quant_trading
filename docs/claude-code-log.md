@@ -2,6 +2,34 @@
 
 每次啟動請在此檔最上方新增一筆：
 
+## 2026-04-22 (Qlib 全面遷移 — Option C 改版)
+- 啟動時所在 branch：develop（Phase 5d merge 後）
+- 使用者決策：推翻 Option A（backtest-only），改採 **Option C 全面遷移到 Qlib**，理由「最合適、最沒技術債」
+- 產出：
+  - `docs/decisions/ADR-001-qlib-integration.md`：重寫為 Option C（Greenfield），含目標架構（`qlib_ext/` + `app/`）、Strangler Fig 時程、刪除/保留模組清單、git tags（`v0.5-legacy` / `v1.0-qlib-cutover` / `v1.1-cleanup`）
+  - `TASKS.md` 重整 Phase 6–11：
+    - Phase 6 Qlib 基礎建設 + TW 資料層（10 tasks）
+    - Phase 7 TW Features/Labels DataHandler（8 tasks）
+    - Phase 8 Qlib Training + MLflow Registry（8 tasks）
+    - Phase 9 Backtest + Strategy + Analysis（7 tasks）
+    - Phase 10 Orchestration Cutover（10 tasks，★ cutover day）
+    - Phase 11 Legacy 清理 + 文件重寫（7 tasks）
+- 關鍵決策：
+  - MLflow 取代 `src/registry/model_registry.py`（Qlib 原生），local file store + pCloud nightly sync，不架 MLflow server
+  - Supabase 降格為 control plane index（只存 `mlflow_run_id` → profile/排程狀態）
+  - TW hard rules（keyword exclusion / listing age / price floor）改寫到 `qlib_ext/strategies/tw_topk_dropout.py`
+  - Phase 10 shadow run 3 天再切換，`v0.5-legacy` tag 保留 rollback 能力
+- 下次繼續：Phase 6.1（requirements.txt 加 pyqlib>=0.9.6 + qlib_ext/ 骨架，feat/phase6-qlib-foundation）
+
+## 2026-04-22 (Qlib 初評 — Option A，已推翻)
+- 產出：ADR-001 v1（Option A backtest-only，3–5 人日），TASKS.md 新增 Phase 6/7/8（backtest adapter / Alpha158 horse-race / 技術債）
+- 推翻原因：使用者要求「最合適、最沒技術債」，Option A 保留舊架構 → 改走 Option C
+- 技術債盤點（已併入 Phase 10/11）：
+  - `run_daily.py:162` ML scoring 傳空 DataFrame → SHAP 與 predict 永遠跑不到（★優先）
+  - `run_daily.py:87` coverage 用 regex 解析 notes，脆弱
+  - `quant-trainer` service 沒有 orchestration，`python -m src.signals.trainer` 缺 `__main__`
+  - Docker image 超過 1.5 GB，shap + lightgbm 該拆 multi-stage
+
 ## 2026-04-22 (Phase 5d)
 - 啟動時所在 branch：develop → feat/phase5d-shap
 - 完成的子任務：Phase 5d 全部（5d.1–5d.7）+ Phase 5.x 部分驗收
