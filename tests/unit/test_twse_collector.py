@@ -114,8 +114,6 @@ def test_collect_empty_dataframe_returns_no_files(tmp_path):
 # ---------------------------------------------------------------------------
 
 def test_dump_to_bin_creates_bin_files(tmp_path):
-    from qlib.data.dump_bin import DumpDataAll  # skip if qlib not installed
-
     collector, _ = _make_collector(tmp_path)
     collector.collect(date(2024, 1, 2), date(2024, 1, 8))
     collector.dump_to_bin()
@@ -123,6 +121,32 @@ def test_dump_to_bin_creates_bin_files(tmp_path):
     features_dir = tmp_path / "qlib_data" / "features"
     bin_files = list(features_dir.rglob("*.bin"))
     assert len(bin_files) > 0, "dump_to_bin produced no .bin files"
+
+
+def test_dump_to_bin_creates_calendar(tmp_path):
+    collector, _ = _make_collector(tmp_path)
+    collector.collect(date(2024, 1, 2), date(2024, 1, 8))
+    collector.dump_to_bin()
+
+    cal_path = tmp_path / "qlib_data" / "calendars" / "day.txt"
+    assert cal_path.exists()
+    lines = [l for l in cal_path.read_text().splitlines() if l]
+    assert len(lines) >= 5
+
+
+def test_dump_to_bin_bin_file_format(tmp_path):
+    import numpy as np
+
+    collector, _ = _make_collector(tmp_path)
+    collector.collect(date(2024, 1, 2), date(2024, 1, 8))
+    collector.dump_to_bin()
+
+    bin_path = tmp_path / "qlib_data" / "features" / "2330.tw" / "close.day.bin"
+    assert bin_path.exists()
+    data = np.fromfile(bin_path, dtype="<f4")
+    # first element is calendar start index (non-negative), rest are price values
+    assert data[0] >= 0
+    assert len(data) > 1
 
 
 # ---------------------------------------------------------------------------
