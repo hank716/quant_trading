@@ -1,0 +1,16 @@
+# Copy to config/auth_users.yaml and fill in bcrypt hashes
+# Generate hash: python -c "import bcrypt; print(bcrypt.hashpw(b'yourpassword', bcrypt.gensalt()).decode())"
+credentials:
+  usernames:
+    hank:
+      name: Hank
+      password: "$2b$12$REPLACE_WITH_BCRYPT_HASH"
+      profile: user_a
+    friend1:
+      name: Friend
+      password: "$2b$12$REPLACE_WITH_BCRYPT_HASH"
+      profile: user_b
+cookie:
+  name: fin_auth
+  key: "REPLACE_WITH_32CHAR_RANDOM_SECRET"
+  expiry_days: 7

@@ -53,7 +53,7 @@ services:
     env_file:
       - path: ../.env.local
         required: false
-    command: ["python", "-m", "src.orchestration.run_daily", "--use-mock-data", "--skip-discord"]
+    command: ["python", "-m", "app.orchestration.run_daily", "--profile", "user_a"]
 
   quant-trainer:
     build:

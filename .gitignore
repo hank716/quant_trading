@@ -47,3 +47,6 @@ workspace/mlruns/
 !.claude/agents/
 !.claude/agents/*.md
 BLOCKED.md
+
+# --- 用戶認證（機密，不進 git）---
+config/auth_users.yaml
