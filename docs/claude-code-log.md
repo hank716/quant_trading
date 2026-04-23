@@ -2,6 +2,35 @@
 
 每次啟動請在此檔最上方新增一筆：
 
+## 2026-04-23 (Phase 10 — Orchestration Cutover + UI / LLM / Discord)
+
+- 啟動時所在 branch：`feat/phase10-cutover`（已從 develop 分出）
+- 確認：211 unit tests pass，無 BLOCKED.md
+- 完成的子任務：
+  - **10.1** `app/orchestration/run_daily.py`：sync → qrun → LLM selector → explainer → Discord → Supabase 完整 daily pipeline
+  - **10.2** `compose/docker-compose.yml`：`quant-daily` 指令改為 `app.orchestration.run_daily`
+  - **10.3/10.4** `app/llm/adapters.py`：`select_from_signal()` + `explain_candidates()` — 將 legacy llm/ 包裝成接受 Qlib signal DataFrame 的介面
+  - **10.5** `app/notify/discord_notifier.py`：`QlibDiscordNotifier` + `build_message()`，推播含 IC/Rank IC/Sharpe/MDD 指標
+  - **10.6** auth 設定：`config/auth_users.yaml.example`、`requirements.txt` 加 `streamlit-authenticator>=0.3.0` + `bcrypt>=4.0.0`、`.gitignore` 加 `config/auth_users.yaml`
+  - **10.7** `app/ui/app.py`（602 行）：6 頁 Streamlit UI + bcrypt auth guard（dev fallback）
+    - 今日報告（MLflow signal + 候選清單 + 加入持股）
+    - 我的持股（data_editor + atomic save）
+    - 策略設定（strategy_1m.yaml + profile YAML 表單）
+    - 模型狀態（champion 指標、SHAP bar chart、promote/retrain 按鈕）
+    - 回測分析（date filter、指標表、PNG artifact、multi-run 比較）
+    - 監控 & 告警（coverage checker、Supabase run history、Discord health）
+    - Sidebar System（手動 sync/run、服務健康燈號）
+  - **10.8** `app/control/portfolio_editor.py`：atomic load/save/add/remove，`tests/unit/test_portfolio_editor.py`（6 tests）
+- 遇到的卡點：
+  - `docs/supabase-setup.md` 含真實 API key（cred 暴露）→ 立即 `git checkout -- docs/supabase-setup.md` 還原，未 commit
+- 未完成（需人工）：
+  - **10.9** 3 天 shadow run 驗證（需真實 daily run）
+  - **10.10** cutover tag `v1.0-qlib-cutover`（shadow run 通過後）
+  - **10.11** 最終驗收（UI 登入測試、Discord 推播）
+  - `config/auth_users.yaml` 需人工建立（複製 `.example`，填入 bcrypt hash）
+- 測試結果：211 passed
+- PR #16 → develop，已 squash merge
+
 ## 2026-04-22 (Phase 9 — Backtest, Strategy & Analysis)
 - 啟動時所在 branch：develop（Phase 8 已 merge）
 - 使用 agents：fin-pipeline-engineer（Phase 9 全部實作）
