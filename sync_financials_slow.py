@@ -52,7 +52,8 @@ def save_cursor(path: Path, payload: dict[str, object]) -> None:
 def main() -> None:
     args = parse_args()
     base_dir = Path(__file__).resolve().parent
-    load_dotenv(base_dir / ".env")
+    load_dotenv(base_dir / ".env.local", override=False)
+    load_dotenv(base_dir / ".env", override=False)  # backward-compat fallback
 
     as_of_date = date.fromisoformat(args.as_of_date)
     start_date = date.fromisoformat(args.start_date) if args.start_date else as_of_date - timedelta(days=900)
