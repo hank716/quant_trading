@@ -28,7 +28,8 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     base_dir = Path(__file__).resolve().parent
-    load_dotenv(base_dir / ".env")
+    load_dotenv(base_dir / ".env.local", override=False)
+    load_dotenv(base_dir / ".env", override=False)  # backward-compat fallback
     as_of_date = date.fromisoformat(args.as_of_date)
 
     client = build_data_client(base_dir, args)
