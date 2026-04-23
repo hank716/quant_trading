@@ -28,5 +28,5 @@ def get_run_metrics(run_id: str) -> dict[str, float]:
 def get_recorder(run_id: str) -> Any:
     """Return a loaded Qlib recorder for the given MLflow run_id."""
     from qlib.workflow import R
-    recorder = R.get_recorder(run_id=run_id, recorder_name=None)
+    recorder = R.get_recorder(recorder_id=run_id, experiment_name="workflow")
     return recorder

@@ -13,7 +13,15 @@ def init_tw_qlib(provider_uri: str | Path | None = None) -> None:
     import qlib
     from qlib.constant import REG_TW
 
-    os.environ.setdefault("MLFLOW_TRACKING_URI", "file:workspace/mlruns")
+    mlflow_uri = os.environ.setdefault("MLFLOW_TRACKING_URI", "file:workspace/mlruns")
     uri = str(provider_uri or DEFAULT_PROVIDER_URI)
-    qlib.init(provider_uri=uri, region=REG_TW)
+    qlib.init(
+        provider_uri=uri,
+        region=REG_TW,
+        exp_manager={
+            "class": "MLflowExpManager",
+            "module_path": "qlib.workflow.expm",
+            "kwargs": {"uri": mlflow_uri, "default_exp_name": "workflow"},
+        },
+    )
     logger.info("Qlib initialized with provider_uri=%s region=REG_TW", uri)

@@ -69,7 +69,7 @@ def run(workflow: str) -> int:
 
     logger.info("Starting qrun workflow: %s", workflow)
     result = subprocess.run(
-        [sys.executable, "-m", "qlib.workflow.cli", workflow],
+        [sys.executable, "-m", "qlib.cli.run", workflow],
         capture_output=False,
     )
 

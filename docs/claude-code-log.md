@@ -2,6 +2,23 @@
 
 每次啟動請在此檔最上方新增一筆：
 
+## 2026-04-23 第三場（Phase 10 Qlib API bug fixes — pipeline 全通）
+
+- 啟動時所在 branch：`develop`（Phase 10 fix PR #17 已 merge）
+- 使用者報告：`streamlit: command not found` + `run_daily` 跑很久 + training 失敗
+- 修復的 bug（共 6 個 Qlib API 相容性問題）：
+  1. `qlib.workflow.cli` → `qlib.cli.run`（`run_training.py:72`）
+  2. `RobustZScoreNorm.__init__` 需要 `fit_start_time`/`fit_end_time` → `TWCombinedHandler` 動態建 infer_processors
+  3. YAML 訓練日期（2020–2024）超出資料範圍 → 更新為 2025-04-22～2026-04-22，移除需要 ^TWII 的 `PortAnaRecord`
+  4. Qlib 寫 `mlruns/`（root）但 code 讀 `workspace/mlruns/` → YAML + `init_tw_qlib()` 加入 `exp_manager` 指向 `workspace/mlruns`
+  5. `mlflow.search_runs()` 未指定 experiment → 加入 `experiment_names=["workflow"]`
+  6. `R.get_recorder(run_id=...)` → `R.get_recorder(recorder_id=...)`（API 重命名）
+- 順帶修：`docker/ui.Dockerfile` CMD 從 `src/ui/app.py` → `app/ui/app.py`；`mlflow_helper.get_recorder()` 同步修正
+- 最終驗證：`run_daily complete: candidates=12, thesis_chars=1938`（Groq LLM 打到、Discord 送出、Supabase 更新）
+- `pip install -r requirements.txt` 安裝 streamlit + streamlit-authenticator + shap
+- TASKS.md 更新：10.5/10.6/10.7/10.8/10.10 compose 部分標為 [x]
+- 下次繼續：累積 3 天 shadow run（10.9），之後 tag v1.0-qlib-cutover，再做 Phase 11
+
 ## 2026-04-23 下半場（Phase 10 修正 — LLM assist bug + README/env docs cleanup）
 
 - 啟動時所在 branch：`develop`（剛完成 Phase 10 cutover PR #16）

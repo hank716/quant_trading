@@ -1322,12 +1322,12 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
 - [ ] Cache 格式不變（SHA256-by-request）
 
 ### 10.5 Discord 通知
-- [ ] `app/notify/discord_notifier.py`：從 Qlib PortAnaRecord 讀 Sharpe / Turnover 放進推送訊息
-- [ ] `notifications/discord_notifier.py` → 搬遷到 `app/notify/`（保留 re-export 一個 sprint 供 rollback）
+- [x] `app/notify/discord_notifier.py`：從 SigAnaRecord 讀 IC / Rank IC / ICIR 放進推送訊息（PortAnaRecord 因無 ^TWII 基準資料已移除；Sharpe/Turnover 留待 Phase 11+ 回填）
+- [x] `notifications/discord_notifier.py` → 搬遷到 `app/notify/`（舊路徑保留至 Phase 11 刪除）
 
 ### 10.6 用戶認證
-- [ ] `requirements.txt` 加入 `streamlit-authenticator>=0.3.0`
-- [ ] 建立 `config/auth_users.yaml`（**加入 .gitignore**）：
+- [x] `requirements.txt` 加入 `streamlit-authenticator>=0.3.0`（已安裝）
+- [x] 建立 `config/auth_users.yaml.example`（實際檔案用戶自行複製填寫，已加入 .gitignore）：
   ```yaml
   credentials:
     usernames:
@@ -1344,74 +1344,24 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
     key: <random_32char_secret>   # 加到 .env.local，不進 git
     expiry_days: 7
   ```
-- [ ] `app/ui/app.py` 頂層加認證 guard：
-  ```python
-  import streamlit_authenticator as stauth
-  auth = stauth.Authenticate("config/auth_users.yaml", ...)
-  name, auth_status, username = auth.login("登入 fin", "main")
-  if not auth_status:
-      st.stop()
-  profile = get_profile_for_user(username)   # → "user_a" / "user_b"
-  ```
-- [ ] 登入後 sidebar 右上角顯示用戶名 + 登出按鈕
+- [x] `app/ui/app.py` 頂層加認證 guard（streamlit-authenticator，dev fallback 當 config/auth_users.yaml 不存在）
+- [x] 登入後 sidebar 右上角顯示用戶名 + 登出按鈕
 
 ### 10.7 Streamlit UI 大改（用戶導向單一介面）
 
 > **設計原則：** 用戶登入後只看這一個頁面，不需碰任何程式碼、YAML、MLflow UI、Grafana。
 > 以下所有操作都在 `app/ui/app.py` sidebar 頁面切換完成。
 
-- [ ] **頁面 1 — 今日報告**（預設首頁）
-  - 當日 Top-K 候選清單（rank、ticker、中文名、ML score、SHAP top-3 feature）
-  - 每檔展開可看 LLM 中文選股論述
-  - 一鍵「加入持股」按鈕 → 寫入 `config/portfolio_{profile}.yaml`
-  - 最新一次 run 的摘要統計（universe 大小、通過 filter 數、IC、執行時間）
-  - 若 pipeline 尚未跑當日，顯示「手動觸發」按鈕
-
-- [ ] **頁面 2 — 我的持股**
-  - 表格顯示目前 `config/portfolio_{profile}.yaml` 所有持股
-  - 欄位：ticker、中文名、買入日期、備注
-  - 行內編輯：新增 / 刪除 / 修改備注，存檔即更新 YAML（不需碰檔案）
-  - 持股清單自動饋入 Phase 9 Strategy 的 hard-keep filter
-
-- [ ] **頁面 3 — 策略設定**
-  - 讀 `config/strategy_1m.yaml` + `config/profiles/{profile}.yaml` 渲染成表單
-  - 可調項目（不需寫 code）：
-    - 過濾規則：最低股價、最少上市天數、關鍵字排除清單
-    - 訊號閾值：MA 期數、volume ratio 參數、revenue YoY 閾值
-    - 選股數量：Top-K candidates
-    - LLM 設定：selector provider、explainer provider 切換（rule_based / groq）
-  - 「儲存設定」按鈕 → 寫回 YAML，下次 pipeline run 生效
-  - 「還原預設」按鈕
-
-- [ ] **頁面 4 — 模型狀態**
-  - Champion model：IC、Rank IC、Sharpe、MDD、訓練日期、feature count
-  - SHAP top-10 feature importance bar chart
-  - 候選模型列表（mlflow runs），可 promote 成 champion
-  - 「觸發 Retrain」按鈕 → 呼叫 `run_training.py`，顯示 log stream
-
-- [ ] **頁面 5 — 回測分析**
-  - 選 MLflow run 或日期範圍
-  - 顯示：IC / Rank IC / ICIR / Sharpe / MDD / Turnover 數值
-  - 分位數累積收益圖（從 MLflow artifact 讀 PNG）
-  - 多 run 對比模式
-
-- [ ] **頁面 6 — 監控 & 告警**
-  - 資料健康度：每個欄位（price / revenue / ROE / GM）最後更新時間、覆蓋率 %
-  - Pipeline 狀態：最近 10 次 run 的狀態（success / failed）+ 耗時
-  - Discord 推播紀錄：最近推播時間、內容摘要
-  - 告警設定：覆蓋率告警閾值、retrain trigger 條件（可 UI 調整）
-  - 「測試 Discord 推播」按鈕
-
-- [ ] **系統（sidebar 底部小區塊，不佔主頁）**
-  - 手動觸發 sync / daily run（帶 log stream 顯示）
-  - 服務健康燈號（pipeline container / DB / pCloud 連線狀態）
+- [x] **頁面 1 — 今日報告**（預設首頁）
+- [x] **頁面 2 — 我的持股**
+- [x] **頁面 3 — 策略設定**
+- [x] **頁面 4 — 模型狀態**
+- [x] **頁面 5 — 回測分析**
+- [x] **頁面 6 — 監控 & 告警**
+- [x] **系統（sidebar 底部小區塊，不佔主頁）**
 
 ### 10.8 Portfolio YAML 讀寫層
-- [ ] 建立 `app/control/portfolio_editor.py`：
-  - `load_portfolio(profile) -> list[dict]`
-  - `save_portfolio(profile, holdings: list[dict])` — atomic write（寫暫存 → rename）
-  - `add_holding(profile, ticker, date, note)`
-  - `remove_holding(profile, ticker)`
+- [x] 建立 `app/control/portfolio_editor.py`：`load_portfolio` / `save_portfolio` / `add_holding` / `remove_holding`（含 atomic write）
 
 ### 10.9 3 天 shadow run 驗證
 - [ ] 每日同時跑 legacy 與 new pipeline，比對：
@@ -1421,7 +1371,7 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
 
 ### 10.10 Cutover
 - [ ] Shadow run 通過後，`v1.0-qlib-cutover` tag
-- [ ] compose 切到新路徑（`quant-daily` → `app.orchestration.run_daily`，`fin-ui` → `app.ui.app`）
+- [x] compose 切到新路徑（`quant-daily` → `app.orchestration.run_daily` ✅；`fin-ui` → `docker/ui.Dockerfile` 已改指向 `app/ui/app.py` ✅）
 - [ ] 實跑 1 週無重大問題
 
 ### 10.11 Phase 10 驗收

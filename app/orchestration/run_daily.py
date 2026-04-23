@@ -61,7 +61,11 @@ def _run_training(workflow: str) -> str | None:
     try:
         import mlflow
         mlflow.set_tracking_uri(os.environ.get("MLFLOW_TRACKING_URI", "file:workspace/mlruns"))
-        runs = mlflow.search_runs(order_by=["start_time DESC"], max_results=1)
+        runs = mlflow.search_runs(
+            experiment_names=["workflow"],
+            order_by=["start_time DESC"],
+            max_results=1,
+        )
         if not runs.empty:
             return runs.iloc[0]["run_id"]
     except Exception as exc:
@@ -75,7 +79,7 @@ def _load_signal(run_id: str) -> "pd.Series | None":
         from qlib.workflow import R
         from qlib_ext import init_tw_qlib
         init_tw_qlib()
-        recorder = R.get_recorder(run_id=run_id, experiment_name="workflow")
+        recorder = R.get_recorder(recorder_id=run_id, experiment_name="workflow")
         pred = recorder.load_object("pred.pkl")
         if pred is None:
             return None
