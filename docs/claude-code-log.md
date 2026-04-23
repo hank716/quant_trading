@@ -2,6 +2,32 @@
 
 每次啟動請在此檔最上方新增一筆：
 
+## 2026-04-23 下半場（Phase 10 修正 — LLM assist bug + README/env docs cleanup）
+
+- 啟動時所在 branch：`develop`（剛完成 Phase 10 cutover PR #16）
+- 使用者報告：昨天按 README 執行遇到錯誤；env docs 混亂；LLM assist 沒被跑到
+- 掃描發現 3 個問題：
+  1. **LLM assist 完全沒跑到**：`app/orchestration/run_daily.py:_select_candidates` 呼叫 `SelectorFactory.build()` 但丟棄回傳物件、從沒呼叫 `.select()`；explainer 雖然有呼叫 `.explain()` 但 payload schema 錯誤（legacy 要 `{strategy_intent, portfolio_snapshot, system_result}`，run_daily 塞 `{instrument, score, metrics}`）。
+  2. **README/文件跟現況脫節**：還在寫 Grafana/Prometheus、主路徑指向 `main.py`、Phase 進度表停在 5。
+  3. **Env docs 散亂**：`.env` vs `.env.local` 並存、`SELECTION_PROVIDER` / `LLM_MIN_INTERVAL_SECONDS` / `LLM_MAX_RETRIES` / `LLM_RETRY_BACKOFF_SECONDS` 沒寫在文件、`AUTH_COOKIE_KEY` 寫了但 code 不讀。
+- 使用者決定：
+  - LLM 修法採「寫新的 Qlib-native LLM class」（而不是最小 adapter 套 legacy）
+  - "3 天歷史資料" = Phase 10.9 shadow run 比對，不是訓練視窗 3 年
+- 完成的子任務：
+  - `app/llm/selector.py`（220 行）：`QlibRuleBasedSelector` + `QlibLLMSelector` + `QlibSelectorFactory`，直接吃 `pd.Series` 不用 Candidate
+  - `app/llm/explainer.py`（180 行）：`QlibRuleBasedExplainer` + `QlibLLMExplainer` + `QlibExplainerFactory`，產中文論述
+  - `app/llm/adapters.py` 重寫：thin `run_selection` / `run_explanation`，honour `LLM_SAFE_MODE`（同 provider 時自動降級 explainer）
+  - `app/orchestration/run_daily.py`：加 `load_dotenv(.env.local)`、`_load_profile` 回傳 tuple、`_select_and_explain` 真的呼叫 LLM、log `llm_call=<bool>`
+  - `tests/unit/test_qlib_llm.py`：14 個測試（rule-based / factory / adapter / SAFE_MODE / monkeypatched LLM call regression guard）
+  - README 大改：刪 Grafana/Prometheus、主路徑改 `app.orchestration.*`、加 `--lookback-days 900` 首次 bootstrap 章節、Phase 0–10 ✅
+  - `docs/env-variables.md` 補 `SELECTION_PROVIDER` + rate-limit 三兄弟 + `LLM_CACHE_DIR`、刪 `AUTH_COOKIE_KEY`、標準化 `.env.local`
+  - `docs/quickstart.md` 對齊 Phase 10、加 Phase 10.9 shadow roadmap
+  - `main.py` / `sync_data.py` / `sync_financials_slow.py`：`.env.local` 優先、`.env` fallback
+- 遇到的卡點：無
+- 測試結果：225 passed（原 211 + 新 14）
+- PR #17 → develop，squash merged
+- 下次繼續：使用者設 `GROQ_API_KEY` 實跑 3 天，累積 MLflow 紀錄後跑 Phase 10.9 shadow validation → tag `v1.0-qlib-cutover` → Phase 11 刪 legacy
+
 ## 2026-04-23 (Phase 10 — Orchestration Cutover + UI / LLM / Discord)
 
 - 啟動時所在 branch：`feat/phase10-cutover`（已從 develop 分出）
