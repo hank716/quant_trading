@@ -8,15 +8,40 @@ import sys
 from datetime import date
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 logger = logging.getLogger(__name__)
 
+# Load env files for local runs; Docker injects vars via env_file.
+_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(_ROOT / ".env.local", override=False)
+load_dotenv(_ROOT / ".env", override=False)  # backward-compat fallback
 
-def _load_profile(profile: str) -> dict:
+
+def _load_profile(profile: str) -> tuple[dict, dict, list[dict]]:
+    """Return (profile_cfg, strategy_cfg, portfolio_snapshot) for the given profile."""
     import yaml
-    path = Path(f"config/profiles/{profile}.yaml")
-    if not path.exists():
-        raise FileNotFoundError(f"Profile not found: {path}")
-    return yaml.safe_load(path.read_text())
+
+    profile_path = Path(f"config/profiles/{profile}.yaml")
+    if not profile_path.exists():
+        raise FileNotFoundError(f"Profile not found: {profile_path}")
+    profile_cfg = yaml.safe_load(profile_path.read_text()) or {}
+
+    strategy_path = Path(profile_cfg.get("strategy", "config/strategy_1m.yaml"))
+    strategy_cfg: dict = {}
+    if strategy_path.exists():
+        strategy_cfg = yaml.safe_load(strategy_path.read_text()) or {}
+    else:
+        logger.warning("Strategy file not found: %s; using empty config", strategy_path)
+
+    try:
+        from app.control.portfolio_editor import load_portfolio
+        portfolio_snapshot = load_portfolio(profile)
+    except Exception as exc:
+        logger.warning("Could not load portfolio for profile %s: %s", profile, exc)
+        portfolio_snapshot = []
+
+    return profile_cfg, strategy_cfg, portfolio_snapshot
 
 
 def _sync_data(lookback_days: int = 5) -> None:
@@ -44,7 +69,7 @@ def _run_training(workflow: str) -> str | None:
     return None
 
 
-def _load_signal(run_id: str) -> "pd.DataFrame | None":
+def _load_signal(run_id: str) -> "pd.Series | None":
     """Load prediction signal from MLflow recorder."""
     try:
         from qlib.workflow import R
@@ -67,36 +92,65 @@ def _load_signal(run_id: str) -> "pd.DataFrame | None":
         return None
 
 
-def _select_candidates(signal: "pd.Series", profile_cfg: dict, top_k: int = 20) -> list[dict]:
-    """Apply rule-based or LLM selector to score Series."""
-    rows = [
-        {"instrument": sym, "score": float(score), "metrics": {}}
-        for sym, score in signal.nlargest(top_k * 3).items()
-    ]
-    provider = profile_cfg.get("selector_provider", "rule_based")
+def _load_universe_meta() -> dict[str, dict]:
+    """Best-effort ticker → {name, market, industry} lookup via FinMind stock info.
+
+    Returns an empty dict on any failure — the LLM will still see ticker + score.
+    """
     try:
-        from llm.selector import SelectorFactory
-        SelectorFactory.build(provider)
-        selected = rows[:top_k]
-        logger.info("Selected %d candidates via %s", len(selected), provider)
-        return selected
+        from datetime import date as _date
+
+        from data.finmind_client import FinMindClient
+        from core.universe import UniverseBuilder
+
+        ub = UniverseBuilder(client=FinMindClient(), as_of_date=_date.today())
+        catalog = ub.build()
+        return {
+            row.stock_id: {
+                "name": row.stock_name,
+                "market": row.market_type,
+                "industry": row.industry_category or "",
+            }
+            for row in catalog
+        }
     except Exception as exc:
-        logger.warning("Selector failed (%s), using top-%d by score: %s", provider, top_k, exc)
-        return rows[:top_k]
+        logger.debug("Universe metadata unavailable: %s", exc)
+        return {}
 
 
-def _explain_candidates(candidates: list[dict], profile_cfg: dict) -> list[dict]:
-    """Add LLM/rule-based Chinese thesis to each candidate."""
-    provider = profile_cfg.get("llm_provider", "rule_based")
-    try:
-        from llm.explainer import ExplainerFactory
-        explainer = ExplainerFactory.build(provider)
-        for c in candidates:
-            payload = {"instrument": c["instrument"], "score": c["score"], "metrics": c.get("metrics", {})}
-            c["thesis"] = explainer.explain(payload)
-    except Exception as exc:
-        logger.warning("Explainer failed: %s — skipping thesis", exc)
-    return candidates
+def _select_and_explain(
+    signal: "pd.Series",
+    strategy_cfg: dict,
+    profile_cfg: dict,
+    portfolio_snapshot: list[dict],
+) -> tuple[list[dict], str]:
+    """Run selector + explainer; return (candidate list, thesis string)."""
+    from app.llm.adapters import run_explanation, run_selection
+
+    universe_meta = _load_universe_meta()
+    selector_output = run_selection(signal, strategy_cfg, profile_cfg, portfolio_snapshot, universe_meta)
+    thesis = run_explanation(selector_output, signal, strategy_cfg, profile_cfg, portfolio_snapshot)
+
+    candidates: list[dict] = []
+    for rank, sel in enumerate(selector_output.get("selections", []), start=1):
+        candidates.append(
+            {
+                "rank": rank,
+                "instrument": sel.get("asset"),
+                "verdict": sel.get("verdict"),
+                "confidence": sel.get("confidence"),
+                "score": signal.get(sel.get("asset"), 0.0) if hasattr(signal, "get") else 0.0,
+                "summary": sel.get("summary", ""),
+                "bull_points": sel.get("bull_points", []),
+                "bear_points": sel.get("bear_points", []),
+                "invalidation_conditions": sel.get("invalidation_conditions", []),
+                "thesis": "",
+            }
+        )
+    # Attach full thesis to the first candidate (Discord shows it inline).
+    if candidates and thesis:
+        candidates[0]["thesis"] = thesis
+    return candidates, thesis
 
 
 def _push_discord(candidates: list[dict], profile_cfg: dict, run_id: str | None, metrics: dict) -> None:
@@ -123,12 +177,17 @@ def _register_supabase(run_id: str | None, status: str, metrics: dict) -> None:
         logger.warning("Supabase update skipped: %s", exc)
 
 
-def run(profile: str, skip_sync: bool = False, skip_train: bool = False,
-        workflow: str = "qlib_ext/workflows/daily_lgbm.yaml",
-        top_k: int = 20) -> int:
+def run(
+    profile: str,
+    skip_sync: bool = False,
+    skip_train: bool = False,
+    workflow: str = "qlib_ext/workflows/daily_lgbm.yaml",
+    top_k: int = 20,
+) -> int:
     """Run the full daily Qlib pipeline and return exit code."""
-    profile_cfg = _load_profile(profile)
-    run_id = None
+    del top_k  # top-K is derived from strategy_cfg decision.max_consider + max_watch
+    profile_cfg, strategy_cfg, portfolio_snapshot = _load_profile(profile)
+    run_id: str | None = None
     metrics: dict = {}
 
     try:
@@ -149,14 +208,15 @@ def run(profile: str, skip_sync: bool = False, skip_train: bool = False,
         signal = _load_signal(run_id) if run_id else None
         if signal is None or signal.empty:
             logger.warning("No signal available — using empty candidate list")
-            candidates = []
+            candidates: list[dict] = []
+            thesis = ""
         else:
-            candidates = _select_candidates(signal, profile_cfg, top_k=top_k)
-            candidates = _explain_candidates(candidates, profile_cfg)
+            candidates, thesis = _select_and_explain(signal, strategy_cfg, profile_cfg, portfolio_snapshot)
 
         _push_discord(candidates, profile_cfg, run_id, metrics)
         _register_supabase(run_id, "success", metrics)
-        logger.info("run_daily complete: run_id=%s candidates=%d", run_id, len(candidates))
+        logger.info("run_daily complete: run_id=%s candidates=%d thesis_chars=%d",
+                    run_id, len(candidates), len(thesis))
         return 0
 
     except Exception as exc:
