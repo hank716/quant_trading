@@ -97,26 +97,21 @@ def _load_signal(run_id: str) -> "pd.Series | None":
 
 
 def _load_universe_meta() -> dict[str, dict]:
-    """Best-effort ticker → {name, market, industry} lookup via FinMind stock info.
+    """Best-effort ticker → {name, market, industry} lookup from Qlib instrument catalog.
 
-    Returns an empty dict on any failure — the LLM will still see ticker + score.
+    Returns an empty dict on any failure — LLM sees ticker + score without names.
     """
     try:
-        from datetime import date as _date
-
-        from data.finmind_client import FinMindClient
-        from core.universe import UniverseBuilder
-
-        ub = UniverseBuilder(client=FinMindClient(), as_of_date=_date.today())
-        catalog = ub.build()
-        return {
-            row.stock_id: {
-                "name": row.stock_name,
-                "market": row.market_type,
-                "industry": row.industry_category or "",
-            }
-            for row in catalog
-        }
+        import qlib
+        from qlib.data import D
+        instruments = D.instruments(market="all")
+        df = D.list_instruments(instruments=instruments, as_list=False)
+        if df is None or df.empty:
+            return {}
+        result: dict[str, dict] = {}
+        for inst in df.index.tolist():
+            result[str(inst)] = {"name": str(inst), "market": "", "industry": ""}
+        return result
     except Exception as exc:
         logger.debug("Universe metadata unavailable: %s", exc)
         return {}

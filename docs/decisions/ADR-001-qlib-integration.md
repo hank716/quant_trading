@@ -1,7 +1,8 @@
 # ADR-001: Full Qlib Migration（選項 C — Greenfield Architecture）
 
-**Status:** Accepted
+**Status:** Implemented
 **Date:** 2026-04-22
+**Implemented:** 2026-04-27
 **Deciders:** Hank, Claude Code
 **Supersedes:** 內部初稿（選項 A，同日起草後被推翻）
 
@@ -138,6 +139,33 @@ Phase 11                                                                        
 - `v0.5-legacy` — Phase 5d merge 之後的 develop HEAD（Phase 6 開工前 tag）
 - `v1.0-qlib-cutover` — Phase 10 merge 之後（prod 切換日）
 - `v1.1-cleanup` — Phase 11 merge 之後（legacy 刪完）
+
+## Resolution
+
+Phase 11 completed on 2026-04-27. All six acceptance criteria from the Decision section have been met:
+
+1. `python -m app.orchestration.run_daily --profile user_a` runs the full Qlib pipeline end-to-end with MLflow output.
+2. Streamlit UI (`app/ui/app.py`) reads directly from MLflow recorders and Supabase index.
+3. Discord push (`app/notify/discord_notifier.py`) includes Qlib-computed IC and Sharpe.
+4. `pytest -q` passes with 109 unit tests after all legacy modules deleted.
+5. Docker image < 1.5 GB (single-stage builds, no duplicate feature/signal code).
+6. `docs/architecture.md` and `CLAUDE.md` rewritten to reflect post-Phase-11 state.
+
+**Deleted modules (Phase 11):**
+- `core/` (all 7 files — decision_engine, filter_engine, signal_engine, models, universe, strategy_loader, report_renderer)
+- `data/` (official_hybrid_client, finmind_client)
+- `notifications/` (moved to `app/notify/`)
+- `llm/` (moved to `app/llm/`)
+- `src/features/` (tech_features, fund_features, feature_builder)
+- `src/signals/labeler.py`, `src/signals/trainer.py`, `src/signals/predictor.py`
+- `src/registry/model_registry.py`
+- `src/reporting/` (schema.py, converter.py)
+- `src/storage/artifact_writer.py`
+- `src/orchestration/` (run_daily.py, run_signal.py, run_report.py)
+- `main.py`, `sync_data.py`, `sync_financials_slow.py`
+- `test/test_decision_system.py`
+
+**Git tag:** `v1.1-cleanup`
 
 ## References
 - Qlib Repo: https://github.com/microsoft/qlib

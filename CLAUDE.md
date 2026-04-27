@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Personal Taiwan stock screening system. Daily pipeline analyzes TWSE/TPEx markets (~2000 stocks), applies rule-based filters and quantitative signals, and outputs investment candidates with explanations. Infrastructure uses Docker + Supabase + pCloud, with a Streamlit control UI and Grafana dashboards.
+Personal Taiwan stock screening system. Daily pipeline analyzes TWSE/TPEx markets (~2000 stocks) using Microsoft Qlib as the core ML framework, applies rule-based hard filters and LightGBM signals, and outputs investment candidates with Chinese-language explanations. Infrastructure uses Docker + Supabase (control plane) + pCloud (artifact backup) + MLflow (model registry), with a Streamlit UI.
 
-**Migration in progress:** Phase 6–11 replace the core pipeline with Microsoft Qlib (Strangler Fig). Legacy code stays alive until Phase 10 cutover. See `docs/decisions/ADR-001-qlib-integration.md` and `docs/architecture.md`.
+**Phase 11 complete.** All legacy code has been deleted. The active system is fully Qlib-based. See `docs/decisions/ADR-001-qlib-integration.md` and `docs/architecture.md`.
 
 ## Commands
 
@@ -20,250 +20,249 @@ pytest -q -m "not integration"
 # Run all tests including integration
 pytest -q
 
-# Test with mock data (no API calls, no Discord)
-python main.py --profile user_a --use-mock-data --skip-discord
+# Daily pipeline (sync + train + signal + Discord + Supabase)
+python -m app.orchestration.run_daily --profile user_a
 
-# Sync daily market data to local cache
-python sync_data.py --profile user_a --data-provider official_hybrid --lookback-days 35
+# Skip data sync (use cached Qlib bin data)
+python -m app.orchestration.run_daily --profile user_a --skip-sync
 
-# Sync financial statements (run periodically, respects quotas)
-python sync_financials_slow.py --batch-size 30
+# Skip training (use existing MLflow recorder for signal)
+python -m app.orchestration.run_daily --profile user_a --skip-train
 
-# Full run with official data
-python main.py --profile user_a --data-provider official_hybrid --stock-limit 100 --stock-limit-mode liquidity --skip-discord
+# Sync Qlib bin data from TWSE/TPEx
+python -m app.orchestration.sync_qlib_data --lookback-days 5
+
+# Run training workflow only
+python -m app.orchestration.run_training --workflow qlib_ext/workflows/daily_lgbm.yaml
+
+# Run backtest only
+python -m app.orchestration.run_backtest
 
 # Apply Supabase schema (requires DATABASE_URL)
 bash scripts/linux/apply_schema.sh
+
+# Start Streamlit UI
+streamlit run app/ui/app.py
 ```
 
-**Key `main.py` flags:**
-- `--profile {default|user_a|user_b}` — selects user config, portfolio, and Discord webhook
-- `--as-of-date YYYY-MM-DD` — backtest / historical run (defaults to today)
-- `--selector-provider {rule_based|groq|openai_compatible}` — overrides profile's LLM selector
-- `--llm-provider {rule_based|groq|openai_compatible}` — overrides profile's explainer LLM
-- `--force-llm-explainer` — bypasses safe mode to use LLM for explanation
+**Key `run_daily` flags:**
+- `--profile {user_a|user_b|default}` — selects user config, portfolio, and Discord webhook
+- `--skip-sync` — skip Qlib data sync step
+- `--skip-train` — skip qrun training, load signal from latest MLflow recorder
+- `--workflow PATH` — override Qlib workflow YAML (default: `qlib_ext/workflows/daily_lgbm.yaml`)
+- `--top-k N` — hint for top-K selection (effective value comes from `strategy_cfg`)
 
 ## Architecture
 
-Full overview: `docs/architecture.md`. Quick reference below.
+Full diagram: `docs/architecture.md`. Quick reference below.
 
-### Current Pipeline (Phase 5 state)
+### Pipeline (post-Phase 11)
 
 ```
-UniverseBuilder          → ~2000 Taiwan stocks/ETFs, ranked by trading volume
+sync_qlib_data           → TWSE/TPEx → Qlib bin (workspace/qlib_data/)
   ↓
-Data fetch (parallel)    → price history, institutional flows, monthly revenue, financials
+run_training             → qrun daily_lgbm.yaml → LightGBM → MLflow recorder
   ↓
-FilterEngine             → hard rules: market type, listing age, price floor, keyword exclusions
-SignalEngine             → quantitative signals: MA, 20-day return, inst. flows, revenue YoY, ROE
+_load_signal             → reads pred.pkl from MLflow recorder (latest date slice)
   ↓
-SelectorFactory          → RuleBasedSelector OR LLM selector (Groq/OpenAI-compat)
-ExplainerFactory         → RuleBasedExplainer OR LLM explainer (Chinese-language thesis)
+app/llm/adapters         → run_selection (QlibRuleBasedSelector / QlibLLMSelector)
+                         → run_explanation (QlibRuleBasedExplainer / QlibLLMExplainer)
   ↓
-ArtifactWriter           → signals.parquet, positions.parquet, trades.parquet, report.json, manifest.json
+QlibDiscordNotifier      → webhook with IC / Sharpe / candidate thesis
   ↓
-SupabaseClient           → insert pipeline_run, register artifacts, insert candidates
+QlibRunCRUD              → Supabase qlib_runs: mlflow_run_id, status, metrics
   ↓
-PCloudClient             → upload artifacts to /reports/date={date}/run_id={run_id}/
-  ↓
-ReportRenderer           → Markdown + HTML reports
-DiscordNotifier          → webhook with report attachments
-  ↓
-ModelRegistry            → LightGBM champion model (Supabase + pCloud-backed)
-Predictor                → predict_from_champion → score DataFrame
-SHAPExplainer            → top-N feature importances → /shap/date={date}/run_id={run_id}/
+PCloudClient             → nightly backup of workspace/mlruns/
 ```
 
-**UI：** 單一 Streamlit 網頁（`http://localhost:8501`）。用戶登入後在此頁面完成所有操作——查看選股、管理持股、調整策略、監控告警，不需碰任何程式碼。Grafana / Prometheus 已移除。
+**UI:** Single Streamlit page (`http://localhost:8501`). Auth via `streamlit-authenticator` (config: `config/auth_users.yaml`). Six pages: 今日報告 / 我的持股 / 策略設定 / 模型狀態 / 回測分析 / 監控 & 告警. All data sourced from MLflow recorders + Supabase index.
 
 ### Module Map
 
-#### Legacy core (will be deleted in Phase 11)
+#### app/ — post-Qlib thin layers (active)
 
 | Path | Responsibility |
 |------|---------------|
-| `core/decision_engine.py` | Orchestrates filter → signal → select pipeline |
-| `core/filter_engine.py` | Hard rules (market, keywords, price, listing days) |
-| `core/signal_engine.py` | Quantitative signals (price action, inst. flows, revenue, financials) |
-| `core/models.py` | Pydantic models: `HardRules`, `SignalResult`, `Candidate`, `DailyResult` |
-| `core/universe.py` | Fetches metadata for all stocks; optionally ranks by liquidity |
-| `core/strategy_loader.py` | Parses strategy, profile, and portfolio YAML files |
-| `core/report_renderer.py` | Markdown and HTML report generation |
-| `data/official_hybrid_client.py` | Primary data: TWSE/TPEx JSON/CSV + cached financials |
-| `data/finmind_client.py` | Alternative data client with MD5-keyed response cache |
-| `llm/selector.py` | Rule-based and LLM candidate selection |
-| `llm/explainer.py` | Rule-based and LLM explanation generation |
-| `llm/openai_compat.py` | OpenAI-compatible API abstraction with retry, rate-limit, response caching |
-| `notifications/discord_notifier.py` | Discord webhook with file attachment support |
-| `main.py` | Legacy CLI entry point (compatibility shim) |
-| `sync_data.py` | Sync daily TWSE/TPEx market data to local cache |
-| `sync_financials_slow.py` | Sync financial statements (quota-aware) |
+| `app/orchestration/run_daily.py` | Daily pipeline entry point: sync → train → signal → LLM → Discord → Supabase |
+| `app/orchestration/run_training.py` | Runs `qrun` workflow YAML; returns exit code |
+| `app/orchestration/sync_qlib_data.py` | Triggers `qlib_ext/data_collector/` to sync Qlib bin data |
+| `app/orchestration/run_backtest.py` | Standalone backtest via Qlib workflow |
+| `app/control/portfolio_editor.py` | load/save/add/remove portfolio holdings (YAML-backed) |
+| `app/control/champion.py` | Champion model get/list/promote logic (MLflow-backed) |
+| `app/control/mlflow_helper.py` | `get_run_metrics()` — thin MLflow client wrapper |
+| `app/llm/selector.py` | QlibRuleBasedSelector / QlibLLMSelector (reads MLflow SignalRecord) |
+| `app/llm/explainer.py` | QlibRuleBasedExplainer / QlibLLMExplainer (Chinese thesis) |
+| `app/llm/adapters.py` | `run_selection()` / `run_explanation()` — dispatcher with safe-mode logic |
+| `app/notify/discord_notifier.py` | QlibDiscordNotifier + `build_message()` |
+| `app/ui/app.py` | Streamlit UI (6 pages, streamlit-authenticator, reads MLflow + Supabase) |
 
-#### src/ — current active modules (Phase 2–5)
+#### qlib_ext/ — TW-specific Qlib extensions (active)
 
 | Path | Responsibility |
 |------|---------------|
-| `src/orchestration/run_daily.py` | Daily pipeline entry point: artifacts + DB + ML scoring + SHAP |
+| `qlib_ext/__init__.py` | `init_tw_qlib()` — initialize Qlib with TW region + workspace path |
+| `qlib_ext/data_collector/twse_collector.py` | TWSE daily price/volume → Qlib bin |
+| `qlib_ext/data_collector/tpex_collector.py` | TPEx daily price/volume → Qlib bin |
+| `qlib_ext/data_collector/financial_collector.py` | Monthly revenue + quarterly financials → Qlib bin |
+| `qlib_ext/handlers/tw_alpha.py` | DataHandlerLP: technical features (MA, volume ratio, inst. flow) |
+| `qlib_ext/handlers/tw_fundamental.py` | DataHandlerLP: fundamental features (revenue momentum, ROE, gross margin) |
+| `qlib_ext/strategies/tw_topk_dropout.py` | TopkDropout + TW hard rules (keyword exclusion, price floor, listing age) |
+| `qlib_ext/workflows/daily_lgbm.yaml` | Main qrun config: LightGBM training + prediction |
+| `qlib_ext/workflows/backtest_only.yaml` | Backtest-only qrun config |
+| `qlib_ext/workflows/retrain.yaml` | Scheduled retrain config |
+
+#### src/ — infrastructure utilities (active, kept)
+
+| Path | Responsibility |
+|------|---------------|
 | `src/database/client.py` | Supabase wrapper with mock fallback |
-| `src/database/crud.py` | PipelineRunCRUD, ArtifactCRUD, CandidateCRUD, CoverageCRUD |
-| `src/database/schema.sql` | Supabase schema: 11 tables + indexes |
-| `src/storage/artifact_writer.py` | Writes parquet/json artifacts to workspace/runs/{run_id}/ |
+| `src/database/crud.py` | PipelineRunCRUD, CandidateCRUD, CoverageCRUD |
+| `src/database/qlib_crud.py` | QlibRunCRUD — `qlib_runs` table operations |
+| `src/database/schema.sql` | Supabase schema: `qlib_runs`, `backtest_runs`, `coverage_snapshots`, `system_alerts` |
 | `src/storage/pcloud_client.py` | pCloud API wrapper with mock fallback |
-| `src/reporting/converter.py` | DailyResult → artifact schemas converter |
-| `src/monitoring/coverage_checker.py` | Data quality monitoring (Phase 4) |
-| `src/registry/retrain_gate.py` | Retrain trigger logic based on coverage/drift (Phase 4) |
-| `src/registry/model_registry.py` | LightGBM model registration + champion tracking (Phase 5c) |
-| `src/features/tech_features.py` | Technical features: MA return, volume ratio, institutional flow (Phase 5a) |
-| `src/features/fund_features.py` | Fundamental features: revenue momentum, ROE, gross margin (Phase 5a) |
-| `src/features/feature_builder.py` | Builds cross-sectional feature matrix (Phase 5a) |
-| `src/signals/labeler.py` | Forward return + binary label computation (Phase 5b) |
-| `src/signals/trainer.py` | Walk-forward LightGBM training + model save (Phase 5b) |
-| `src/signals/predictor.py` | Champion model inference with in-process cache (Phase 5c) |
-| `src/signals/explainer_shap.py` | SHAP TreeExplainer + generic fallback, top-N summary (Phase 5d) |
-| `src/ui/app.py` | Streamlit UI: Home / Runs / 庫存股 / Coverage / Reports / Run Control / 🤖 模型 |
-
-#### Qlib layer (Phase 6–10, new)
-
-| Path | Responsibility |
-|------|---------------|
-| `qlib_ext/` | TW-specific Qlib extensions (data collectors, DataHandlers, strategies, workflows) |
-| `app/orchestration/` | New pipeline entry points reading from Qlib recorders |
-| `app/control/` | Supabase thin index + MLflow helper |
-| `app/notify/` | Discord notifier (post-cutover home) |
-| `app/ui/` | Streamlit UI (post-cutover, reads MLflow) |
+| `src/signals/explainer_shap.py` | SHAP TreeExplainer + top-N summary (post-processor, reads Qlib SignalRecord) |
+| `src/signals/schema.py` | Pydantic schemas for signal output |
+| `src/registry/retrain_gate.py` | Retrain trigger logic based on coverage / drift |
+| `src/monitoring/coverage_checker.py` | Data quality monitoring |
+| `src/ui/app.py` | Legacy Streamlit UI (reference only — superseded by `app/ui/app.py`) |
 
 ### Directory Structure
 
 ```
 fin/
-├── core/           ← legacy decision engine (alive until Phase 11 deletion)
-├── data/           ← legacy data clients
-├── llm/            ← selector, explainer, openai_compat
-├── notifications/  ← discord notifier (legacy; moves to app/notify/ in Phase 10)
-├── config/         ← strategy YAML, profiles, portfolios (kept forever)
+├── app/
+│   ├── orchestration/   ← run_daily.py, run_training.py, sync_qlib_data.py, run_backtest.py
+│   ├── control/         ← portfolio_editor.py, champion.py, mlflow_helper.py
+│   ├── llm/             ← selector.py, explainer.py, adapters.py
+│   ├── notify/          ← discord_notifier.py
+│   └── ui/              ← app.py (Streamlit, active)
+│
+├── qlib_ext/
+│   ├── data_collector/  ← twse_collector.py, tpex_collector.py, financial_collector.py
+│   ├── handlers/        ← tw_alpha.py, tw_fundamental.py
+│   ├── strategies/      ← tw_topk_dropout.py
+│   └── workflows/       ← daily_lgbm.yaml, backtest_only.yaml, retrain.yaml
+│
 ├── src/
-│   ├── orchestration/   ← run_daily.py (legacy entry point)
-│   ├── database/        ← client.py, crud.py, schema.sql
-│   ├── storage/         ← pcloud_client.py, artifact_writer.py
-│   ├── reporting/       ← schema.py, converter.py
-│   ├── signals/         ← labeler, trainer, predictor, explainer_shap
-│   ├── features/        ← tech_features, fund_features, feature_builder
-│   ├── registry/        ← model_registry (Phase 5c), retrain_gate
-│   ├── monitoring/      ← coverage_checker
-│   └── ui/              ← app.py (Streamlit)
+│   ├── database/        ← client.py, crud.py, qlib_crud.py, schema.sql
+│   ├── storage/         ← pcloud_client.py
+│   ├── signals/         ← explainer_shap.py, schema.py
+│   ├── registry/        ← retrain_gate.py
+│   ├── monitoring/      ← coverage_checker.py
+│   └── ui/              ← app.py (legacy reference, not active)
 │
-├── qlib_ext/       ← NEW Phase 6+: TW-specific Qlib extensions
-│   ├── data_collector/  ← TWSE/TPEx/financial → Qlib bin
-│   ├── handlers/        ← DataHandlerLP subclasses
-│   ├── strategies/      ← TW TopkDropout + hard rules
-│   └── workflows/       ← qrun YAML configs
-│
-├── app/            ← NEW Phase 6+: post-Qlib thin layers
-│   ├── orchestration/   ← run_daily.py (new entry, active from Phase 10)
-│   ├── control/         ← Supabase index + MLflow helper
-│   ├── notify/          ← Discord (post-cutover)
-│   ├── llm/             ← reads Qlib SignalRecord
-│   └── ui/              ← Streamlit (post-cutover)
+├── config/
+│   ├── profiles/        ← {profile}.yaml: strategy, portfolio, LLM provider, Discord
+│   ├── strategy_1m.yaml ← hard rules, signal thresholds, selection limits
+│   ├── portfolio_{profile}.yaml  ← current holdings (editable via UI)
+│   ├── auth_users.yaml  ← streamlit-authenticator config (gitignored)
+│   └── auth_users.yaml.example
 │
 ├── tests/
-│   ├── unit/            ← fast tests, no external deps
+│   ├── unit/            ← fast tests, no external deps (109 tests)
 │   ├── contract/        ← schema validation
 │   └── integration/     ← require Docker or credentials (@pytest.mark.integration)
-├── docker/         ← app.Dockerfile, ui.Dockerfile, trainer.Dockerfile, qlib.Dockerfile (Phase 6)
-├── compose/        ← docker-compose.yml, prometheus.yml, grafana provisioning
-├── scripts/        ← linux/ and windows/ run/start scripts
-├── docs/           ← setup guides, ADRs, architecture, work log
-├── workspace/      ← runtime data (gitignored): hotdata, runs, outputs, logs, tmp, qlib_data, mlruns
-└── main.py         ← legacy entry point (deleted Phase 11)
+│
+├── docker/
+│   ├── app.Dockerfile   ← general app image
+│   ├── ui.Dockerfile    ← Streamlit UI image
+│   ├── trainer.Dockerfile
+│   └── qlib.Dockerfile  ← Qlib data sync image
+│
+├── compose/
+│   └── docker-compose.yml  ← services: quant-ui, quant-daily, quant-trainer, qlib-sync, quant-sync
+│
+├── scripts/             ← linux/ and windows/ run/start scripts
+├── docs/                ← setup guides, ADRs, architecture, work log
+└── workspace/           ← runtime data (gitignored)
+    ├── qlib_data/       ← Qlib bin data synced from TWSE/TPEx
+    ├── mlruns/          ← MLflow experiment tracking store
+    ├── hotdata/         ← cached lookups
+    ├── runs/            ← per-run SHAP output (shap_summary.json)
+    └── logs/
 ```
 
 ### Configuration Hierarchy
 
 ```
 config/strategy_1m.yaml          ← hard rules, signal thresholds, selection limits
-config/profiles/{profile}.yaml   ← user's strategy, portfolio, LLM provider, output dir, Discord
+config/profiles/{profile}.yaml   ← LLM provider, Discord webhook, portfolio path
 config/portfolio_{profile}.yaml  ← current holdings (shown in Streamlit UI, editable)
+config/auth_users.yaml           ← streamlit-authenticator credentials (gitignored)
 .env.local                       ← secrets: API tokens, webhook URLs, LLM keys (gitignored)
 ```
 
+### Docker Services
+
+| Service | Dockerfile | Command |
+|---------|------------|---------|
+| `quant-ui` | `docker/ui.Dockerfile` | `streamlit run app/ui/app.py` (port 8501, always-on) |
+| `quant-daily` | `docker/app.Dockerfile` | `python -m app.orchestration.run_daily --profile user_a` (profile: jobs) |
+| `quant-trainer` | `docker/trainer.Dockerfile` | `python -m app.orchestration.run_training --workflow ...` (profile: jobs) |
+| `qlib-sync` | `docker/qlib.Dockerfile` | `python -m app.orchestration.sync_qlib_data --lookback-days 5` (profile: jobs) |
+| `quant-sync` | `docker/app.Dockerfile` | legacy sync stub (profile: jobs) |
+
+Run one-off jobs: `docker compose --profile jobs run --rm quant-daily`
+
 ### LLM Safe Mode
 
-When `LLM_SAFE_MODE=true` (default) and both selector and explainer use the same external LLM, the explainer auto-demotes to `rule_based` to halve API calls. Use `--force-llm-explainer` to override.
+When `LLM_SAFE_MODE=true` (default) and selector and explainer use the same external LLM, the explainer auto-demotes to `rule_based` to halve API calls. Configured in `app/llm/adapters.py`.
 
 LLM responses are cached to `.cache/llm/` by SHA256 of the request payload.
 
-### Data Sources
+### Data Flow
 
-`official_hybrid` (recommended): daily prices, institutional flows, monthly revenue from official TWSE/TPEx endpoints. Financial statements from local cache built by `sync_financials_slow.py` only — never live-fetched in `main.py`.
+Qlib bin data lives at `workspace/qlib_data/`. `qlib_ext.init_tw_qlib()` initializes Qlib with this path on every process start. MLflow tracking URI defaults to `file:workspace/mlruns`; set `MLFLOW_TRACKING_URI` to override. pCloud backup uploads `workspace/mlruns/` nightly.
 
-### Artifact Storage
+### Supabase Tables (post-Phase 11)
 
-Each run writes to `workspace/runs/{run_id}/`:
-- `signals.parquet`, `positions.parquet`, `trades.parquet`
-- `report.json`, `manifest.json`
-- `shap/{run_id}/shap_summary.json` (when champion model + feature matrix available)
-
-Run state is tracked in Supabase `pipeline_runs` table. Artifacts are uploaded to pCloud at `/reports/date={date}/run_id={run_id}/`.
-
-Post-Phase 8: MLflow stores model artifacts at `workspace/mlruns/` with pCloud nightly backup.
-
-## Qlib Migration (Phase 6–11)
-
-**Decision:** Full migration to Microsoft Qlib (Option C — Strangler Fig).  
-**ADR:** `docs/decisions/ADR-001-qlib-integration.md`  
-**Architecture:** `docs/architecture.md`
-
-| Phase | Adds | Legacy status |
-|-------|------|---------------|
-| 6 | `qlib_ext/` + TW bin data layer | Alive, prod |
-| 7 | `qlib_ext/handlers/` (features + labels) | Alive, prod |
-| 8 | `qlib_ext/workflows/` + MLflow registry | Alive, prod |
-| 9 | `qlib_ext/strategies/` + backtest | Alive, prod |
-| 10 | `app/orchestration/run_daily.py` — 3-day shadow, then cutover | Alive, standby |
-| 11 | Delete `core/`, `src/features/`, `src/signals/trainer`, etc. | Deleted |
-
-**Rollback tags:**
-- `v0.5-legacy` — snapshot before Phase 6 starts
-- `v1.0-qlib-cutover` — Phase 10 cutover commit
-- `v1.1-cleanup` — Phase 11 complete
+| Table | Purpose |
+|-------|---------|
+| `qlib_runs` | MLflow run index: `mlflow_run_id`, `profile`, `status`, `metrics` JSON, timestamps |
+| `backtest_runs` | Backtest results index |
+| `coverage_snapshots` | Data quality snapshots from `coverage_checker` |
+| `system_alerts` | Retrain gate alerts and coverage warnings |
 
 ## Git Workflow
 
 ```
 main     ← protected, never push directly, only manual review merges here
 develop  ← integration branch, merge feature branches here
-feat/phaseN-description  ← working branch per phase
-docs/description         ← documentation-only branches
+feat/description   ← working branches
+docs/description   ← documentation-only branches
 ```
 
-Every phase: branch from develop → commit subtasks → `pytest -q` passes → PR to develop → squash merge → delete remote branch.
+Every change: branch from develop → commit → `pytest -q` passes → PR to develop → squash merge → delete remote branch.
+
+**Tags:**
+- `v0.5-legacy` — Phase 5 snapshot (pre-Qlib migration)
+- `v1.0-qlib-cutover` — Phase 10 cutover
+- `v1.1-cleanup` — Phase 11 complete (current)
 
 ## Environment Variables
 
-See `env.example` for full reference. Critical ones by phase:
+See `env.example` for full reference. Required variables:
 
 ```dotenv
-# Always needed
-DATA_PROVIDER=official_hybrid
-FINMIND_TOKEN=          # if using finmind provider
+# Qlib data
+MLFLOW_TRACKING_URI=file:workspace/mlruns
 
-# LLM
+# LLM (at least one required if not using rule_based)
 GROQ_API_KEY=
 LLM_SAFE_MODE=true
-OFFICIAL_TLS_INSECURE_FALLBACK=true
 
-# Phase 2+: pCloud
+# pCloud (artifact backup)
 PCLOUD_TOKEN=
 PCLOUD_REGION=eu
 
-# Phase 3+: Supabase
+# Supabase (control plane)
 SUPABASE_URL=
 SUPABASE_SERVICE_KEY=
-SUPABASE_DB_HOST=       # for Grafana PostgreSQL datasource
+SUPABASE_DB_HOST=
 SUPABASE_DB_PASSWORD=
 
-# Phase 8+: MLflow
-MLFLOW_TRACKING_URI=file:workspace/mlruns
+# TLS (TWSE endpoints sometimes have cert issues)
+OFFICIAL_TLS_INSECURE_FALLBACK=true
 ```
 
 ## Claude Code Agents
@@ -273,16 +272,15 @@ Project-level agents live in `.claude/agents/`. Use them for specialized tasks:
 | Agent | When to invoke |
 |-------|---------------|
 | `taiwan-quant-analyst` | Signal design, strategy evaluation, Taiwan market analysis, Chinese investment thesis |
-| `fin-pipeline-engineer` | Phase implementation, Docker/Supabase/pCloud, git workflow enforcement |
+| `fin-pipeline-engineer` | Pipeline implementation, Docker/Supabase/pCloud, git workflow enforcement |
 | `fin-test-engineer` | Writing unit/contract/integration tests, coverage review |
 | `fin-architect-doc` | ADR writing, CLAUDE.md updates, documentation consolidation, architecture planning |
 
 ## Testing
 
 ```bash
-pytest -q -m "not integration"   # unit tests only (fast, no external deps)
+pytest -q -m "not integration"   # 109 unit tests (fast, no external deps)
 pytest -q                         # all tests (integration tests skip without credentials)
 ```
 
 Integration tests in `tests/integration/` are gated with `@pytest.mark.skipif(not os.getenv(...))`.
-Legacy smoke test `test/test_decision_system.py` must always pass until Phase 11 deletion.

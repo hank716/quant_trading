@@ -38,6 +38,7 @@ workspace/runs/*/
 workspace/qlib_data/
 workspace/qlib_data_csv/
 workspace/mlruns/
+mlruns/
 
 # --- Docker ---
 .docker-cache/

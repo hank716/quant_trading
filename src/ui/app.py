@@ -16,9 +16,9 @@ def get_db():
 
 @st.cache_resource
 def get_crud():
-    from src.database.crud import PipelineRunCRUD, CandidateCRUD, CoverageCRUD
+    from src.database.crud import CoverageCRUD
     db = get_db()
-    return PipelineRunCRUD(db), CandidateCRUD(db), CoverageCRUD(db)
+    return CoverageCRUD(db)
 
 
 # ---- Sidebar nav ----
@@ -32,44 +32,7 @@ st.sidebar.caption(f"v7 Phase 5d | {datetime.now().strftime('%Y-%m-%d %H:%M')}")
 # ================================================================== #
 if page == "🏠 Home":
     st.title("fin 量化研究工作站")
-    run_crud, candidate_crud, _ = get_crud()
-    db = get_db()
-
-    col1, col2 = st.columns(2)
-    with col1:
-        st.subheader("最新 Run")
-        runs = run_crud.latest(limit=1)
-        if runs:
-            r = runs[0]
-            st.metric("Run ID", r.get("run_id", "—"))
-            st.metric("交易日", r.get("trade_date", "—"))
-            st.metric("狀態", r.get("status", "—"))
-        else:
-            st.info("尚無 run 記錄")
-
-    with col2:
-        st.subheader("最新候選標的")
-        if runs:
-            trade_date_str = runs[0].get("trade_date")
-            if trade_date_str:
-                from datetime import date
-                try:
-                    td = date.fromisoformat(str(trade_date_str)[:10])
-                    candidates = candidate_crud.latest_by_date(td)
-                    eligible = [c for c in candidates if c.get("list_type") == "eligible"]
-                    watch = [c for c in candidates if c.get("list_type") == "watch"]
-                    st.write(f"**Consider（{len(eligible)} 檔）**")
-                    if eligible:
-                        import pandas as pd
-                        st.dataframe(pd.DataFrame(eligible)[["instrument", "score"]], use_container_width=True)
-                    st.write(f"**Watch（{len(watch)} 檔）**")
-                    if watch:
-                        import pandas as pd
-                        st.dataframe(pd.DataFrame(watch)[["instrument", "score"]], use_container_width=True)
-                except Exception:
-                    st.info("無法載入候選標的")
-        else:
-            st.info("尚無候選標的")
+    st.info("Legacy UI — 請改用 app/ui/app.py（Phase 10 新 UI）")
 
 
 # ================================================================== #
@@ -77,15 +40,7 @@ if page == "🏠 Home":
 # ================================================================== #
 elif page == "📋 Runs":
     st.title("近期 Run 記錄")
-    run_crud, _, _ = get_crud()
-    runs = run_crud.latest(limit=20)
-    if runs:
-        import pandas as pd
-        df = pd.DataFrame(runs)
-        cols = [c for c in ["run_id", "trade_date", "mode", "status", "started_at", "ended_at"] if c in df.columns]
-        st.dataframe(df[cols], use_container_width=True)
-    else:
-        st.info("尚無 run 記錄（mock mode）")
+    st.info("Legacy UI — 請改用 app/ui/app.py")
 
 
 # ================================================================== #
@@ -159,7 +114,7 @@ elif page == "📊 Coverage":
     from pathlib import Path as _Path
 
     st.title("資料覆蓋率")
-    _, _, coverage_crud = get_crud()
+    coverage_crud = get_crud()
     snapshots = coverage_crud.latest(limit=30)
 
     # ---- Retrain gate status (load from latest run artifact) ----

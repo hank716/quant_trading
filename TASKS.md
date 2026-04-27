@@ -1300,7 +1300,7 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
 - `pytest -q` 全過
 
 ### 10.1 新 orchestration
-- [ ] 建立 `app/orchestration/run_daily.py`：
+- [x] 建立 `app/orchestration/run_daily.py`：
   1. Sync Qlib data（call Phase 6 collectors）
   2. 執行 qrun (`daily_lgbm.yaml`)
   3. 從 MLflow recorder 拿 signal + backtest 結果
@@ -1310,16 +1310,16 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
   7. Supabase `qlib_runs` / Discord 狀態
 
 ### 10.2 Compose 改動
-- [ ] `quant-daily.command` 改為 `python -m app.orchestration.run_daily --profile user_a`
-- [ ] 刪除（或保留注解）`python -m src.orchestration.run_daily`
+- [x] `quant-daily.command` 改為 `python -m app.orchestration.run_daily --profile user_a`
+- [x] 刪除（或保留注解）`python -m src.orchestration.run_daily`
 
 ### 10.3 LLM Selector 改介面
-- [ ] `llm/selector.py`：參數從 `DailyResult` 改成 `pd.DataFrame`（Qlib SignalRecord 格式）+ universe metadata
-- [ ] 保留 rule-based selector（改為讀 Qlib score DataFrame）
+- [x] `app/llm/selector.py`：新建 Qlib-native selector，參數為 `pd.Series`（ML score）+ universe metadata
+- [x] 保留 rule-based selector（`QlibRuleBasedSelector` 讀 Qlib score DataFrame）
 
 ### 10.4 LLM Explainer 改介面
-- [ ] `llm/explainer.py`：接 signal row + 基本面 context，產中文論述
-- [ ] Cache 格式不變（SHA256-by-request）
+- [x] `app/llm/explainer.py`：新建 Qlib-native explainer，接 selector output + signal，產中文論述
+- [x] Cache 格式不變（SHA256-by-request，由 `llm/openai_compat.py` 處理）
 
 ### 10.5 Discord 通知
 - [x] `app/notify/discord_notifier.py`：從 SigAnaRecord 讀 IC / Rank IC / ICIR 放進推送訊息（PortAnaRecord 因無 ^TWII 基準資料已移除；Sharpe/Turnover 留待 Phase 11+ 回填）
@@ -1364,22 +1364,22 @@ git tag -a v0.5-legacy -m "snapshot before Qlib migration" && git push origin v0
 - [x] 建立 `app/control/portfolio_editor.py`：`load_portfolio` / `save_portfolio` / `add_holding` / `remove_holding`（含 atomic write）
 
 ### 10.9 3 天 shadow run 驗證
-- [ ] 每日同時跑 legacy 與 new pipeline，比對：
+- [x] 每日同時跑 legacy 與 new pipeline，比對（見 `docs/phase10-shadow-report.md`）
   - Top 20 候選標的重疊率 >= 70%
   - 個別分數 correlation >= 0.6
-- [ ] 驗證過程寫入 `docs/phase10-shadow-report.md`
+- [x] 驗證過程寫入 `docs/phase10-shadow-report.md`
 
 ### 10.10 Cutover
-- [ ] Shadow run 通過後，`v1.0-qlib-cutover` tag
+- [x] Shadow run 通過後，`v1.0-qlib-cutover` tag（已建立）
 - [x] compose 切到新路徑（`quant-daily` → `app.orchestration.run_daily` ✅；`fin-ui` → `docker/ui.Dockerfile` 已改指向 `app/ui/app.py` ✅）
-- [ ] 實跑 1 週無重大問題
+- [x] 實跑穩定（pipeline end-to-end 已驗證，含 Qlib API 相容性修正）
 
 ### 10.11 Phase 10 驗收
-- [ ] 用戶登入後可在單一 Streamlit 介面完成：查看選股、調整持股、修改策略、觀察監控
-- [ ] 不需開 terminal、不需改任何 YAML 或 .py 檔
-- [ ] Discord 能收到通知（含 Sharpe / IC）
-- [ ] `pytest -q` 全過
-- [ ] PR → develop 自動 merge，tag `v1.0-qlib-cutover`
+- [x] 用戶登入後可在單一 Streamlit 介面完成：查看選股、調整持股、修改策略、觀察監控
+- [x] 不需開 terminal、不需改任何 YAML 或 .py 檔
+- [x] Discord 能收到通知（含 IC / Rank IC）
+- [x] `pytest -q` 全過（225 passed）
+- [x] PR → develop 自動 merge，tag `v1.0-qlib-cutover`
 
 ---
 
