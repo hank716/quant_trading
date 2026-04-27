@@ -67,8 +67,9 @@ def test_get_by_run_id_not_found(crud, mock_client):
 
 
 def test_list_by_family(crud, mock_client):
-    mock_client.select.return_value = [{"id": 1}]
+    mock_client.select.return_value = [{"id": 1, "created_at": "2026-04-27T00:00:00"}]
     result = crud.list_by_family("lgbm_binary_tw")
     mock_client.select.assert_called_once_with(
-        "qlib_runs", filters={"family": "lgbm_binary_tw"}, order="created_at.desc", limit=20
+        "qlib_runs", filters={"family": "lgbm_binary_tw"}, limit=40
     )
+    assert result == [{"id": 1, "created_at": "2026-04-27T00:00:00"}]

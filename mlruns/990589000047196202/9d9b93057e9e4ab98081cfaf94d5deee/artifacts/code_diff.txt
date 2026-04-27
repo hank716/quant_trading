@@ -1,0 +1,128 @@
+diff --git a/app/orchestration/run_training.py b/app/orchestration/run_training.py
+index 2100fce..8f93c30 100644
+--- a/app/orchestration/run_training.py
++++ b/app/orchestration/run_training.py
+@@ -69,7 +69,7 @@ def run(workflow: str) -> int:
+ 
+     logger.info("Starting qrun workflow: %s", workflow)
+     result = subprocess.run(
+-        [sys.executable, "-m", "qlib.workflow.cli", workflow],
++        [sys.executable, "-m", "qlib.cli.run", workflow],
+         capture_output=False,
+     )
+ 
+diff --git a/qlib_ext/handlers/tw_combined.py b/qlib_ext/handlers/tw_combined.py
+index e4350db..59845b3 100644
+--- a/qlib_ext/handlers/tw_combined.py
++++ b/qlib_ext/handlers/tw_combined.py
+@@ -16,12 +16,6 @@ _DEFAULT_LEARN_PROCESSORS = [
+     {"class": "CSRankNorm", "kwargs": {"fields_group": "label"}},
+ ]
+ 
+-_DEFAULT_INFER_PROCESSORS = [
+-    {"class": "RobustZScoreNorm", "kwargs": {"fields_group": "feature", "clip_outlier": True}},
+-    {"class": "Fillna", "kwargs": {"fields_group": "feature"}},
+-]
+-
+-
+ class TWCombinedHandler(DataHandlerLP):
+     """Combined technical + fundamental DataHandler for Taiwan stocks.
+ 
+@@ -37,7 +31,7 @@ class TWCombinedHandler(DataHandlerLP):
+         start_time=None,
+         end_time=None,
+         freq="day",
+-        infer_processors=_DEFAULT_INFER_PROCESSORS,
++        infer_processors=None,
+         learn_processors=_DEFAULT_LEARN_PROCESSORS,
+         fit_start_time=None,
+         fit_end_time=None,
+@@ -47,6 +41,20 @@ class TWCombinedHandler(DataHandlerLP):
+         include_fundamental: bool = True,
+         **kwargs,
+     ):
++        if infer_processors is None:
++            infer_processors = [
++                {
++                    "class": "RobustZScoreNorm",
++                    "kwargs": {
++                        "fit_start_time": fit_start_time,
++                        "fit_end_time": fit_end_time,
++                        "fields_group": "feature",
++                        "clip_outlier": True,
++                    },
++                },
++                {"class": "Fillna", "kwargs": {"fields_group": "feature"}},
++            ]
++
+         tech_fields, tech_names = TWAlphaHandler.get_feature_config()
+         if include_fundamental:
+             fund_fields, fund_names = TWFundamentalHandler.get_feature_config()
+diff --git a/qlib_ext/workflows/daily_lgbm.yaml b/qlib_ext/workflows/daily_lgbm.yaml
+index c6398dc..bf7122c 100644
+--- a/qlib_ext/workflows/daily_lgbm.yaml
++++ b/qlib_ext/workflows/daily_lgbm.yaml
+@@ -8,38 +8,10 @@ data_handler_config: &data_handler_config
+     class: TWCombinedHandler
+     module_path: qlib_ext.handlers.tw_combined
+     kwargs:
+-        start_time: "2020-01-01"
+-        end_time: "2024-12-31"
+-        fit_start_time: "2020-01-01"
+-        fit_end_time: "2022-12-31"
+-
+-port_analysis_config: &port_analysis_config
+-    executor:
+-        class: SimulatorExecutor
+-        module_path: qlib.backtest.executor
+-        kwargs:
+-            time_per_step: "day"
+-            generate_portfolio_metrics: True
+-    strategy:
+-        class: TwTopkFilteredStrategy
+-        module_path: qlib_ext.strategies.tw_topk_filtered
+-        kwargs:
+-            signal: <PRED>
+-            topk: 50
+-            n_drop: 5
+-            min_price: 10.0
+-            min_listing_days: 180
+-    backtest:
+-        start_time: "2023-01-01"
+-        end_time: "2024-12-31"
+-        account: 100000000
+-        benchmark: *benchmark
+-        exchange_kwargs:
+-            limit_threshold: 0.095
+-            deal_price: close
+-            open_cost: 0.001425
+-            close_cost: 0.004425
+-            min_cost: 5
++        start_time: "2025-04-22"
++        end_time: "2026-04-22"
++        fit_start_time: "2025-04-22"
++        fit_end_time: "2025-12-31"
+ 
+ task:
+     model:
+@@ -63,9 +35,9 @@ task:
+         kwargs:
+             handler: *data_handler_config
+             segments:
+-                train: ["2020-01-01", "2022-06-30"]
+-                valid: ["2022-07-01", "2022-12-31"]
+-                test: ["2023-01-01", "2024-12-31"]
++                train: ["2025-04-22", "2025-12-31"]
++                valid: ["2026-01-01", "2026-03-01"]
++                test: ["2026-03-01", "2026-04-22"]
+     record:
+         - class: SignalRecord
+           module_path: qlib.workflow.record_temp
+@@ -77,7 +49,3 @@ task:
+           kwargs:
+             ana_long_short: False
+             ann_scaler: 252
+-        - class: PortAnaRecord
+-          module_path: qlib.workflow.record_temp
+-          kwargs:
+-            config: *port_analysis_config

@@ -27,16 +27,12 @@ def test_supabase_not_mock(db):
          (os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_ANON_KEY"))),
     reason="Needs Supabase credentials",
 )
-def test_pipeline_run_crud_roundtrip(db):
-    from src.database.crud import PipelineRunCRUD
-    crud = PipelineRunCRUD(db)
-    run_id = f"test_integration_{date.today().isoformat()}"
-
-    started = crud.start(run_id, date.today(), mode="daily", git_commit="test")
-    assert started["run_id"] == run_id
-
-    finished = crud.finish(run_id, status="success", notes="integration test")
-    assert finished["status"] == "success"
+def test_coverage_crud_roundtrip(db):
+    from src.database.crud import CoverageCRUD
+    crud = CoverageCRUD(db)
+    td = date.today()
+    row = crud.insert_snapshot(td, "integration_test", 0.9, 0.85, ["2330"])
+    assert row.get("revenue_coverage") == pytest.approx(0.9)
 
     latest = crud.latest(limit=5)
-    assert any(r["run_id"] == run_id for r in latest)
+    assert any(r.get("run_id") == "integration_test" for r in latest)

@@ -1,0 +1,8 @@
+artifact_location: file:///home/hank/Documents/fin/mlruns/990589000047196202
+creation_time: 1776928443632
+experiment_id: '990589000047196202'
+last_update_time: 1776928443632
+lifecycle_stage: active
+name: workflow
+trace_location: null
+workspace: default

@@ -62,9 +62,9 @@ def _get_db():
 
 @st.cache_resource
 def _get_crud():
-    from src.database.crud import PipelineRunCRUD, CandidateCRUD, CoverageCRUD
+    from src.database.crud import CoverageCRUD
     db = _get_db()
-    return PipelineRunCRUD(db), CandidateCRUD(db), CoverageCRUD(db)
+    return CoverageCRUD(db)
 
 
 @st.cache_data(ttl=300)
@@ -514,14 +514,15 @@ elif page == "監控 & 告警":
     st.divider()
     st.subheader("Pipeline 狀態")
     try:
-        run_crud, _, _ = _get_crud()
-        recent_runs = run_crud.latest(limit=10)
+        from src.database.qlib_crud import QlibRunCRUD
+        qlib_crud = QlibRunCRUD(_get_db())
+        recent_runs = qlib_crud.list_by_family("lgbm_binary", limit=10)
         if recent_runs:
             rdf = pd.DataFrame(recent_runs)
-            show_cols = [c for c in ["run_id", "status", "trade_date", "started_at", "ended_at"] if c in rdf.columns]
+            show_cols = [c for c in ["mlflow_run_id", "status", "family", "created_at"] if c in rdf.columns]
             st.dataframe(rdf[show_cols], use_container_width=True)
         else:
-            st.info("尚無 pipeline run 記錄")
+            st.info("尚無 Qlib run 記錄")
     except Exception as exc:
         st.warning(f"Supabase 無法連線：{exc}")
 

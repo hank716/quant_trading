@@ -1,0 +1,60 @@
+diff --git a/app/orchestration/run_training.py b/app/orchestration/run_training.py
+index 2100fce..8f93c30 100644
+--- a/app/orchestration/run_training.py
++++ b/app/orchestration/run_training.py
+@@ -69,7 +69,7 @@ def run(workflow: str) -> int:
+ 
+     logger.info("Starting qrun workflow: %s", workflow)
+     result = subprocess.run(
+-        [sys.executable, "-m", "qlib.workflow.cli", workflow],
++        [sys.executable, "-m", "qlib.cli.run", workflow],
+         capture_output=False,
+     )
+ 
+diff --git a/qlib_ext/handlers/tw_combined.py b/qlib_ext/handlers/tw_combined.py
+index e4350db..59845b3 100644
+--- a/qlib_ext/handlers/tw_combined.py
++++ b/qlib_ext/handlers/tw_combined.py
+@@ -16,12 +16,6 @@ _DEFAULT_LEARN_PROCESSORS = [
+     {"class": "CSRankNorm", "kwargs": {"fields_group": "label"}},
+ ]
+ 
+-_DEFAULT_INFER_PROCESSORS = [
+-    {"class": "RobustZScoreNorm", "kwargs": {"fields_group": "feature", "clip_outlier": True}},
+-    {"class": "Fillna", "kwargs": {"fields_group": "feature"}},
+-]
+-
+-
+ class TWCombinedHandler(DataHandlerLP):
+     """Combined technical + fundamental DataHandler for Taiwan stocks.
+ 
+@@ -37,7 +31,7 @@ class TWCombinedHandler(DataHandlerLP):
+         start_time=None,
+         end_time=None,
+         freq="day",
+-        infer_processors=_DEFAULT_INFER_PROCESSORS,
++        infer_processors=None,
+         learn_processors=_DEFAULT_LEARN_PROCESSORS,
+         fit_start_time=None,
+         fit_end_time=None,
+@@ -47,6 +41,20 @@ class TWCombinedHandler(DataHandlerLP):
+         include_fundamental: bool = True,
+         **kwargs,
+     ):
++        if infer_processors is None:
++            infer_processors = [
++                {
++                    "class": "RobustZScoreNorm",
++                    "kwargs": {
++                        "fit_start_time": fit_start_time,
++                        "fit_end_time": fit_end_time,
++                        "fields_group": "feature",
++                        "clip_outlier": True,
++                    },
++                },
++                {"class": "Fillna", "kwargs": {"fields_group": "feature"}},
++            ]
++
+         tech_fields, tech_names = TWAlphaHandler.get_feature_config()
+         if include_fundamental:
+             fund_fields, fund_names = TWFundamentalHandler.get_feature_config()

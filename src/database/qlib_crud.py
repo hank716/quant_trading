@@ -47,9 +47,6 @@ class QlibRunCRUD:
 
     def list_by_family(self, family: str, limit: int = 20) -> list[dict]:
         """Return recent runs for a model family, newest first."""
-        return self._client.select(
-            "qlib_runs",
-            filters={"family": family},
-            order="created_at.desc",
-            limit=limit,
-        )
+        rows = self._client.select("qlib_runs", filters={"family": family}, limit=limit * 2)
+        rows.sort(key=lambda r: r.get("created_at", ""), reverse=True)
+        return rows[:limit]
